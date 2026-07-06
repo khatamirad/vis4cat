@@ -33,7 +33,7 @@ CoreMeta4Cat defines four data classes. Vis4Cat priority order:
 | Class | Format | Current focus |
 |---|---|---|
 | **Reaction** | Tabular (CSV, XLSX) | ✅ Active |
-| **Characterization** | Tabular or text files | ✅ Active |
+| **Characterization** | Tabular or text files | 🔜 Next |
 | Synthesis | Tabular | 🔜 Later |
 | Simulation | Tabular | 🔜 Later |
 
@@ -43,17 +43,21 @@ CoreMeta4Cat defines four data classes. Vis4Cat priority order:
 
 Vis4Cat follows a step-wise maturity model. Each tier is a superset of the previous.
 
-### Tier 1 — Basic
-- Read CSV / XLSX / JSON into a homogeneous data structure
-- Auto-detect numeric and categorical columns (see §6 — Column Classification Logic)
-- Render interactive plot (scatter, line)
-- Interactions: zoom, hover, filter, select variables via dropdowns
-- Export plot as HTML / PNG / SVG
+### Tier 1 — Basic ✅ COMPLETE (Reaction data class only)
+- Read CSV / XLSX into a homogeneous data structure
+- Auto-detect numeric and categorical columns (see §7 — Column Classification Logic)
+- Render interactive scatter and line plot with variable selection via dropdowns
+- Color / group-by support with high-cardinality warnings
+- Dataset-level query filtering: range sliders for dual columns, checkbox lists for categorical columns
+- Export plot as PNG
 
-### Tier 2 — Checkpoint
-- Validate column types, units, missing values
-- Template matching: suggest compatible plot types based on detected variable roles
-- Descriptive statistics panel (per-column: mean, std, min, max, missing count, unique count)
+> **Scope note:** Tier 1 is validated against two Reaction datasets (STEU, catalyticData_b). Characterization, Synthesis, and Simulation data classes are not yet tested. Each data class may require adjustments to the classification logic, supported file formats, or default visualization behaviour before Tier 1 can be declared complete for that class.
+
+### Tier 2 — Checkpoint (partially delivered ahead of schedule)
+- ✅ Missing value detection and highlighting per column
+- ✅ Descriptive statistics panel: mean, std, min, median, max, unique count, most frequent value, missing count — sortable, exportable as CSV
+- ⬜ Template matching: suggest compatible plot types based on detected variable roles
+- ⬜ Unit validation
 
 ### Tier 3 — Advanced (Basic Calculator)
 - User-defined descriptors: compute new columns from existing ones via formula input
@@ -72,30 +76,38 @@ Vis4Cat follows a step-wise maturity model. Each tier is a superset of the previ
 
 ---
 
-## 5. Demo Datasets
+## 5. Software Architecture Principle
 
-### Dataset 1 — STEU (CO Hydrogenation, High-Throughput Screening)
-- Source: Repo4Cat (open access)
-- Structure: High-throughput parallel reactor data. Conditions (T, P, GHSV, gas composition), catalyst descriptors (ID, support, metal loadings), time on stream, and selectivity columns (naming pattern: `S_[Product]_[Reactant] [%]`)
-- Key scientific insight: Selectivity columns (`S_Propane_CO [%]` etc.) are not immediately parseable by a machine without semantic mapping — this is a live demonstration of why Voc4Cat matters
-- **Intended demo plot:** Line plot — TOS [h] vs. a selectivity column, colored by catalyst ID → stability over time across catalysts
+Vis4Cat follows a lightweight MVC-inspired separation of concerns — not as a strict framework, but as a discipline applied even within the single-file HTML demo:
 
-### Dataset 2 — catalyticData_b (CO₂ Hydrogenation Performance)
-- Source: Repo4Cat (open access)
-- Structure: Clean tabular dataset. Independent variables: temperature [degC], pressure [bar], feed composition. Dependent variable: X_CO2 (conversion). Product distribution: full alkane/alkene/alcohol series to C15. Categorical: channel, condition, catalyst_loading [g]
-- No explicit selectivity column — raw outlet flows only
-- **Intended demo plot:** Scatter — temperature [degC] vs. X_CO2, colored by catalyst_loading [g]
-- **Intended Tier 3 showcase:** User defines selectivity descriptor (e.g. `S_CH4 = C1an_out / (CO2_in - CO2_out)`), then plots S_CH4 vs. X_CO2
+| Layer | In Vis4Cat | Rule |
+|---|---|---|
+| **Model** | `state` object, `filterState` object, pure computation functions (`classifyColumns`, `computeStats`, `applyFilters`) | Never touches the DOM. Single source of truth. |
+| **View** | Render functions (`renderPlot`, `renderStatsTable`, `renderFilterControls`, etc.) | Only reads from state. Never mutates data. |
+| **Controller** | Event handlers (`onFilterColToggle`, `onRangeChange`, `onCatToggle`, `renderPlot` trigger) | Updates state first, then calls render. |
 
-### Demo Story Arc (catalyticData_b)
-1. Upload → immediate scatter plot, value in seconds
-2. User notices no selectivity column
-3. User opens basic calculator, defines formula, new column appears
-4. User plots derived descriptor — demonstrates Tier 1 → Tier 3 transition in one session
+This discipline costs nothing at the current scale and prevents a structural rewrite when we move to a production framework for DataVerse integration.
 
 ---
 
-## 6. Column Classification Logic ✅ LOCKED
+## 6. Demo Datasets
+
+### Dataset 1 — STEU (CO Hydrogenation, High-Throughput Screening)
+- Source: Repo4Cat (open access)
+- Structure: ~2100 rows, 257+ columns. High-throughput parallel reactor data. Conditions (T, P, GHSV, gas composition), catalyst descriptors (ID, support, metal loadings), time on stream, selectivity columns (naming pattern: `S_[Product]_[Reactant] [%]`)
+- Key scientific insight: Selectivity columns (`S_Propane_CO [%]` etc.) are not immediately parseable by a machine without semantic mapping — live demonstration of why Voc4Cat matters
+- **Demo plot:** Line — TOS [h] vs. selectivity column, colored by catalyst ID → stability over time across catalysts
+
+### Dataset 2 — catalyticData_b (CO₂ Hydrogenation Performance)
+- Source: Repo4Cat (open access)
+- Structure: ~60 rows, tabular. Independent variables: temperature [degC], pressure [bar], feed composition. Dependent variable: X_CO2 (conversion). Product distribution: full alkane/alkene/alcohol series to C15. Categorical: channel, condition, catalyst_loading [g]
+- No explicit selectivity column — raw outlet flows only
+- **Demo plot:** Scatter — temperature [degC] vs. X_CO2, colored by catalyst_loading [g]
+- **Tier 3 showcase:** User defines `S_CH4 = C1an_out / (CO2_in - CO2_out)`, plots derived descriptor → demonstrates Tier 1 → Tier 3 transition in one session
+
+---
+
+## 7. Column Classification Logic ✅ LOCKED
 
 Agreed and implemented. Do not revisit without a concrete breaking case.
 
@@ -105,22 +117,25 @@ Agreed and implemented. Do not revisit without a concrete breaking case.
 
 **Step 2 — numeric columns**
 - Monotonically increasing integers with ratio > 0.95 → `index` (excluded from all dropdowns)
-- `unique_count / n_rows < 0.05` AND `unique_count < 20` → `dual` (offered as both axis and color/group)
+- `unique_count / n_rows < 0.05` AND `unique_count < 20` → `dual` (offered as axis AND color/group)
 - Otherwise → `continuous`
 
 **Step 3 — display limit (independent of classification)**
 - Any column with unique_count > 15 offered as color → ⚠ high-cardinality warning shown
-- Column is still available, user decides
+- Column is still available; user decides
 
-**Role → dropdown mapping:**
-- X axis: `continuous`, `dual`
-- Y axis: `continuous`, `dual`
-- Color / group by: `categorical`, `dual`
-- Excluded: `index`
+**Role → UI mapping:**
+
+| Role | X axis | Y axis | Color/group | Filter panel |
+|---|---|---|---|---|
+| `continuous` | ✅ | ✅ | — | — |
+| `dual` | ✅ | ✅ | ✅ | ✅ range slider |
+| `categorical` | — | — | ✅ | ✅ checkbox list |
+| `index` | — | — | — | — |
 
 ---
 
-## 7. Visualization Templates (Reaction Data Class)
+## 8. Visualization Templates (Reaction Data Class)
 
 Defined for Tier 2 (checkpoint) implementation. Not yet enforced at Tier 1.
 
@@ -133,7 +148,7 @@ Defined for Tier 2 (checkpoint) implementation. Not yet enforced at Tier 1.
 
 ---
 
-## 8. Demo Delivery Modes
+## 9. Demo Delivery Modes
 
 | Mode | Purpose | When to use |
 |---|---|---|
@@ -147,40 +162,55 @@ Git naming convention: `demo-{context}-{tool-name}` (e.g. `demo-nfdi4cat-vis4cat
 
 ---
 
-## 9. Decisions Log
+## 10. Decisions Log
 
 | Date | Decision | Rationale |
 |---|---|---|
-| 2026-07-06 | Column classification logic locked (§6) | Agreed after reviewing both datasets; revisit only with a concrete breaking case |
+| 2026-07-06 | Column classification logic locked (§7) | Agreed after reviewing both datasets; revisit only with a concrete breaking case |
 | 2026-07-06 | Tier 3 formula engine = "basic calculator" (no dimensional validation) | Validation is a semantic-tier concern; don't over-engineer Tier 1→2 |
-| 2026-07-06 | Report / statistics → slide-in panel on right, not sidebar box | Sidebar competes with plot controls; panel keeps plot visible alongside stats |
+| 2026-07-06 | Statistics → slide-in panel (right), not sidebar box | Sidebar competes with plot controls; panel keeps plot visible alongside stats |
 | 2026-07-06 | Scatter/line toggle = user-controlled, not auto-detected | Auto-detection of time axes is a heuristic that fails; one click is cheaper than a wrong default |
-| 2026-07-06 | Start with Reaction + Characterization data classes only | Scope control for TRL 2→3; Synthesis and Simulation deferred |
+| 2026-07-06 | Start with Reaction data class only for Tier 1 | Scope control for TRL 2→3; Characterization next, Synthesis and Simulation deferred |
+| 2026-07-06 | Histogram / distribution plot deferred to visualization panel | Stats panel = numbers only; histogram belongs to Tier 2 visualization templates |
+| 2026-07-06 | Filter panel = dropdown below toolbar, not slide-in | Filters are adjusted frequently while looking at the plot; covering the plot defeats the purpose |
+| 2026-07-06 | Filter column selection = user-picks (not all-auto) | Wide datasets (STEU: 257 cols) would generate unmanageable filter controls if all dual/cat shown |
+| 2026-07-06 | Column inspector removed from sidebar | Redundant with stats panel; sidebar should do one job: control the plot |
+| 2026-07-06 | MVC as discipline, not framework | Overkill as strict architecture at TRL 2→3; separation of concerns applied informally within single HTML file |
 
 ---
 
-## 10. Open Decisions
+## 11. Open Decisions
 
-- [ ] **Statistics panel scope:** Which stats for categorical columns? (unique count, mode, missing — confirmed). Any catalysis-specific checks to add (e.g. constant columns, percentage-range detection)?
 - [ ] **Semantic mapping ownership:** Does mapping happen at deposit time (depositor) or at visualization time (viewer)? Where are confirmed mappings stored?
-- [ ] **New descriptor scope:** Does "add descriptor" at Tier 3 mean proposing a new Voc4Cat term, or just a free-text label outside the controlled vocabulary?
-- [ ] **Characterization data:** Specific file formats and visualization types not yet defined (Tier 1 focus is tabular Reaction data)
+- [ ] **New descriptor scope:** Does "add descriptor" at Tier 3 mean proposing a new Voc4Cat term, or a free-text label outside the controlled vocabulary?
+- [ ] **Characterization data:** File formats not yet defined (candidates: tabular CSV/XLSX for e.g. BET isotherms, XRD patterns; potentially proprietary instrument formats). Visualization types likely differ from Reaction (e.g. spectrum plots with wavenumber/2θ on X). Column classification logic may need adjustment. Requires at least one representative dataset before Tier 1 can be declared complete for this class.
 - [ ] **Use-case collection:** Additional datasets from Repo4Cat beyond STEU and catalyticData_b
+- [ ] **DataVerse integration:** Core software component to be identified; local test environment to be set up
 
 ---
 
-## 11. Current Sprint (TRL 2 → 3)
+## 12. Current Sprint Status
 
-**Done:**
+### Tier 1 — Basic ✅ COMPLETE for Reaction data class · ⬜ Not yet validated for Characterization, Synthesis, Simulation
 - [x] Scope and maturity tier model defined
-- [x] Column classification logic designed and implemented
-- [x] Basic visualization engine (HTML demo v1): file upload, auto-detection, scatter/line, color grouping, export
-- [x] Dataset report / auto-analysis (integrated, then moved to statistics panel — in progress)
+- [x] Column classification logic designed and implemented (locked)
+- [x] File upload: CSV and XLSX support, drag & drop
+- [x] Auto-detection of column roles with high-cardinality warnings
+- [x] Scatter / line plot with X, Y, color/group dropdowns
+- [x] Scatter ↔ Line toggle (user-controlled)
+- [x] Dataset query filtering: range sliders (dual) + checkbox lists (categorical) with live re-render
+- [x] Filter panel: column search, active filter badge, reset
+- [x] Descriptive statistics slide-in panel (ahead of schedule — checkpoint tier)
+- [x] Statistics export as CSV
+- [x] Plot export as PNG
+- [x] BRIEF.md, README.md, repo structure on GitHub
 
-**In progress:**
-- [ ] Descriptive statistics slide-in panel (right side, toolbar button)
+### Next — Tier 3 (Basic Calculator)
+- [ ] Formula input UI for user-defined descriptors
+- [ ] Column computation engine (pure JS, no dimensional validation)
+- [ ] New descriptor appears in X/Y dropdowns immediately
 
-**Next:**
-- [ ] Basic calculator (user-defined descriptors)
-- [ ] Identify core software component for DataVerse integration
+### Next — DataVerse Integration (TRL 3)
+- [ ] Identify core software component for DataVerse previewer
 - [ ] Prepare local DataVerse test environment
+- [ ] Implement local DataVerse integration

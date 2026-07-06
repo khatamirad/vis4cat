@@ -229,77 +229,9 @@
     line-height: 1.4;
   }
 
-  /* Dataset report */
-  .report-box {
-    background: var(--accent-light);
-    border: 1px solid #b8d4e8;
-    border-radius: 6px;
-    padding: 11px 13px;
-    font-size: 11.5px;
-    color: var(--text);
-    line-height: 1.6;
-  }
-  .report-box .report-title {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 6px;
-  }
-  .report-box .report-line { margin-bottom: 2px; }
-  .report-box .report-line:last-child { margin-bottom: 0; }
-  .report-box strong { font-weight: 600; }
-  .report-box .report-warn { color: var(--warn-text); }
-  .report-box .report-suggest {
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid #b8d4e8;
-    color: var(--text-muted);
-  }
-  .report-box code {
-    font-family: var(--font-mono);
-    font-size: 10.5px;
-    background: rgba(26,82,118,0.08);
-    padding: 1px 4px;
-    border-radius: 3px;
-    color: var(--accent);
-  }
 
-  /* Column inspector */
-  .col-inspector {
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    overflow: hidden;
-  }
-  .col-inspector-header {
-    background: var(--bg);
-    padding: 8px 12px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
-    border-bottom: 1px solid var(--border);
-    letter-spacing: 0.04em;
-  }
-  .col-row {
-    display: flex;
-    align-items: center;
-    padding: 5px 12px;
-    border-bottom: 1px solid var(--border);
-    gap: 6px;
-    font-size: 11px;
-  }
-  .col-row:last-child { border-bottom: none; }
-  .col-name {
-    flex: 1;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .col-detail { font-size: 10px; color: var(--text-faint); white-space: nowrap; }
+
+
 
   /* Plot button */
   .plot-btn {
@@ -390,6 +322,379 @@
   .sidebar::-webkit-scrollbar { width: 4px; }
   .sidebar::-webkit-scrollbar-track { background: transparent; }
   .sidebar::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+
+  /* ── Statistics panel ── */
+  .stats-btn {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: 5px;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+    margin-left: auto;
+  }
+  .stats-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .stats-btn.active { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+
+  .stats-panel {
+    position: absolute;
+    top: 0; right: 0;
+    width: 620px;
+    height: 100%;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+    box-shadow: -4px 0 20px rgba(0,0,0,0.06);
+  }
+  .stats-panel.open { transform: translateX(0); }
+
+  .stats-panel-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .stats-panel-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+  }
+  .stats-panel-meta {
+    font-size: 11px;
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+  }
+  .stats-download-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    font-family: var(--font);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .stats-download-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .stats-close-btn {
+    width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    border: none; background: none;
+    font-size: 16px; color: var(--text-faint);
+    cursor: pointer; border-radius: 4px;
+    transition: background 0.12s, color 0.12s;
+  }
+  .stats-close-btn:hover { background: var(--bg); color: var(--text); }
+
+  /* Sort controls */
+  .stats-sort-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    background: var(--bg);
+  }
+  .stats-sort-label { font-size: 11px; color: var(--text-faint); }
+  .sort-btn {
+    padding: 3px 9px;
+    font-family: var(--font);
+    font-size: 11px;
+    font-weight: 500;
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: border-color 0.12s, color 0.12s, background 0.12s;
+  }
+  .sort-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  /* Stats table */
+  .stats-table-wrap {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+  }
+  .stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11.5px;
+  }
+  .stats-table thead {
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 1;
+  }
+  .stats-table th {
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .stats-table th.num { text-align: right; }
+  .stats-table td {
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .stats-table td.num {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .stats-table td.na {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+  .stats-table tr:last-child td { border-bottom: none; }
+  .stats-table tr:hover td { background: var(--bg); }
+  .stats-col-name {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+  }
+  .missing-high { color: var(--warn-text) !important; font-weight: 600; }
+  .stats-table-wrap::-webkit-scrollbar { width: 4px; height: 4px; }
+  .stats-table-wrap::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+
+  /* ── Filter panel ── */
+  .filter-btn {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: 5px;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: #fff3e0; border-color: #e67e22; color: #a04000; }
+  .filter-btn .filter-count {
+    background: #e67e22;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 3px;
+    display: none;
+  }
+  .filter-btn.active .filter-count { display: inline; }
+
+  .filter-dropdown {
+    display: none;
+    position: absolute;
+    top: 44px;
+    left: 0; right: 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    z-index: 20;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  .filter-dropdown.open { display: flex; }
+
+  .filter-col-selector {
+    width: 260px;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    max-height: 340px;
+    flex-shrink: 0;
+  }
+  .filter-search-wrap {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .filter-search {
+    width: 100%;
+    font-family: var(--font);
+    font-size: 12px;
+    padding: 5px 9px;
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .filter-search:focus { border-color: var(--accent); }
+  .filter-search::placeholder { color: var(--text-faint); }
+
+  .filter-col-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 6px 0;
+  }
+  .filter-col-list::-webkit-scrollbar { width: 4px; }
+  .filter-col-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+
+  .filter-col-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .filter-col-item:hover { background: var(--bg); }
+  .filter-col-item input[type=checkbox] { cursor: pointer; accent-color: var(--accent); }
+  .filter-col-item-name {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--text);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .filter-col-item .pill { margin-left: 0; flex-shrink: 0; }
+  .filter-col-empty {
+    padding: 12px;
+    font-size: 11px;
+    color: var(--text-faint);
+    text-align: center;
+  }
+
+  /* Active filter controls */
+  .filter-controls-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-height: 340px;
+    min-width: 0;
+  }
+  .filter-controls-area::-webkit-scrollbar { width: 4px; }
+  .filter-controls-area::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+
+  .filter-empty-hint {
+    font-size: 12px;
+    color: var(--text-faint);
+    margin: auto;
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  .filter-control-block { display: flex; flex-direction: column; gap: 6px; }
+  .filter-control-label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Range slider */
+  .range-wrap { display: flex; flex-direction: column; gap: 4px; }
+  .range-inputs { display: flex; align-items: center; gap: 8px; }
+  .range-val {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 3px 7px;
+    width: 80px;
+    text-align: right;
+  }
+  .range-sep { font-size: 11px; color: var(--text-faint); }
+  input[type=range] {
+    width: 100%;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  /* Category checkboxes */
+  .cat-check-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .cat-check-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    color: var(--text-muted);
+    transition: border-color 0.12s, background 0.12s;
+    user-select: none;
+  }
+  .cat-check-item:hover { border-color: var(--accent); color: var(--text); }
+  .cat-check-item input { accent-color: var(--accent); cursor: pointer; }
+
+  /* Filter footer */
+  .filter-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+  .filter-active-label { font-size: 11px; color: var(--text-faint); }
+  .filter-reset-btn {
+    padding: 4px 10px;
+    font-family: var(--font);
+    font-size: 11px;
+    font-weight: 500;
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: border-color 0.12s, color 0.12s;
+  }
+  .filter-reset-btn:hover { border-color: #c0392b; color: #c0392b; }
 </style>
 </head>
 <body>
@@ -417,19 +722,9 @@
     </div>
 
     <!-- Column inspector -->
-    <!-- Dataset report -->
-    <div id="reportSection" style="display:none;">
-      <div class="section-label">Dataset report</div>
-      <div id="reportBox" class="report-box"></div>
-    </div>
 
-    <div id="inspectorSection" style="display:none;">
-      <div class="section-label">Column classification</div>
-      <div class="col-inspector">
-        <div class="col-inspector-header">AUTO-DETECTED TYPES</div>
-        <div id="colInspector"></div>
-      </div>
-    </div>
+
+
 
     <!-- Plot controls -->
     <div id="controlsSection" style="display:none;">
@@ -474,14 +769,78 @@
     <div class="plot-toolbar" id="plotToolbar">
       <span id="plotTitleText" class="plot-title-text" style="display:none;"></span>
       <span id="plotStats" class="plot-stats"></span>
+      <button class="filter-btn" id="filterBtn" onclick="toggleFilterPanel()">⊘ Filter <span class="filter-count" id="filterCount">0</span></button>
+      <button class="stats-btn" id="statsBtn" onclick="toggleStatsPanel()">≡ Statistics</button>
     </div>
-    <div class="plot-area">
+
+    <!-- Filter dropdown panel -->
+    <div class="filter-dropdown" id="filterDropdown">
+      <!-- Left: column selector -->
+      <div class="filter-col-selector">
+        <div class="filter-search-wrap">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:10px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-faint);">Filter columns</span>
+            <button class="stats-close-btn" onclick="toggleFilterPanel()" title="Close filters">✕</button>
+          </div>
+          <input class="filter-search" id="filterSearch" type="text" placeholder="Search columns…" oninput="renderFilterColList()">
+        </div>
+        <div class="filter-col-list" id="filterColList"></div>
+      </div>
+      <!-- Right: active filter controls -->
+      <div style="display:flex; flex-direction:column; flex:1; min-width:0;">
+        <div class="filter-controls-area" id="filterControlsArea">
+          <div class="filter-empty-hint">Select columns on the left<br>to add filter controls.</div>
+        </div>
+        <div class="filter-footer">
+          <span class="filter-active-label" id="filterActiveLabel">No filters active</span>
+          <button class="filter-reset-btn" onclick="resetFilters()">Reset all</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="plot-area" style="position:relative;">
       <div class="empty-state" id="emptyState">
         <div class="empty-icon">⬡</div>
         <div class="empty-title">No data loaded</div>
         <div class="empty-sub">Upload a CSV or XLSX file to begin. Columns will be auto-classified and plot controls will appear.</div>
       </div>
       <div id="plotly-chart" style="display:none;"></div>
+
+      <!-- Statistics slide-in panel -->
+      <div class="stats-panel" id="statsPanel">
+        <div class="stats-panel-header">
+          <span class="stats-panel-title">Dataset Statistics</span>
+          <span class="stats-panel-meta" id="statsMeta"></span>
+          <button class="stats-download-btn" onclick="downloadStats()">↓ Export CSV</button>
+          <button class="stats-close-btn" onclick="toggleStatsPanel()" title="Close">✕</button>
+        </div>
+        <div class="stats-sort-bar">
+          <span class="stats-sort-label">Sort by</span>
+          <button class="sort-btn active" id="sortName" onclick="sortStats('name', this)">Column name</button>
+          <button class="sort-btn" id="sortMissing" onclick="sortStats('missing', this)">Missing ↓</button>
+          <button class="sort-btn" id="sortType" onclick="sortStats('type', this)">Type</button>
+        </div>
+        <div class="stats-table-wrap">
+          <table class="stats-table">
+            <thead>
+              <tr>
+                <th>Column</th>
+                <th>Type</th>
+                <th class="num">Count</th>
+                <th class="num">Missing</th>
+                <th class="num">Mean</th>
+                <th class="num">Std</th>
+                <th class="num">Min</th>
+                <th class="num">Median</th>
+                <th class="num">Max</th>
+                <th class="num">Unique</th>
+                <th>Most frequent</th>
+              </tr>
+            </thead>
+            <tbody id="statsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </main>
 
@@ -591,13 +950,16 @@ function processData(data, fileName) {
   state.columns = classifyColumns(data);
 
   showFileInfo(fileName, data.length, state.columns.length);
-  buildReport();
-  buildColumnInspector();
   buildControls();
 
-  document.getElementById('reportSection').style.display = 'block';
-  document.getElementById('inspectorSection').style.display = 'block';
+  // reset filters when new file loaded
+  filterState.selectedCols = new Set();
+  filterState.activeFilters = {};
+
   document.getElementById('controlsSection').style.display = 'block';
+  document.getElementById('statsBtn').style.display = 'flex';
+  document.getElementById('filterBtn').style.display = 'flex';
+  updateFilterBadge();
 }
 
 function showFileInfo(name, rows, cols) {
@@ -615,82 +977,398 @@ function showError(msg) {
   el.innerHTML = `<div class="warn-box" style="background:var(--error); border-color:#f5b7b1; color:var(--error-text);">⚠ ${msg}</div>`;
 }
 
-// ── Dataset Report ─────────────────────────────────────────────────────────
-function buildReport() {
-  const cols = state.columns;
+// ── Statistics (Model) ─────────────────────────────────────────────────────
+function computeStats() {
+  // Pure computation — reads state.data, returns stats array, touches nothing else
   const n = state.nRows;
+  return state.columns.map(col => {
+    const values = state.data.map(r => r[col.name]);
+    const missing = values.filter(v => v === null || v === undefined || v === '').length;
+    const present = values.filter(v => v !== null && v !== undefined && v !== '');
 
-  const nCont = cols.filter(c => c.role === 'continuous').length;
-  const nCat  = cols.filter(c => c.role === 'categorical').length;
-  const nDual = cols.filter(c => c.role === 'dual').length;
-  const nIdx  = cols.filter(c => c.role === 'index').length;
+    let stats = {
+      name: col.name,
+      role: col.role,
+      count: n - missing,
+      missing,
+      missingPct: missing / n,
+      uniqueCount: col.uniqueCount,
+      // numeric fields
+      mean: null, std: null, min: null, median: null, max: null,
+      // categorical fields
+      mostFrequent: null, freqCount: null
+    };
 
-  // Missing values per column (count rows where value is '', null, undefined, or NaN)
-  const missingCols = cols.filter(c => {
-    const missing = state.data.filter(row => {
-      const v = row[c.name];
-      return v === null || v === undefined || v === '' || (typeof v === 'number' && isNaN(v));
-    }).length;
-    return missing / n > 0.1;
+    if (col.dtype === 'numeric') {
+      const nums = present.map(v => parseFloat(v)).filter(v => !isNaN(v));
+      if (nums.length > 0) {
+        const sorted = [...nums].sort((a, b) => a - b);
+        const mean = nums.reduce((s, v) => s + v, 0) / nums.length;
+        const variance = nums.reduce((s, v) => s + (v - mean) ** 2, 0) / nums.length;
+        stats.mean   = mean;
+        stats.std    = Math.sqrt(variance);
+        stats.min    = sorted[0];
+        stats.max    = sorted[sorted.length - 1];
+        stats.median = sorted.length % 2 === 0
+          ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
+          : sorted[Math.floor(sorted.length / 2)];
+      }
+    } else {
+      // categorical
+      const freq = {};
+      present.forEach(v => { const k = String(v); freq[k] = (freq[k] || 0) + 1; });
+      const top = Object.entries(freq).sort((a, b) => b[1] - a[1])[0];
+      if (top) { stats.mostFrequent = top[0]; stats.freqCount = top[1]; }
+    }
+
+    return stats;
+  });
+}
+
+// ── Statistics Panel (Controller + View) ───────────────────────────────────
+let statsState = { open: false, sortKey: 'name', statsData: [] };
+
+function toggleStatsPanel() {
+  statsState.open = !statsState.open;
+  const panel = document.getElementById('statsPanel');
+  const btn   = document.getElementById('statsBtn');
+  panel.classList.toggle('open', statsState.open);
+  btn.classList.toggle('active', statsState.open);
+
+  if (statsState.open) {
+    statsState.statsData = computeStats();
+    renderStatsTable();
+  }
+}
+
+function sortStats(key, btnEl) {
+  statsState.sortKey = key;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  btnEl.classList.add('active');
+  renderStatsTable();
+}
+
+function renderStatsTable() {
+  // VIEW — only reads statsState, renders table, never touches state.data
+  const rows = [...statsState.statsData];
+
+  if (statsState.sortKey === 'name') {
+    rows.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (statsState.sortKey === 'missing') {
+    rows.sort((a, b) => b.missing - a.missing);
+  } else if (statsState.sortKey === 'type') {
+    const order = { continuous: 0, dual: 1, categorical: 2, index: 3 };
+    rows.sort((a, b) => (order[a.role] ?? 9) - (order[b.role] ?? 9));
+  }
+
+  const fmt = (v, decimals = 3) => {
+    if (v === null || v === undefined) return null;
+    const abs = Math.abs(v);
+    if (abs === 0) return '0';
+    if (abs >= 1000 || abs < 0.001) return v.toExponential(2);
+    return v.toFixed(decimals);
+  };
+
+  const na = `<span style="color:var(--text-faint)">—</span>`;
+
+  const tbody = document.getElementById('statsTableBody');
+  tbody.innerHTML = rows.map(r => {
+    const [rl, rc] = { continuous: ['CONT','pill-cont'], dual: ['DUAL','pill-dual'], categorical: ['CAT','pill-cat'], index: ['IDX','pill-idx'] }[r.role] || ['?',''];
+    const missingStr = r.missing === 0
+      ? `<span style="color:var(--text-faint)">0</span>`
+      : `<span class="${r.missingPct > 0.1 ? 'missing-high' : ''}">${r.missing} (${(r.missingPct * 100).toFixed(1)}%)</span>`;
+
+
+
+    return `<tr>
+      <td><span class="stats-col-name" title="${r.name}">${r.name}</span></td>
+      <td><span class="pill ${rc}">${rl}</span></td>
+      <td class="num">${r.count}</td>
+      <td class="num">${missingStr}</td>
+      <td class="${r.mean !== null ? 'num' : 'na'}">${r.mean !== null ? fmt(r.mean) : na}</td>
+      <td class="${r.std  !== null ? 'num' : 'na'}">${r.std  !== null ? fmt(r.std)  : na}</td>
+      <td class="${r.min  !== null ? 'num' : 'na'}">${r.min  !== null ? fmt(r.min)  : na}</td>
+      <td class="${r.median !== null ? 'num' : 'na'}">${r.median !== null ? fmt(r.median) : na}</td>
+      <td class="${r.max  !== null ? 'num' : 'na'}">${r.max  !== null ? fmt(r.max)  : na}</td>
+      <td class="num">${r.uniqueCount}</td>
+      <td class="num" style="max-width:120px; overflow:hidden; text-overflow:ellipsis;" title="${r.mostFrequent ?? ''}">${
+        r.mostFrequent !== null
+          ? `${r.mostFrequent} <span style="color:var(--text-faint)">(${r.freqCount})</span>`
+          : na
+      }</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('statsMeta').textContent =
+    `${state.nRows.toLocaleString()} rows · ${rows.length} columns`;
+}
+
+// ── Export Stats CSV ────────────────────────────────────────────────────────
+function downloadStats() {
+  const rows = statsState.statsData;
+  const headers = ['column','type','count','missing','missing_pct','mean','std','min','median','max','unique','most_frequent','freq_count'];
+  const csvRows = [headers.join(',')];
+
+  rows.forEach(r => {
+    const fmt = v => v === null || v === undefined ? '' : v;
+    csvRows.push([
+      `"${r.name}"`, r.role, r.count, r.missing,
+      (r.missingPct * 100).toFixed(2) + '%',
+      fmt(r.mean !== null ? r.mean.toFixed(6) : null),
+      fmt(r.std  !== null ? r.std.toFixed(6)  : null),
+      fmt(r.min  !== null ? r.min  : null),
+      fmt(r.median !== null ? r.median : null),
+      fmt(r.max  !== null ? r.max  : null),
+      r.uniqueCount,
+      r.mostFrequent !== null ? `"${r.mostFrequent}"` : '',
+      fmt(r.freqCount)
+    ].join(','));
   });
 
-  // Suggested axes: prefer columns with names matching common catalysis patterns
-  const timePatterns = /\b(time|tos|t_on|hours?|h\b)/i;
-  const tempPatterns = /\b(temp|temperature|T\b|T_rxn|degC)/i;
-  const contCols = cols.filter(c => c.role === 'continuous' || c.role === 'dual');
-  const catCols  = cols.filter(c => c.role === 'categorical' || c.role === 'dual');
-
-  const suggestX = contCols.find(c => timePatterns.test(c.name) || tempPatterns.test(c.name)) || contCols[0];
-  const suggestY = contCols.find(c => c !== suggestX) || contCols[1];
-  const suggestC = catCols.find(c => c.uniqueCount <= 15) || catCols[0];
-
-  let lines = [];
-  lines.push(`<div class="report-line">Loaded <strong>${n.toLocaleString()} rows</strong> across <strong>${cols.length} columns</strong>.</div>`);
-  lines.push(`<div class="report-line">Detected: <strong>${nCont}</strong> continuous, <strong>${nCat}</strong> categorical, <strong>${nDual}</strong> dual-role${nIdx > 0 ? `, <strong>${nIdx}</strong> index (excluded)` : ''}.</div>`);
-
-  if (missingCols.length > 0) {
-    const names = missingCols.slice(0, 3).map(c => `<code>${c.name}</code>`).join(', ');
-    const extra = missingCols.length > 3 ? ` +${missingCols.length - 3} more` : '';
-    lines.push(`<div class="report-line report-warn">⚠ ${missingCols.length} column${missingCols.length > 1 ? 's' : ''} with >10% missing values: ${names}${extra}.</div>`);
-  }
-
-  let suggest = '';
-  if (suggestX) suggest += `Suggested X: <code>${suggestX.name}</code>. `;
-  if (suggestY) suggest += `Suggested Y: <code>${suggestY.name}</code>. `;
-  if (suggestC) suggest += `Suggested color: <code>${suggestC.name}</code>${suggestC.uniqueCount > 15 ? ' <span class="report-warn">(⚠ high cardinality)</span>' : ''}.`;
-
-  if (suggest) {
-    lines.push(`<div class="report-suggest">${suggest}</div>`);
-  }
-
-  document.getElementById('reportBox').innerHTML =
-    `<div class="report-title">Auto-analysis</div>` + lines.join('');
+  const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `vis4cat_stats_${state.fileName.replace(/\.[^.]+$/, '')}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
-// ── Column Inspector ───────────────────────────────────────────────────────
-const roleLabels = {
-  continuous: ['CONT', 'pill-cont'],
-  categorical: ['CAT',  'pill-cat'],
-  dual:        ['DUAL', 'pill-dual'],
-  index:       ['IDX',  'pill-idx']
+// ── Filter State ───────────────────────────────────────────────────────────
+let filterState = {
+  open: false,
+  // selectedCols: set of column names the user checked in the selector
+  selectedCols: new Set(),
+  // activeFilters: { colName: { type: 'range'|'cat', min, max, selected: Set } }
+  activeFilters: {}
 };
 
-function buildColumnInspector() {
-  const container = document.getElementById('colInspector');
-  const shown = state.columns.slice(0, 20); // show first 20 to avoid overflow
-  const rest = state.columns.length - shown.length;
-
-  container.innerHTML = shown.map(col => {
-    const [label, cls] = roleLabels[col.role] || ['?', ''];
-    return `<div class="col-row">
-      <span class="col-name" title="${col.name}">${col.name}</span>
-      <span class="col-detail">${col.uniqueCount}u</span>
-      <span class="pill ${cls}">${label}</span>
-    </div>`;
-  }).join('') + (rest > 0 ? `<div class="col-row" style="justify-content:center; color:var(--text-faint); font-size:11px;">+ ${rest} more columns</div>` : '');
+// ── Filter Controller ──────────────────────────────────────────────────────
+function toggleFilterPanel() {
+  filterState.open = !filterState.open;
+  document.getElementById('filterDropdown').classList.toggle('open', filterState.open);
+  document.getElementById('filterBtn').classList.toggle('active', filterState.open);
+  if (filterState.open) renderFilterColList();
 }
 
-// ── Controls ───────────────────────────────────────────────────────────────
+function resetFilters() {
+  filterState.selectedCols = new Set();
+  filterState.activeFilters = {};
+  renderFilterColList();
+  renderFilterControls();
+  updateFilterBadge();
+  if (state.data) renderPlot();
+}
+
+function onFilterColToggle(colName, checked) {
+  if (checked) {
+    filterState.selectedCols.add(colName);
+    // initialise filter for this column
+    const col = state.columns.find(c => c.name === colName);
+    if (!filterState.activeFilters[colName]) {
+      if (col.role === 'dual') {
+        const nums = state.data.map(r => parseFloat(r[colName])).filter(v => !isNaN(v));
+        const mn = Math.min(...nums), mx = Math.max(...nums);
+        filterState.activeFilters[colName] = { type: 'range', min: mn, max: mx, dataMin: mn, dataMax: mx };
+      } else {
+        const vals = [...new Set(state.data.map(r => String(r[colName])).filter(v => v !== '' && v !== 'undefined'))].sort();
+        filterState.activeFilters[colName] = { type: 'cat', selected: new Set(vals), all: vals };
+      }
+    }
+  } else {
+    filterState.selectedCols.delete(colName);
+    delete filterState.activeFilters[colName];
+  }
+  renderFilterControls();
+  updateFilterBadge();
+  if (state.data) renderPlot();
+}
+
+function onRangeChange(colName, which, value) {
+  const f = filterState.activeFilters[colName];
+  if (!f) return;
+  const safeId = colName.replace(/\W/g, '_');
+  const num = parseFloat(value);
+
+  if (which === 'min') {
+    f.min = Math.min(num, f.max);
+    // clamp the slider itself if it overshot
+    const el = document.getElementById(`range-min-${safeId}`);
+    if (el) el.value = f.min;
+  } else {
+    f.max = Math.max(num, f.min);
+    const el = document.getElementById(`range-max-${safeId}`);
+    if (el) el.value = f.max;
+  }
+
+  // update display labels
+  const minLabel = document.getElementById(`range-min-val-${safeId}`);
+  const maxLabel = document.getElementById(`range-max-val-${safeId}`);
+  if (minLabel) minLabel.textContent = fmtNum(f.min);
+  if (maxLabel) maxLabel.textContent = fmtNum(f.max);
+
+  updateFilterBadge();
+  if (state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
+}
+
+function onCatToggle(colName, value, checked) {
+  const f = filterState.activeFilters[colName];
+  if (!f) return;
+  if (checked) f.selected.add(value); else f.selected.delete(value);
+  // update the selected count label inline without full re-render
+  const safeId = colName.replace(/\W/g, '_');
+  const countEl = document.getElementById(`cat-count-${safeId}`);
+  if (countEl) countEl.textContent = `${f.selected.size}/${f.all.length} selected`;
+  updateFilterBadge();
+  if (state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
+}
+
+// ── Filter Model ───────────────────────────────────────────────────────────
+function applyFilters(data) {
+  // Pure function — takes data, returns filtered data, never touches DOM
+  if (Object.keys(filterState.activeFilters).length === 0) return data;
+  return data.filter(row => {
+    return Object.entries(filterState.activeFilters).every(([col, f]) => {
+      if (f.type === 'range') {
+        const v = parseFloat(row[col]);
+        return !isNaN(v) && v >= f.min && v <= f.max;
+      } else {
+        return f.selected.has(String(row[col]));
+      }
+    });
+  });
+}
+
+function countActiveFilters() {
+  return Object.entries(filterState.activeFilters).filter(([col, f]) => {
+    if (f.type === 'range') return f.min > f.dataMin || f.max < f.dataMax;
+    else return f.selected.size < f.all.length;
+  }).length;
+}
+
+// ── Filter View ────────────────────────────────────────────────────────────
+function renderFilterColList() {
+  const query = (document.getElementById('filterSearch')?.value || '').toLowerCase();
+  const filterableCols = state.columns.filter(c =>
+    (c.role === 'dual' || c.role === 'categorical') &&
+    c.name.toLowerCase().includes(query)
+  );
+
+  const roleMap = {
+    dual: ['DUAL', 'pill-dual'],
+    categorical: ['CAT', 'pill-cat']
+  };
+
+  const container = document.getElementById('filterColList');
+  if (filterableCols.length === 0) {
+    container.innerHTML = `<div class="filter-col-empty">No columns match.</div>`;
+    return;
+  }
+
+  container.innerHTML = filterableCols.map(col => {
+    const [label, cls] = roleMap[col.role] || ['?', ''];
+    const checked = filterState.selectedCols.has(col.name);
+    const id = `fchk-${col.name.replace(/\W/g, '_')}`;
+    return `<label class="filter-col-item">
+      <input type="checkbox" id="${id}" ${checked ? 'checked' : ''}
+        onchange="onFilterColToggle('${col.name.replace(/'/g,"\\'")}', this.checked)">
+      <span class="filter-col-item-name" title="${col.name}">${col.name}</span>
+      <span class="pill ${cls}">${label}</span>
+    </label>`;
+  }).join('');
+}
+
+function fmtNum(v) {
+  if (v === null || v === undefined) return '';
+  const abs = Math.abs(v);
+  if (abs === 0) return '0';
+  if (abs >= 10000 || (abs < 0.01 && abs > 0)) return v.toExponential(2);
+  return parseFloat(v.toFixed(4)).toString();
+}
+
+function renderFilterControls() {
+  const area = document.getElementById('filterControlsArea');
+  const selected = [...filterState.selectedCols];
+
+  if (selected.length === 0) {
+    area.innerHTML = `<div class="filter-empty-hint">Select columns on the left<br>to add filter controls.</div>`;
+    return;
+  }
+
+  area.innerHTML = selected.map(colName => {
+    const f = filterState.activeFilters[colName];
+    if (!f) return '';
+    const col = state.columns.find(c => c.name === colName);
+    const [rl, rc] = f.type === 'range' ? ['DUAL','pill-dual'] : ['CAT','pill-cat'];
+    const safeId = colName.replace(/\W/g, '_');
+
+    if (f.type === 'range') {
+      const step = (f.dataMax - f.dataMin) > 100 ? 1 : (f.dataMax - f.dataMin) > 10 ? 0.1 : 0.01;
+      return `<div class="filter-control-block">
+        <div class="filter-control-label">
+          <span class="pill ${rc}">${rl}</span>
+          <span style="font-family:var(--font-mono);font-size:10.5px">${colName}</span>
+        </div>
+        <div class="range-wrap">
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;flex-direction:column;gap:3px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:10px;color:var(--text-faint);">Min</span>
+                <span class="range-val" id="range-min-val-${safeId}">${fmtNum(f.min)}</span>
+              </div>
+              <input type="range" id="range-min-${safeId}"
+                min="${f.dataMin}" max="${f.dataMax}" step="${step}" value="${f.min}"
+                oninput="onRangeChange('${colName.replace(/'/g,"\\'")}', 'min', this.value)">
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:10px;color:var(--text-faint);">Max</span>
+                <span class="range-val" id="range-max-val-${safeId}">${fmtNum(f.max)}</span>
+              </div>
+              <input type="range" id="range-max-${safeId}"
+                min="${f.dataMin}" max="${f.dataMax}" step="${step}" value="${f.max}"
+                oninput="onRangeChange('${colName.replace(/'/g,"\\'")}', 'max', this.value)">
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-faint);font-family:var(--font-mono);">
+              <span>${fmtNum(f.dataMin)}</span>
+              <span>full range</span>
+              <span>${fmtNum(f.dataMax)}</span>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    } else {
+      const items = f.all.map(v =>
+        `<label class="cat-check-item">
+          <input type="checkbox" ${f.selected.has(v) ? 'checked' : ''}
+            onchange="onCatToggle('${colName.replace(/'/g,"\\'")}', '${v.replace(/'/g,"\\'")}', this.checked)">
+          ${v}
+        </label>`
+      ).join('');
+      return `<div class="filter-control-block">
+        <div class="filter-control-label">
+          <span class="pill ${rc}">${rl}</span>
+          <span style="font-family:var(--font-mono);font-size:10.5px">${colName}</span>
+          <span style="font-size:10px;color:var(--text-faint);font-weight:400" id="cat-count-${safeId}">${f.selected.size}/${f.all.length} selected</span>
+        </div>
+        <div class="cat-check-list">${items}</div>
+      </div>`;
+    }
+  }).join('');
+}
+
+function updateFilterBadge() {
+  const n = countActiveFilters();
+  const btn = document.getElementById('filterBtn');
+  const badge = document.getElementById('filterCount');
+  const label = document.getElementById('filterActiveLabel');
+  btn.classList.toggle('active', n > 0);
+  badge.textContent = n;
+  badge.style.display = n > 0 ? 'inline' : 'none';
+  label.textContent = n > 0 ? `${n} filter${n > 1 ? 's' : ''} active` : 'No filters active';
+}
+
+
 function buildControls() {
   const contCols   = state.columns.filter(c => c.role === 'continuous' || c.role === 'dual');
   const colorCols  = state.columns.filter(c => c.role === 'categorical' || c.role === 'dual');
@@ -754,7 +1432,15 @@ function renderPlot() {
   const xCol = document.getElementById('xSelect').value;
   const yCol = document.getElementById('ySelect').value;
   const cCol = document.getElementById('colorSelect').value;
-  const data = state.data;
+  const data = applyFilters(state.data);  // Model: filter before render
+
+  if (data.length === 0) {
+    document.getElementById('emptyState').style.display = 'flex';
+    document.getElementById('emptyState').querySelector('.empty-title').textContent = 'No data matches current filters';
+    document.getElementById('emptyState').querySelector('.empty-sub').textContent = 'Adjust or reset your filters to see data.';
+    document.getElementById('plotly-chart').style.display = 'none';
+    return;
+  }
 
   let traces = [];
 
@@ -859,7 +1545,8 @@ function renderPlot() {
   const statsEl = document.getElementById('plotStats');
   titleEl.style.display = 'block';
   titleEl.textContent = `${yCol} vs ${xCol}` + (cCol ? ` · grouped by ${cCol}` : '');
-  statsEl.textContent = `${totalPoints.toLocaleString()} points · ${traces.length} series`;
+  const filterNote = data.length < state.nRows ? ` · ${data.length.toLocaleString()} / ${state.nRows.toLocaleString()} rows` : ` · ${state.nRows.toLocaleString()} rows`;
+  statsEl.textContent = `${totalPoints.toLocaleString()} points · ${traces.length} series${filterNote}`;
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
