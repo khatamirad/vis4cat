@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vis4Cat — Basic Visualization</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f7f5;
+    --surface: #ffffff;
+    --border: #e0ddd6;
+    --border-strong: #c8c4bc;
+    --text: #1a1a18;
+    --text-muted: #6b6860;
+    --text-faint: #9e9b94;
+    --accent: #1a5276;
+    --accent-light: #eaf0f6;
+    --pill-cont: #e8f4e8;
+    --pill-cont-text: #2d6a2d;
+    --pill-cat: #fef3e2;
+    --pill-cat-text: #7a4a00;
+    --pill-idx: #f0f0f0;
+    --pill-idx-text: #888;
+    --pill-dual: #f0eaff;
+    --pill-dual-text: #5a2d9e;
+    --warn: #fff3cd;
+    --warn-text: #7a5200;
+    --error: #fff0ee;
+    --error-text: #c0392b;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .logo {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--accent);
+  }
+  .logo span {
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+  .badge {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--accent-light);
+    color: var(--accent);
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+
+  /* ── Layout ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    height: calc(100vh - 52px);
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 10px;
+  }
+
+  /* Upload zone */
+  .upload-zone {
+    border: 1.5px dashed var(--border-strong);
+    border-radius: 6px;
+    padding: 20px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    background: var(--bg);
+  }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+  .upload-zone input { display: none; }
+  .upload-icon {
+    font-size: 22px;
+    margin-bottom: 6px;
+    color: var(--text-muted);
+  }
+  .upload-main {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+  .upload-sub {
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+
+  /* File info */
+  .file-info {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  .file-info strong { font-weight: 600; }
+  .file-meta { color: var(--text-muted); margin-top: 2px; }
+
+  /* Controls */
+  .control-group { display: flex; flex-direction: column; gap: 6px; }
+  .control-group label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  select, .toggle-group {
+    width: 100%;
+    font-family: var(--font);
+    font-size: 13px;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 5px;
+    padding: 7px 10px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6860' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  select:focus { outline: none; border-color: var(--accent); }
+  select:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* Toggle (scatter / line) */
+  .toggle-group {
+    display: flex;
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: 5px;
+    padding: 3px;
+    gap: 3px;
+    background-image: none;
+  }
+  .toggle-btn {
+    flex: 1;
+    padding: 5px 8px;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 500;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-muted);
+    transition: background 0.12s, color 0.12s;
+  }
+  .toggle-btn.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  /* Column type pills */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 1px 6px;
+    border-radius: 3px;
+    vertical-align: middle;
+    margin-left: 5px;
+  }
+  .pill-cont { background: var(--pill-cont); color: var(--pill-cont-text); }
+  .pill-cat  { background: var(--pill-cat);  color: var(--pill-cat-text); }
+  .pill-dual { background: var(--pill-dual); color: var(--pill-dual-text); }
+  .pill-warn { background: var(--warn);      color: var(--warn-text); }
+
+  /* Warnings */
+  .warn-box {
+    background: var(--warn);
+    border: 1px solid #f0d070;
+    border-radius: 5px;
+    padding: 8px 10px;
+    font-size: 11px;
+    color: var(--warn-text);
+    line-height: 1.4;
+  }
+
+  /* Dataset report */
+  .report-box {
+    background: var(--accent-light);
+    border: 1px solid #b8d4e8;
+    border-radius: 6px;
+    padding: 11px 13px;
+    font-size: 11.5px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .report-box .report-title {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .report-box .report-line { margin-bottom: 2px; }
+  .report-box .report-line:last-child { margin-bottom: 0; }
+  .report-box strong { font-weight: 600; }
+  .report-box .report-warn { color: var(--warn-text); }
+  .report-box .report-suggest {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #b8d4e8;
+    color: var(--text-muted);
+  }
+  .report-box code {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    background: rgba(26,82,118,0.08);
+    padding: 1px 4px;
+    border-radius: 3px;
+    color: var(--accent);
+  }
+
+  /* Column inspector */
+  .col-inspector {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .col-inspector-header {
+    background: var(--bg);
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    letter-spacing: 0.04em;
+  }
+  .col-row {
+    display: flex;
+    align-items: center;
+    padding: 5px 12px;
+    border-bottom: 1px solid var(--border);
+    gap: 6px;
+    font-size: 11px;
+  }
+  .col-row:last-child { border-bottom: none; }
+  .col-name {
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .col-detail { font-size: 10px; color: var(--text-faint); white-space: nowrap; }
+
+  /* Plot button */
+  .plot-btn {
+    width: 100%;
+    padding: 10px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    letter-spacing: 0.01em;
+  }
+  .plot-btn:hover { opacity: 0.88; }
+  .plot-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* ── Main canvas ── */
+  .main {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .plot-toolbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    min-height: 44px;
+  }
+  .plot-title-text {
+    font-weight: 500;
+    color: var(--text);
+    font-size: 13px;
+  }
+  .plot-stats {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+  }
+
+  .plot-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #plotly-chart {
+    width: 100%;
+    height: 100%;
+  }
+
+  .empty-state {
+    text-align: center;
+    color: var(--text-faint);
+  }
+  .empty-state .empty-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+    opacity: 0.4;
+  }
+  .empty-state .empty-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .empty-state .empty-sub {
+    font-size: 12px;
+    color: var(--text-faint);
+    max-width: 260px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Scrollbar */
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Vis4Cat <span>/ Basic Demo</span></div>
+  <div class="badge">TRL 2→3</div>
+</header>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+
+    <!-- Upload -->
+    <div>
+      <div class="section-label">Dataset</div>
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls">
+        <div class="upload-icon">⬆</div>
+        <div class="upload-main">Upload file</div>
+        <div class="upload-sub">CSV or XLSX · drag & drop or click</div>
+      </div>
+      <div id="fileInfo" style="display:none; margin-top:10px;"></div>
+    </div>
+
+    <!-- Column inspector -->
+    <!-- Dataset report -->
+    <div id="reportSection" style="display:none;">
+      <div class="section-label">Dataset report</div>
+      <div id="reportBox" class="report-box"></div>
+    </div>
+
+    <div id="inspectorSection" style="display:none;">
+      <div class="section-label">Column classification</div>
+      <div class="col-inspector">
+        <div class="col-inspector-header">AUTO-DETECTED TYPES</div>
+        <div id="colInspector"></div>
+      </div>
+    </div>
+
+    <!-- Plot controls -->
+    <div id="controlsSection" style="display:none;">
+      <div class="section-label">Plot controls</div>
+
+      <div style="display:flex; flex-direction:column; gap:14px;">
+
+        <div class="control-group">
+          <label>Plot type</label>
+          <div class="toggle-group">
+            <button class="toggle-btn active" data-type="scatter" onclick="setPlotType('scatter', this)">● Scatter</button>
+            <button class="toggle-btn" data-type="line" onclick="setPlotType('line', this)">↗ Line</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label>X axis</label>
+          <select id="xSelect" onchange="onSelectionChange()"></select>
+        </div>
+
+        <div class="control-group">
+          <label>Y axis</label>
+          <select id="ySelect" onchange="onSelectionChange()"></select>
+        </div>
+
+        <div class="control-group">
+          <label>Color / group by <span style="color:var(--text-faint); font-weight:400;">(optional)</span></label>
+          <select id="colorSelect" onchange="onSelectionChange()">
+            <option value="">— none —</option>
+          </select>
+          <div id="colorWarn" style="display:none; margin-top:4px;"></div>
+        </div>
+
+        <button class="plot-btn" id="plotBtn" onclick="renderPlot()" disabled>Plot</button>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="plot-toolbar" id="plotToolbar">
+      <span id="plotTitleText" class="plot-title-text" style="display:none;"></span>
+      <span id="plotStats" class="plot-stats"></span>
+    </div>
+    <div class="plot-area">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">⬡</div>
+        <div class="empty-title">No data loaded</div>
+        <div class="empty-sub">Upload a CSV or XLSX file to begin. Columns will be auto-classified and plot controls will appear.</div>
+      </div>
+      <div id="plotly-chart" style="display:none;"></div>
+    </div>
+  </main>
+
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let state = {
+  data: null,          // array of row objects
+  columns: [],         // [{name, dtype, role, uniqueCount, ratio}]
+  plotType: 'scatter',
+  nRows: 0,
+  fileName: ''
+};
+
+// ── Column Classification ──────────────────────────────────────────────────
+function classifyColumns(data) {
+  if (!data || data.length === 0) return [];
+  const keys = Object.keys(data[0]);
+  const n = data.length;
+
+  return keys.map(key => {
+    const values = data.map(r => r[key]).filter(v => v !== null && v !== undefined && v !== '');
+    const uniqueVals = [...new Set(values)];
+    const uniqueCount = uniqueVals.length;
+    const ratio = uniqueCount / n;
+
+    // Determine dtype
+    const numericCount = values.filter(v => !isNaN(parseFloat(v)) && isFinite(v)).length;
+    const isNumeric = numericCount / values.length > 0.9;
+
+    let role;
+
+    if (!isNumeric) {
+      // String column → always categorical
+      role = 'categorical';
+    } else {
+      // Check for row index: monotonically increasing integers starting near 0 or 1
+      const nums = values.map(v => parseFloat(v));
+      const isMonotonicInt = nums.every((v, i) => i === 0 || v >= nums[i-1]) &&
+                             nums.every(v => Number.isInteger(v)) &&
+                             ratio > 0.95;
+      if (isMonotonicInt) {
+        role = 'index';
+      } else if (ratio < 0.05 && uniqueCount < 20) {
+        // Low cardinality numeric → dual: can be used as axis OR color
+        role = 'dual';
+      } else {
+        role = 'continuous';
+      }
+    }
+
+    return { name: key, dtype: isNumeric ? 'numeric' : 'string', role, uniqueCount, ratio };
+  });
+}
+
+// ── File Loading ───────────────────────────────────────────────────────────
+function setupUpload() {
+  const zone = document.getElementById('uploadZone');
+  const input = document.getElementById('fileInput');
+
+  zone.addEventListener('click', () => input.click());
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+  input.addEventListener('change', () => { if (input.files[0]) handleFile(input.files[0]); });
+}
+
+function handleFile(file) {
+  state.fileName = file.name;
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  if (ext === 'csv') {
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      dynamicTyping: false,
+      complete: result => processData(result.data, file.name)
+    });
+  } else if (ext === 'xlsx' || ext === 'xls') {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const wb = XLSX.read(e.target.result, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const data = XLSX.utils.sheet_to_json(ws, { defval: '' });
+        processData(data, file.name);
+      } catch(err) {
+        showError('Could not parse XLSX: ' + err.message);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    showError('Unsupported format. Please upload CSV or XLSX.');
+  }
+}
+
+function processData(data, fileName) {
+  if (!data || data.length === 0) { showError('File appears to be empty.'); return; }
+
+  state.data = data;
+  state.nRows = data.length;
+  state.columns = classifyColumns(data);
+
+  showFileInfo(fileName, data.length, state.columns.length);
+  buildReport();
+  buildColumnInspector();
+  buildControls();
+
+  document.getElementById('reportSection').style.display = 'block';
+  document.getElementById('inspectorSection').style.display = 'block';
+  document.getElementById('controlsSection').style.display = 'block';
+}
+
+function showFileInfo(name, rows, cols) {
+  const el = document.getElementById('fileInfo');
+  el.style.display = 'block';
+  el.innerHTML = `<div class="file-info">
+    <strong>${name}</strong>
+    <div class="file-meta">${rows.toLocaleString()} rows · ${cols} columns</div>
+  </div>`;
+}
+
+function showError(msg) {
+  const el = document.getElementById('fileInfo');
+  el.style.display = 'block';
+  el.innerHTML = `<div class="warn-box" style="background:var(--error); border-color:#f5b7b1; color:var(--error-text);">⚠ ${msg}</div>`;
+}
+
+// ── Dataset Report ─────────────────────────────────────────────────────────
+function buildReport() {
+  const cols = state.columns;
+  const n = state.nRows;
+
+  const nCont = cols.filter(c => c.role === 'continuous').length;
+  const nCat  = cols.filter(c => c.role === 'categorical').length;
+  const nDual = cols.filter(c => c.role === 'dual').length;
+  const nIdx  = cols.filter(c => c.role === 'index').length;
+
+  // Missing values per column (count rows where value is '', null, undefined, or NaN)
+  const missingCols = cols.filter(c => {
+    const missing = state.data.filter(row => {
+      const v = row[c.name];
+      return v === null || v === undefined || v === '' || (typeof v === 'number' && isNaN(v));
+    }).length;
+    return missing / n > 0.1;
+  });
+
+  // Suggested axes: prefer columns with names matching common catalysis patterns
+  const timePatterns = /\b(time|tos|t_on|hours?|h\b)/i;
+  const tempPatterns = /\b(temp|temperature|T\b|T_rxn|degC)/i;
+  const contCols = cols.filter(c => c.role === 'continuous' || c.role === 'dual');
+  const catCols  = cols.filter(c => c.role === 'categorical' || c.role === 'dual');
+
+  const suggestX = contCols.find(c => timePatterns.test(c.name) || tempPatterns.test(c.name)) || contCols[0];
+  const suggestY = contCols.find(c => c !== suggestX) || contCols[1];
+  const suggestC = catCols.find(c => c.uniqueCount <= 15) || catCols[0];
+
+  let lines = [];
+  lines.push(`<div class="report-line">Loaded <strong>${n.toLocaleString()} rows</strong> across <strong>${cols.length} columns</strong>.</div>`);
+  lines.push(`<div class="report-line">Detected: <strong>${nCont}</strong> continuous, <strong>${nCat}</strong> categorical, <strong>${nDual}</strong> dual-role${nIdx > 0 ? `, <strong>${nIdx}</strong> index (excluded)` : ''}.</div>`);
+
+  if (missingCols.length > 0) {
+    const names = missingCols.slice(0, 3).map(c => `<code>${c.name}</code>`).join(', ');
+    const extra = missingCols.length > 3 ? ` +${missingCols.length - 3} more` : '';
+    lines.push(`<div class="report-line report-warn">⚠ ${missingCols.length} column${missingCols.length > 1 ? 's' : ''} with >10% missing values: ${names}${extra}.</div>`);
+  }
+
+  let suggest = '';
+  if (suggestX) suggest += `Suggested X: <code>${suggestX.name}</code>. `;
+  if (suggestY) suggest += `Suggested Y: <code>${suggestY.name}</code>. `;
+  if (suggestC) suggest += `Suggested color: <code>${suggestC.name}</code>${suggestC.uniqueCount > 15 ? ' <span class="report-warn">(⚠ high cardinality)</span>' : ''}.`;
+
+  if (suggest) {
+    lines.push(`<div class="report-suggest">${suggest}</div>`);
+  }
+
+  document.getElementById('reportBox').innerHTML =
+    `<div class="report-title">Auto-analysis</div>` + lines.join('');
+}
+
+// ── Column Inspector ───────────────────────────────────────────────────────
+const roleLabels = {
+  continuous: ['CONT', 'pill-cont'],
+  categorical: ['CAT',  'pill-cat'],
+  dual:        ['DUAL', 'pill-dual'],
+  index:       ['IDX',  'pill-idx']
+};
+
+function buildColumnInspector() {
+  const container = document.getElementById('colInspector');
+  const shown = state.columns.slice(0, 20); // show first 20 to avoid overflow
+  const rest = state.columns.length - shown.length;
+
+  container.innerHTML = shown.map(col => {
+    const [label, cls] = roleLabels[col.role] || ['?', ''];
+    return `<div class="col-row">
+      <span class="col-name" title="${col.name}">${col.name}</span>
+      <span class="col-detail">${col.uniqueCount}u</span>
+      <span class="pill ${cls}">${label}</span>
+    </div>`;
+  }).join('') + (rest > 0 ? `<div class="col-row" style="justify-content:center; color:var(--text-faint); font-size:11px;">+ ${rest} more columns</div>` : '');
+}
+
+// ── Controls ───────────────────────────────────────────────────────────────
+function buildControls() {
+  const contCols   = state.columns.filter(c => c.role === 'continuous' || c.role === 'dual');
+  const colorCols  = state.columns.filter(c => c.role === 'categorical' || c.role === 'dual');
+
+  const xSel = document.getElementById('xSelect');
+  const ySel = document.getElementById('ySelect');
+  const cSel = document.getElementById('colorSelect');
+
+  xSel.innerHTML = contCols.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+  ySel.innerHTML = contCols.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+
+  // Default Y to second column if available
+  if (contCols.length > 1) ySel.selectedIndex = 1;
+
+  cSel.innerHTML = '<option value="">— none —</option>' +
+    colorCols.map(c => {
+      const warn = c.uniqueCount > 15 ? ' ⚠' : '';
+      return `<option value="${c.name}">${c.name}${warn}</option>`;
+    }).join('');
+
+  onSelectionChange();
+}
+
+function onSelectionChange() {
+  const x = document.getElementById('xSelect').value;
+  const y = document.getElementById('ySelect').value;
+  const c = document.getElementById('colorSelect').value;
+  const btn = document.getElementById('plotBtn');
+
+  btn.disabled = !(x && y && x !== y);
+
+  // Color cardinality warning
+  const warnEl = document.getElementById('colorWarn');
+  if (c) {
+    const col = state.columns.find(col => col.name === c);
+    if (col && col.uniqueCount > 15) {
+      warnEl.style.display = 'block';
+      warnEl.innerHTML = `<div class="warn-box">⚠ ${col.uniqueCount} distinct values — legend may be unreadable. Consider filtering first.</div>`;
+    } else {
+      warnEl.style.display = 'none';
+    }
+  } else {
+    warnEl.style.display = 'none';
+  }
+}
+
+function setPlotType(type, btn) {
+  state.plotType = type;
+  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── Plotting ───────────────────────────────────────────────────────────────
+const PALETTE = [
+  '#1a5276','#e67e22','#27ae60','#8e44ad',
+  '#c0392b','#16a085','#d35400','#2c3e50',
+  '#f39c12','#7f8c8d','#2980b9','#229954'
+];
+
+function renderPlot() {
+  const xCol = document.getElementById('xSelect').value;
+  const yCol = document.getElementById('ySelect').value;
+  const cCol = document.getElementById('colorSelect').value;
+  const data = state.data;
+
+  let traces = [];
+
+  const mode = state.plotType === 'line' ? 'lines+markers' : 'markers';
+  const markerSize = state.plotType === 'line' ? 4 : 6;
+
+  if (cCol) {
+    // Group by color column
+    const groups = {};
+    data.forEach(row => {
+      const key = row[cCol] !== undefined && row[cCol] !== '' ? String(row[cCol]) : '(blank)';
+      if (!groups[key]) groups[key] = { x: [], y: [] };
+      const xv = parseFloat(row[xCol]);
+      const yv = parseFloat(row[yCol]);
+      if (!isNaN(xv) && !isNaN(yv)) {
+        groups[key].x.push(xv);
+        groups[key].y.push(yv);
+      }
+    });
+
+    const sortedKeys = Object.keys(groups).sort((a, b) => {
+      const na = parseFloat(a), nb = parseFloat(b);
+      return !isNaN(na) && !isNaN(nb) ? na - nb : a.localeCompare(b);
+    });
+
+    traces = sortedKeys.map((key, i) => ({
+      x: groups[key].x,
+      y: groups[key].y,
+      mode,
+      type: 'scatter',
+      name: key,
+      marker: { size: markerSize, color: PALETTE[i % PALETTE.length], opacity: 0.85 },
+      line: { color: PALETTE[i % PALETTE.length], width: 1.5 }
+    }));
+  } else {
+    // Single trace
+    const xs = [], ys = [];
+    data.forEach(row => {
+      const xv = parseFloat(row[xCol]);
+      const yv = parseFloat(row[yCol]);
+      if (!isNaN(xv) && !isNaN(yv)) { xs.push(xv); ys.push(yv); }
+    });
+
+    traces = [{
+      x: xs, y: ys,
+      mode, type: 'scatter',
+      name: yCol,
+      marker: { size: markerSize, color: PALETTE[0], opacity: 0.75 },
+      line: { color: PALETTE[0], width: 1.5 }
+    }];
+  }
+
+  const totalPoints = traces.reduce((s, t) => s + t.x.length, 0);
+
+  const layout = {
+    xaxis: {
+      title: { text: xCol, font: { size: 12, color: '#6b6860' } },
+      gridcolor: '#e8e5de',
+      linecolor: '#c8c4bc',
+      tickfont: { size: 11, color: '#6b6860' },
+      automargin: true
+    },
+    yaxis: {
+      title: { text: yCol, font: { size: 12, color: '#6b6860' } },
+      gridcolor: '#e8e5de',
+      linecolor: '#c8c4bc',
+      tickfont: { size: 11, color: '#6b6860' },
+      automargin: true
+    },
+    paper_bgcolor: 'white',
+    plot_bgcolor: '#fafaf8',
+    margin: { t: 20, r: 20, b: 60, l: 70 },
+    legend: cCol ? {
+      font: { size: 11 },
+      bgcolor: 'rgba(255,255,255,0.9)',
+      bordercolor: '#e0ddd6',
+      borderwidth: 1,
+      title: { text: cCol, font: { size: 11, color: '#6b6860' } }
+    } : { visible: false },
+    hovermode: 'closest',
+    font: { family: 'Inter, -apple-system, sans-serif' }
+  };
+
+  const config = {
+    responsive: true,
+    displayModeBar: true,
+    modeBarButtonsToRemove: ['select2d', 'lasso2d', 'autoScale2d'],
+    displaylogo: false,
+    toImageButtonOptions: { format: 'png', filename: 'vis4cat_plot', scale: 2 }
+  };
+
+  const chartEl = document.getElementById('plotly-chart');
+  const emptyEl = document.getElementById('emptyState');
+
+  emptyEl.style.display = 'none';
+  chartEl.style.display = 'block';
+
+  Plotly.react('plotly-chart', traces, layout, config);
+
+  // Update toolbar
+  const titleEl = document.getElementById('plotTitleText');
+  const statsEl = document.getElementById('plotStats');
+  titleEl.style.display = 'block';
+  titleEl.textContent = `${yCol} vs ${xCol}` + (cCol ? ` · grouped by ${cCol}` : '');
+  statsEl.textContent = `${totalPoints.toLocaleString()} points · ${traces.length} series`;
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+setupUpload();
+</script>
+
+</body>
+</html>
