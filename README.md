@@ -102,4 +102,4 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
-*NFDI4Cat is funded by the Deutsche Forschungsgemeinschaft (DFG) — project number 441926934.*
+*NFDI4Cat is funded by the Deutsche Forschungsgemeinschaft (DFG).*
