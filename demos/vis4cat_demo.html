@@ -695,6 +695,299 @@
     transition: border-color 0.12s, color 0.12s;
   }
   .filter-reset-btn:hover { border-color: #c0392b; color: #c0392b; }
+
+  /* ── Calculator panel ── */
+  .calc-btn {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: 5px;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .calc-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .calc-btn.active { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+
+  .calc-dropdown {
+    display: none;
+    position: absolute;
+    top: 44px;
+    left: 0; right: 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    z-index: 20;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    flex-direction: column;
+  }
+  .calc-dropdown.open { display: flex; }
+
+  .calc-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+  .calc-header-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+  }
+  .calc-header-sub {
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+
+  .calc-body {
+    display: flex;
+    gap: 0;
+    min-height: 200px;
+    max-height: 340px;
+  }
+
+  /* Left: column reference list */
+  .calc-col-ref {
+    width: 220px;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  .calc-col-ref-header {
+    padding: 8px 12px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .calc-col-ref-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 4px 0;
+  }
+  .calc-col-ref-list::-webkit-scrollbar { width: 4px; }
+  .calc-col-ref-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+  .calc-col-ref-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    cursor: pointer;
+    transition: background 0.1s;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text);
+  }
+  .calc-col-ref-item:hover { background: var(--accent-light); }
+  .calc-col-ref-item:hover .calc-col-ref-name { color: var(--accent); }
+  .calc-col-ref-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .calc-col-ref-hint {
+    font-size: 9px;
+    color: var(--text-faint);
+    padding: 6px 12px;
+    border-top: 1px solid var(--border);
+    line-height: 1.5;
+  }
+
+  /* Right: formula builder */
+  .calc-form-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 16px 20px;
+    overflow-y: auto;
+  }
+  .calc-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+  .calc-field label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.03em;
+  }
+  .calc-input {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 7px 10px;
+    border: 1px solid var(--border-strong);
+    border-radius: 5px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+    width: 100%;
+  }
+  .calc-input:focus { border-color: var(--accent); background: var(--surface); }
+  .calc-input.error { border-color: #c0392b; background: var(--error); }
+
+  .calc-formula-input {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 8px 10px;
+    border: 1px solid var(--border-strong);
+    border-radius: 5px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+    width: 100%;
+    min-height: 60px;
+    resize: vertical;
+  }
+  .calc-formula-input:focus { border-color: var(--accent); background: var(--surface); }
+  .calc-formula-input.error { border-color: #c0392b; background: var(--error); }
+
+  .calc-hint {
+    font-size: 10.5px;
+    color: var(--text-faint);
+    line-height: 1.5;
+    margin-top: 2px;
+  }
+  .calc-hint code {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 1px 4px;
+    border-radius: 3px;
+    color: var(--text-muted);
+  }
+
+  .calc-error-msg {
+    font-size: 11px;
+    color: #c0392b;
+    background: var(--error);
+    border: 1px solid #f5b7b1;
+    border-radius: 4px;
+    padding: 6px 10px;
+    margin-bottom: 10px;
+    display: none;
+  }
+
+  .calc-add-btn {
+    padding: 8px 18px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    align-self: flex-start;
+  }
+  .calc-add-btn:hover { opacity: 0.88; }
+  .calc-add-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* Computed descriptors list */
+  .calc-descriptors {
+    border-top: 1px solid var(--border);
+    padding: 10px 20px;
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+  .calc-descriptors-title {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 7px;
+  }
+  .calc-descriptor-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .calc-descriptor-tag {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--text);
+  }
+  .calc-descriptor-remove {
+    background: none;
+    border: none;
+    color: var(--text-faint);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.12s;
+  }
+  .calc-descriptor-remove:hover { color: #c0392b; }
+
+  /* ƒ pill for computed columns in dropdowns */
+  .pill-calc { background: #fde8d8; color: #a04000; }
+
+  /* ── Formula autocomplete ── */
+  .calc-autocomplete {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.97);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    z-index: 100;
+    max-height: 200px;
+    overflow-y: auto;
+    min-width: 240px;
+    backdrop-filter: blur(4px);
+    display: none;
+  }
+  .calc-autocomplete.open { display: block; }
+  .calc-autocomplete::-webkit-scrollbar { width: 4px; }
+  .calc-autocomplete::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+
+  .calc-ac-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: background 0.1s;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text);
+  }
+  .calc-ac-item:hover, .calc-ac-item.selected {
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+  .calc-ac-item .pill { margin-left: 0; flex-shrink: 0; }
+  .calc-ac-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .calc-ac-match { font-weight: 700; color: var(--accent); }
+  .calc-ac-empty {
+    padding: 8px 12px;
+    font-size: 11px;
+    color: var(--text-faint);
+    font-family: var(--font);
+  }
 </style>
 </head>
 <body>
@@ -770,7 +1063,53 @@
       <span id="plotTitleText" class="plot-title-text" style="display:none;"></span>
       <span id="plotStats" class="plot-stats"></span>
       <button class="filter-btn" id="filterBtn" onclick="toggleFilterPanel()">⊘ Filter <span class="filter-count" id="filterCount">0</span></button>
+      <button class="calc-btn" id="calcBtn" onclick="toggleCalcPanel()">ƒ Calculator</button>
       <button class="stats-btn" id="statsBtn" onclick="toggleStatsPanel()">≡ Statistics</button>
+    </div>
+
+    <!-- Calculator dropdown panel -->
+    <div class="calc-dropdown" id="calcDropdown">
+      <div class="calc-header">
+        <span class="calc-header-title">ƒ Basic Calculator</span>
+        <span class="calc-header-sub">Wrap column names in <code style="font-family:var(--font-mono);font-size:10px;background:var(--border);padding:1px 4px;border-radius:3px;">{curly braces}</code></span>
+        <button class="stats-close-btn" onclick="toggleCalcPanel()" title="Close">✕</button>
+      </div>
+      <div class="calc-body">
+        <!-- Left: column reference -->
+        <div class="calc-col-ref">
+          <div class="calc-col-ref-header">Available columns</div>
+          <div class="calc-col-ref-list" id="calcColRefList"></div>
+          <div class="calc-col-ref-hint">Click a column to insert it into the formula.</div>
+        </div>
+        <!-- Right: formula input -->
+        <div class="calc-form-area">
+          <div class="calc-field">
+            <label>Descriptor name</label>
+            <input class="calc-input" id="calcName" type="text" placeholder="e.g. S_CH4"
+              oninput="onCalcInput()">
+          </div>
+          <div class="calc-field">
+            <label>Formula</label>
+            <div style="position:relative;">
+              <textarea class="calc-formula-input" id="calcFormula"
+                placeholder="e.g. {C1an_out} / ({CO2_in} - {CO2_out})"
+                oninput="onCalcInput(); onFormulaInput(event)"
+                onkeydown="onFormulaKeydown(event)"></textarea>
+              <div class="calc-autocomplete" id="calcAutocomplete"></div>
+            </div>
+            <div class="calc-hint">
+              Type <code>{</code> to search and insert column names. Supports <code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>( )</code> and <code>Math.*</code> functions.
+            </div>
+          </div>
+          <div class="calc-error-msg" id="calcError"></div>
+          <button class="calc-add-btn" id="calcAddBtn" onclick="addDescriptor()" disabled>Add descriptor</button>
+        </div>
+      </div>
+      <!-- Computed descriptors list -->
+      <div class="calc-descriptors" id="calcDescriptorsSection" style="display:none;">
+        <div class="calc-descriptors-title">Computed descriptors</div>
+        <div class="calc-descriptor-list" id="calcDescriptorList"></div>
+      </div>
     </div>
 
     <!-- Filter dropdown panel -->
@@ -952,13 +1291,18 @@ function processData(data, fileName) {
   showFileInfo(fileName, data.length, state.columns.length);
   buildControls();
 
-  // reset filters when new file loaded
+  // reset filters and calculator when new file loaded
   filterState.selectedCols = new Set();
   filterState.activeFilters = {};
+  calcState.descriptors = [];
+  calcState.open = false;
+  document.getElementById('calcDropdown').classList.remove('open');
+  document.getElementById('calcBtn').classList.remove('active');
 
   document.getElementById('controlsSection').style.display = 'block';
   document.getElementById('statsBtn').style.display = 'flex';
   document.getElementById('filterBtn').style.display = 'flex';
+  document.getElementById('calcBtn').style.display = 'flex';
   updateFilterBadge();
 }
 
@@ -1368,26 +1712,342 @@ function updateFilterBadge() {
   label.textContent = n > 0 ? `${n} filter${n > 1 ? 's' : ''} active` : 'No filters active';
 }
 
+// ── Calculator State ───────────────────────────────────────────────────────
+let calcState = {
+  open: false,
+  descriptors: []  // [{name, formula}]
+};
 
+// ── Calculator Controller ──────────────────────────────────────────────────
+function toggleCalcPanel() {
+  calcState.open = !calcState.open;
+  document.getElementById('calcDropdown').classList.toggle('open', calcState.open);
+  document.getElementById('calcBtn').classList.toggle('active', calcState.open);
+  if (calcState.open) renderCalcColRef();
+}
+
+function onCalcInput() {
+  const name    = document.getElementById('calcName').value.trim();
+  const formula = document.getElementById('calcFormula').value.trim();
+  const btn     = document.getElementById('calcAddBtn');
+  const errEl   = document.getElementById('calcError');
+  errEl.style.display = 'none';
+  document.getElementById('calcName').classList.remove('error');
+  document.getElementById('calcFormula').classList.remove('error');
+  btn.disabled = !(name && formula);
+}
+
+function insertColRef(colName) {
+  const ta = document.getElementById('calcFormula');
+  const start = ta.selectionStart;
+  const end   = ta.selectionEnd;
+  ta.value = ta.value.slice(0, start) + `{${colName}}` + ta.value.slice(end);
+  ta.selectionStart = ta.selectionEnd = start + colName.length + 2;
+  ta.focus();
+  onCalcInput();
+}
+
+function addDescriptor() {
+  const name    = document.getElementById('calcName').value.trim();
+  const formula = document.getElementById('calcFormula').value.trim();
+
+  // validate name uniqueness
+  const allNames = [...state.columns.map(c => c.name), ...calcState.descriptors.map(d => d.name)];
+  if (allNames.includes(name)) {
+    showCalcError(`"${name}" already exists. Choose a different name.`);
+    document.getElementById('calcName').classList.add('error');
+    return;
+  }
+
+  // compute — Model
+  const result = computeDescriptor(formula);
+  if (result.error) {
+    showCalcError(result.error);
+    document.getElementById('calcFormula').classList.add('error');
+    return;
+  }
+
+  // update state — Model
+  calcState.descriptors.push({ name, formula });
+  state.data = state.data.map((row, i) => ({ ...row, [name]: result.values[i] }));
+  state.columns = classifyColumns(state.data);
+
+  // clear inputs
+  document.getElementById('calcName').value = '';
+  document.getElementById('calcFormula').value = '';
+  document.getElementById('calcAddBtn').disabled = true;
+  document.getElementById('calcError').style.display = 'none';
+
+  // update views
+  renderCalcColRef();
+  renderCalcDescriptors();
+  buildControls();
+}
+
+function removeDescriptor(name) {
+  calcState.descriptors = calcState.descriptors.filter(d => d.name !== name);
+  state.data = state.data.map(row => {
+    const r = { ...row };
+    delete r[name];
+    return r;
+  });
+  state.columns = classifyColumns(state.data);
+  renderCalcColRef();
+  renderCalcDescriptors();
+  buildControls();
+  if (document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
+}
+
+function showCalcError(msg) {
+  const el = document.getElementById('calcError');
+  el.textContent = `⚠ ${msg}`;
+  el.style.display = 'block';
+}
+
+// ── Calculator Model ───────────────────────────────────────────────────────
+function computeDescriptor(formula) {
+  // extract {colName} references
+  const refs = [...formula.matchAll(/\{([^}]+)\}/g)].map(m => m[1]);
+  const allCols = [...state.columns.map(c => c.name), ...calcState.descriptors.map(d => d.name)];
+  const missing = refs.filter(r => !allCols.includes(r));
+  if (missing.length > 0) {
+    return { error: `Unknown column${missing.length > 1 ? 's' : ''}: ${missing.map(m => `{${m}}`).join(', ')}` };
+  }
+
+  // build safe JS expression
+  const expr = formula.replace(/\{([^}]+)\}/g, (_, col) => `row[${JSON.stringify(col)}]`);
+
+  try {
+    const fn = new Function('row', 'Math', `"use strict"; return (${expr});`);
+    const values = state.data.map(row => {
+      try {
+        const v = fn(row, Math);
+        return (v === null || v === undefined || isNaN(v) || !isFinite(v)) ? null : Number(v);
+      } catch { return null; }
+    });
+    const validCount = values.filter(v => v !== null).length;
+    if (validCount === 0) {
+      return { error: 'Formula produced no valid values. Check column references and operators.' };
+    }
+    return { values };
+  } catch (e) {
+    return { error: `Formula syntax error: ${e.message}` };
+  }
+}
+
+// ── Calculator View ────────────────────────────────────────────────────────
+function renderCalcColRef() {
+  const list = document.getElementById('calcColRefList');
+  const roleMap = {
+    continuous:  ['CONT', 'pill-cont'],
+    dual:        ['DUAL', 'pill-dual'],
+    categorical: ['CAT',  'pill-cat'],
+    index:       ['IDX',  'pill-idx'],
+    computed:    ['ƒ',    'pill-calc']
+  };
+  const allCols = [
+    ...state.columns.map(c => ({ name: c.name, role: c.role })),
+    ...calcState.descriptors.map(d => ({ name: d.name, role: 'computed' }))
+  ];
+  list.innerHTML = allCols.map(col => {
+    const [label, cls] = roleMap[col.role] || ['?', ''];
+    return `<div class="calc-col-ref-item" onclick="insertColRef('${col.name.replace(/'/g, "\\'")}')">
+      <span class="calc-col-ref-name" title="${col.name}">${col.name}</span>
+      <span class="pill ${cls}">${label}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderCalcDescriptors() {
+  const section = document.getElementById('calcDescriptorsSection');
+  const list    = document.getElementById('calcDescriptorList');
+  if (calcState.descriptors.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = calcState.descriptors.map(d =>
+    `<div class="calc-descriptor-tag">
+      <span class="pill pill-calc">ƒ</span>
+      <span>${d.name}</span>
+      <button class="calc-descriptor-remove" onclick="removeDescriptor('${d.name.replace(/'/g, "\\'")}')">✕</button>
+    </div>`
+  ).join('');
+}
+
+
+// ── Formula Autocomplete ───────────────────────────────────────────────────
+let acState = {
+  open: false,
+  selectedIndex: -1,
+  matches: [],
+  braceStart: -1  // position of the opening { in the textarea
+};
+
+function getAllColNames() {
+  return [
+    ...state.columns.map(c => ({ name: c.name, role: c.role })),
+    ...calcState.descriptors.map(d => ({ name: d.name, role: 'computed' }))
+  ];
+}
+
+function onFormulaInput(e) {
+  const ta  = document.getElementById('calcFormula');
+  const val = ta.value;
+  const pos = ta.selectionStart;
+
+  // find the most recent unmatched { before cursor
+  let braceStart = -1;
+  for (let i = pos - 1; i >= 0; i--) {
+    if (val[i] === '}') break;  // closed brace — we're outside
+    if (val[i] === '{') { braceStart = i; break; }
+  }
+
+  if (braceStart === -1) {
+    closeAutocomplete();
+    return;
+  }
+
+  acState.braceStart = braceStart;
+  const query = val.slice(braceStart + 1, pos).toLowerCase();
+  const all   = getAllColNames();
+  acState.matches = query === ''
+    ? all
+    : all.filter(c => c.name.toLowerCase().includes(query));
+
+  acState.selectedIndex = 0;
+  renderAutocomplete(query);
+}
+
+function onFormulaKeydown(e) {
+  if (!acState.open) return;
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    acState.selectedIndex = Math.min(acState.selectedIndex + 1, acState.matches.length - 1);
+    renderAutocomplete();
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    acState.selectedIndex = Math.max(acState.selectedIndex - 1, 0);
+    renderAutocomplete();
+  } else if (e.key === 'Enter' || e.key === 'Tab') {
+    if (acState.matches.length > 0) {
+      e.preventDefault();
+      insertAutocomplete(acState.matches[acState.selectedIndex].name);
+    }
+  } else if (e.key === 'Escape') {
+    closeAutocomplete();
+  }
+}
+
+function insertAutocomplete(colName) {
+  const ta  = document.getElementById('calcFormula');
+  const val = ta.value;
+  const pos = ta.selectionStart;
+  // replace from { to cursor with {colName}
+  ta.value = val.slice(0, acState.braceStart) + `{${colName}}` + val.slice(pos);
+  const newPos = acState.braceStart + colName.length + 2;
+  ta.selectionStart = ta.selectionEnd = newPos;
+  ta.focus();
+  closeAutocomplete();
+  onCalcInput();
+}
+
+function closeAutocomplete() {
+  acState.open = false;
+  acState.matches = [];
+  acState.selectedIndex = -1;
+  acState.braceStart = -1;
+  document.getElementById('calcAutocomplete').classList.remove('open');
+}
+
+function renderAutocomplete(query) {
+  const ac = document.getElementById('calcAutocomplete');
+  const matches = acState.matches;
+
+  if (matches.length === 0) {
+    ac.innerHTML = `<div class="calc-ac-empty">No columns match.</div>`;
+    ac.classList.add('open');
+    acState.open = true;
+    return;
+  }
+
+  const roleMap = {
+    continuous:  ['CONT', 'pill-cont'],
+    dual:        ['DUAL', 'pill-dual'],
+    categorical: ['CAT',  'pill-cat'],
+    index:       ['IDX',  'pill-idx'],
+    computed:    ['ƒ',    'pill-calc']
+  };
+
+  const q = (query || '').toLowerCase();
+
+  ac.innerHTML = matches.map((col, i) => {
+    const [label, cls] = roleMap[col.role] || ['?', ''];
+    // highlight matching substring
+    const lo = col.name.toLowerCase();
+    const idx = q ? lo.indexOf(q) : -1;
+    let nameHtml = col.name;
+    if (idx !== -1 && q) {
+      nameHtml =
+        col.name.slice(0, idx) +
+        `<span class="calc-ac-match">${col.name.slice(idx, idx + q.length)}</span>` +
+        col.name.slice(idx + q.length);
+    }
+    return `<div class="calc-ac-item ${i === acState.selectedIndex ? 'selected' : ''}"
+      onmousedown="event.preventDefault(); insertAutocomplete('${col.name.replace(/'/g, "\\'")}')">
+      <span class="calc-ac-name">${nameHtml}</span>
+      <span class="pill ${cls}">${label}</span>
+    </div>`;
+  }).join('');
+
+  ac.classList.add('open');
+  acState.open = true;
+
+  // scroll selected item into view
+  const selected = ac.querySelector('.selected');
+  if (selected) selected.scrollIntoView({ block: 'nearest' });
+}
+
+// close autocomplete when clicking outside
+document.addEventListener('mousedown', e => {
+  const ac = document.getElementById('calcAutocomplete');
+  if (ac && !ac.contains(e.target)) closeAutocomplete();
+});
+
+// ── Controls ───────────────────────────────────────────────────────────────
 function buildControls() {
-  const contCols   = state.columns.filter(c => c.role === 'continuous' || c.role === 'dual');
-  const colorCols  = state.columns.filter(c => c.role === 'categorical' || c.role === 'dual');
+  // computed descriptors are classified as continuous after classifyColumns
+  // we track which names are computed to show ƒ pill in dropdowns
+  const computedNames = new Set(calcState.descriptors.map(d => d.name));
+
+  const contCols  = state.columns.filter(c => c.role === 'continuous' || c.role === 'dual');
+  const colorCols = state.columns.filter(c => c.role === 'categorical' || c.role === 'dual');
 
   const xSel = document.getElementById('xSelect');
   const ySel = document.getElementById('ySelect');
   const cSel = document.getElementById('colorSelect');
 
-  xSel.innerHTML = contCols.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-  ySel.innerHTML = contCols.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+  const optionHTML = (c) => {
+    const tag = computedNames.has(c.name) ? ' ƒ' : '';
+    return `<option value="${c.name}">${c.name}${tag}</option>`;
+  };
 
-  // Default Y to second column if available
-  if (contCols.length > 1) ySel.selectedIndex = 1;
+  // preserve current selections
+  const prevX = xSel.value;
+  const prevY = ySel.value;
+  const prevC = cSel.value;
+
+  xSel.innerHTML = contCols.map(optionHTML).join('');
+  ySel.innerHTML = contCols.map(optionHTML).join('');
+
+  // restore selection if column still exists, else default
+  if (prevX && contCols.find(c => c.name === prevX)) xSel.value = prevX;
+  if (prevY && contCols.find(c => c.name === prevY)) ySel.value = prevY;
+  else if (contCols.length > 1) ySel.selectedIndex = 1;
 
   cSel.innerHTML = '<option value="">— none —</option>' +
     colorCols.map(c => {
       const warn = c.uniqueCount > 15 ? ' ⚠' : '';
       return `<option value="${c.name}">${c.name}${warn}</option>`;
     }).join('');
+  if (prevC && colorCols.find(c => c.name === prevC)) cSel.value = prevC;
 
   onSelectionChange();
 }
