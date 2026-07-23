@@ -2,13 +2,5 @@
 
 
 
-Datasets used for development are not committed to this repository.
-
-They are available via Repo4Cat (open access):
-
-
-
-\- STEU — CO hydrogenation high-throughput screening
-
-\- catalyticData\_b — CO₂ hydrogenation performance
-
+Datasets used for development are deposited directly on repo4cat
+https://repository.nfdi4cat.org/dataverse/services-vis4cat
