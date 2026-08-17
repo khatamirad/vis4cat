@@ -547,6 +547,7 @@
     <div>
       <div class="section-label">Data source</div>
       <div id="vizFileInfo" style="margin-bottom:10px;"></div>
+      <div id="noNumericWarning" class="warn-box" style="display:none;"></div>
       <button class="back-btn" onclick="backToMerge()">← Back to merge</button>
     </div>
 
@@ -1157,6 +1158,21 @@ function confirmAndVisualize() {
     <div class="file-meta">${state.nRows.toLocaleString()} rows · ${state.columns.length} columns</div>
   </div>`;
 
+  // No numeric (continuous/dual) columns means X/Y and stack pickers will
+  // always be empty and Plot can never enable — surface why up front rather
+  // than leaving the person staring at blank dropdowns. Two common causes:
+  // numbers stored as text or mixed with units in the same cell, or a table
+  // laid out with samples as columns and properties as rows (Vis4Cat expects
+  // one row per sample, one column per variable).
+  const hasNumericCols = state.columns.some(c => c.role === 'continuous' || c.role === 'dual');
+  const noNumericEl = document.getElementById('noNumericWarning');
+  if (!hasNumericCols) {
+    noNumericEl.style.display = 'block';
+    noNumericEl.innerHTML = 'This file has no numeric columns to plot. Common causes: numbers stored as text or mixed with units/symbols in the same cell, extra title rows above the real header row, or the table having samples as columns and properties as rows (Vis4Cat expects one row per sample, one column per variable).';
+  } else {
+    noNumericEl.style.display = 'none';
+  }
+
   document.getElementById('controlsSection').style.display = 'block';
   document.getElementById('statsBtn').style.display = 'flex';
   document.getElementById('filterBtn').style.display = 'flex';
@@ -1168,7 +1184,17 @@ function confirmAndVisualize() {
   updateFilterBadge();
 
   document.getElementById('plotly-chart').style.display = 'none';
-  document.getElementById('emptyState').style.display = 'block';
+  const emptyEl = document.getElementById('emptyState');
+  emptyEl.style.display = 'block';
+  if (!hasNumericCols) {
+    emptyEl.querySelector('.empty-icon').textContent = '⚠';
+    emptyEl.querySelector('.empty-title').textContent = 'No numeric columns found';
+    emptyEl.querySelector('.empty-sub').textContent = 'Numbers may be stored as text, mixed with units, or the table may have samples as columns and properties as rows. See the note in the sidebar.';
+  } else {
+    emptyEl.querySelector('.empty-icon').textContent = '⬡';
+    emptyEl.querySelector('.empty-title').textContent = 'No data loaded';
+    emptyEl.querySelector('.empty-sub').textContent = 'Confirm a merge on the previous screen to begin plotting.';
+  }
 
   document.getElementById('mergeApp').style.display = 'none';
   document.getElementById('vizApp').style.display = 'grid';
@@ -2157,9 +2183,18 @@ function renderBarPlot() {
   const statsEl = document.getElementById('plotStats');
 
   if (!xCol || stackCols.length === 0 || rawData.length === 0) {
+    const noNumericCols = !state.columns.some(c => c.role === 'continuous' || c.role === 'dual');
     emptyEl.style.display = 'flex';
-    emptyEl.querySelector('.empty-title').textContent = rawData.length === 0 ? 'No data matches current filters' : 'Choose an X axis and at least one stack column';
-    emptyEl.querySelector('.empty-sub').textContent = rawData.length === 0 ? 'Adjust or reset your filters to see data.' : 'Pick a category column for X and one or more numeric columns to stack.';
+    if (rawData.length === 0) {
+      emptyEl.querySelector('.empty-title').textContent = 'No data matches current filters';
+      emptyEl.querySelector('.empty-sub').textContent = 'Adjust or reset your filters to see data.';
+    } else if (noNumericCols) {
+      emptyEl.querySelector('.empty-title').textContent = 'No numeric columns found';
+      emptyEl.querySelector('.empty-sub').textContent = 'Numbers may be stored as text, mixed with units, or the table may have samples as columns and properties as rows. See the note in the sidebar.';
+    } else {
+      emptyEl.querySelector('.empty-title').textContent = 'Choose an X axis and at least one stack column';
+      emptyEl.querySelector('.empty-sub').textContent = 'Pick a category column for X and one or more numeric columns to stack.';
+    }
     chartEl.style.display = 'none';
     document.getElementById('barWarnings').style.display = 'none';
     titleEl.style.display = 'none';
