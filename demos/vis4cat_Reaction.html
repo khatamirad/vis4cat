@@ -201,6 +201,52 @@
     overflow-y: auto; background: var(--surface);
   }
   .bar-stack-list .filter-col-item { padding: 5px 10px; }
+
+  /* Closed-by-default multi-select dropdown — used for bar's Stack columns
+     and Distribution's Value columns, so picking from a long column list
+     doesn't mean permanently scrolling a checklist taking up sidebar space. */
+  .msel { position: relative; }
+  .msel-trigger {
+    width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    font-family: var(--font); font-size: 13px; color: var(--text); background: var(--surface);
+    border: 1px solid var(--border-strong); border-radius: 5px; padding: 7px 10px; cursor: pointer;
+    text-align: left; transition: border-color .15s;
+  }
+  .msel-trigger:hover { border-color: var(--accent); }
+  .msel-trigger-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .msel-summary-empty { color: var(--text-faint); }
+  .msel-caret { color: var(--text-faint); font-size: 10px; flex-shrink: 0; transition: transform .15s; margin-left: 6px; }
+  .msel.open .msel-trigger { border-color: var(--accent); }
+  .msel.open .msel-caret { transform: rotate(180deg); }
+  .msel-panel {
+    display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 30;
+    background: var(--surface); border: 1px solid var(--border-strong); border-radius: 6px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.12); overflow: hidden;
+  }
+  .msel.open .msel-panel { display: block; }
+  .msel-search {
+    width: 100%; font-family: var(--font); font-size: 12px; padding: 7px 10px; border: none;
+    border-bottom: 1px solid var(--border); background: var(--bg); color: var(--text); outline: none;
+  }
+  .msel-panel .bar-stack-list { max-height: 200px; border: none; border-radius: 0; }
+  .msel-trigger:disabled { opacity: .45; cursor: not-allowed; }
+  .msel-trigger:disabled:hover { border-color: var(--border-strong); }
+
+  /* Searchable single-select dropdown ("ssel") — same shell as .msel above,
+     used for X/Y/Color axis (scatter/line), Bar's X axis, and Distribution's
+     Group by. Picking a row sets the (hidden) backing <select>'s value and
+     fires a real change event, so every existing onchange="..." handler and
+     .value read elsewhere in the app works unchanged. */
+  .ssel-list { max-height: 220px; overflow-y: auto; }
+  .ssel-option {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 7px 10px; font-size: 12.5px; color: var(--text); cursor: pointer;
+  }
+  .ssel-option:hover { background: var(--bg); }
+  .ssel-option.selected { background: var(--good-bg); color: var(--accent); font-weight: 600; }
+  .ssel-option-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ssel-check { color: var(--accent); font-size: 12px; flex-shrink: 0; visibility: hidden; margin-left: 8px; }
+  .ssel-option.selected .ssel-check { visibility: visible; }
   .sample-data-link {
     display: block; text-align: center; margin-top: 8px; font-size: 11.5px; font-weight: 500;
     color: var(--accent); text-decoration: none; cursor: pointer;
@@ -257,6 +303,9 @@
     border-radius: 3px; cursor: pointer; background: transparent; color: var(--text-muted); transition: background .12s, color .12s;
   }
   .toggle-btn.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  /* Plot-type group wraps to 2 per row once a 4th option (Distribution) is added */
+  .toggle-group-wrap { flex-wrap: wrap; }
+  .toggle-group-wrap .toggle-btn { flex: 1 1 calc(50% - 3px); }
 
   .pill { display: inline-flex; align-items: center; font-size: 10px; font-weight: 600; letter-spacing: .04em; padding: 1px 6px; border-radius: 3px; vertical-align: middle; margin-left: 5px; }
   .pill-cont { background: var(--good-bg); color: var(--good); }
@@ -271,6 +320,40 @@
   }
   .plot-btn:hover { opacity: .88; }
   .plot-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+  /* ── Loading / busy indicators ──────────────────────────────────────── */
+  /* Rendering a large filtered dataset (or merging one) can take a
+     noticeable moment. Without feedback the app can look frozen, so any
+     trigger — a direct button click or an automatic re-render from
+     toggling a filter/color/column — swaps in a spinner and an animated
+     background, not just changed text, so it reads clearly at a glance. */
+  @keyframes v4cSpin { to { transform: rotate(360deg); } }
+  @keyframes v4cPulse { 0%, 100% { background-color: var(--accent); } 50% { background-color: #0f3a54; } }
+
+  .v4c-spinner {
+    display: inline-block; width: 13px; height: 13px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.35); border-top-color: #fff;
+    animation: v4cSpin .6s linear infinite; flex-shrink: 0;
+  }
+
+  .visualize-btn.busy, .plot-btn.busy {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    cursor: wait; pointer-events: none; opacity: 1 !important;
+    animation: v4cPulse 1.1s ease-in-out infinite;
+  }
+
+  .plot-busy-badge {
+    position: absolute; top: 14px; right: 14px; z-index: 25;
+    display: flex; align-items: center; gap: 7px;
+    background: var(--accent); color: #fff;
+    font-family: var(--font); font-size: 12px; font-weight: 600;
+    padding: 6px 13px; border-radius: 20px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.18);
+    opacity: 0; transform: translateY(-6px);
+    pointer-events: none;
+    transition: opacity .15s ease, transform .15s ease;
+  }
+  .plot-busy-badge.visible { opacity: 1; transform: translateY(0); animation: v4cPulse 1.1s ease-in-out infinite; }
 
   .viz-main { display: flex; flex-direction: column; overflow: hidden; height: calc(100vh - 52px); }
   .plot-toolbar {
@@ -287,13 +370,30 @@
   .viz-empty-state .empty-title { font-size: 15px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
   .viz-empty-state .empty-sub { font-size: 12px; color: var(--text-faint); max-width: 260px; margin: 0 auto; line-height: 1.6; }
 
-  .stats-btn, .filter-btn, .calc-btn, .colors-btn {
+  .stats-btn, .filter-btn, .calc-btn, .colors-btn, .export-fig-btn {
     display: none; align-items: center; gap: 6px; padding: 5px 12px; background: var(--bg);
     border: 1px solid var(--border-strong); border-radius: 5px; font-family: var(--font); font-size: 12px;
     font-weight: 500; color: var(--text-muted); cursor: pointer; transition: border-color .15s, color .15s;
   }
-  .stats-btn:hover, .filter-btn:hover, .calc-btn:hover, .colors-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .stats-btn:hover, .filter-btn:hover, .calc-btn:hover, .colors-btn:hover, .export-fig-btn:hover { border-color: var(--accent); color: var(--accent); }
   .stats-btn.active, .calc-btn.active, .colors-btn.active { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+  .export-fig-btn { margin-left: 8px; }
+  .export-fig-btn:disabled { opacity: .35; cursor: not-allowed; }
+  .export-dropdown {
+    display: none; position: absolute; top: 36px; right: 0; width: 300px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.1); z-index: 20; padding: 8px;
+  }
+  .export-dropdown.open { display: block; }
+  .export-action-btn {
+    width: 100%; display: flex; align-items: flex-start; gap: 9px; padding: 8px 9px; background: none; border: none;
+    border-radius: 6px; text-align: left; font-family: var(--font); font-size: 12.5px; color: var(--text); cursor: pointer; transition: background .12s;
+  }
+  .export-action-btn:hover { background: var(--bg); }
+  .export-action-sub { font-size: 10.5px; color: var(--text-faint); margin-top: 1px; }
+  .export-name-warn {
+    font-size: 11px; color: var(--error-text); background: var(--error); border: 1px solid #f5b7b1;
+    border-radius: 5px; padding: 6px 9px; margin-bottom: 6px; display: none;
+  }
   .filter-btn { margin-left: 0; }
   .filter-btn.active { background: #fff3e0; border-color: #e67e22; color: #a04000; }
   .filter-btn .filter-count { background: #e67e22; color: white; font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 3px; display: none; }
@@ -548,6 +648,13 @@
       <div class="section-label">Data source</div>
       <div id="vizFileInfo" style="margin-bottom:10px;"></div>
       <div id="noNumericWarning" class="warn-box" style="display:none;"></div>
+      <div class="control-group" style="margin-bottom:10px;">
+        <label for="exportedByInput">Exported by <span style="color:var(--error-text); font-weight:600;">*</span></label>
+        <input type="text" id="exportedByInput" placeholder="Your name (required to export)" autocomplete="off"
+          oninput="onExportedByInput(this.value)"
+          style="width:100%; font-family:var(--font); font-size:13px; color:var(--text); background:var(--surface); border:1px solid var(--border-strong); border-radius:5px; padding:7px 10px;">
+        <div class="strategy-hint" style="margin-top:2px;">Required before exporting — once Vis4Cat is integrated with Dataverse, this will be filled in automatically from your login.</div>
+      </div>
       <button class="back-btn" onclick="backToMerge()">← Back to merge</button>
     </div>
 
@@ -556,25 +663,56 @@
       <div style="display:flex; flex-direction:column; gap:14px;">
         <div class="control-group">
           <label>Plot type</label>
-          <div class="toggle-group">
+          <div class="toggle-group toggle-group-wrap">
             <button class="toggle-btn active" data-type="scatter" onclick="setPlotType('scatter', this)">● Scatter</button>
             <button class="toggle-btn" data-type="line" onclick="setPlotType('line', this)">↗ Line</button>
             <button class="toggle-btn" data-type="bar" onclick="setPlotType('bar', this)">▤ Bar</button>
+            <button class="toggle-btn" data-type="distribution" onclick="setPlotType('distribution', this)">◫ Distribution</button>
           </div>
         </div>
 
         <div id="scatterLineControls" style="display:flex; flex-direction:column; gap:14px;">
           <div class="control-group">
             <label>X axis</label>
-            <select id="xSelect" onchange="onSelectionChange()"></select>
+            <div class="msel" id="xSelectDd">
+              <button type="button" class="msel-trigger" onclick="toggleMsel('xSelectDd')">
+                <span class="msel-trigger-text msel-summary-empty" id="xSelectSummary">— select —</span>
+                <span class="msel-caret">▾</span>
+              </button>
+              <div class="msel-panel">
+                <input class="msel-search" id="xSelectSearch" type="text" placeholder="Search columns…" oninput="buildControls()">
+                <div class="ssel-list" id="xSelectList"></div>
+              </div>
+            </div>
+            <select id="xSelect" onchange="onSelectionChange()" style="display:none;"></select>
           </div>
           <div class="control-group">
             <label>Y axis</label>
-            <select id="ySelect" onchange="onSelectionChange()"></select>
+            <div class="msel" id="ySelectDd">
+              <button type="button" class="msel-trigger" onclick="toggleMsel('ySelectDd')">
+                <span class="msel-trigger-text msel-summary-empty" id="ySelectSummary">— select —</span>
+                <span class="msel-caret">▾</span>
+              </button>
+              <div class="msel-panel">
+                <input class="msel-search" id="ySelectSearch" type="text" placeholder="Search columns…" oninput="buildControls()">
+                <div class="ssel-list" id="ySelectList"></div>
+              </div>
+            </div>
+            <select id="ySelect" onchange="onSelectionChange()" style="display:none;"></select>
           </div>
           <div class="control-group">
             <label>Color / group by <span style="color:var(--text-faint); font-weight:400;">(optional)</span></label>
-            <select id="colorSelect" onchange="onSelectionChange()">
+            <div class="msel" id="colorSelectDd">
+              <button type="button" class="msel-trigger" onclick="toggleMsel('colorSelectDd')">
+                <span class="msel-trigger-text msel-summary-empty" id="colorSelectSummary">— none —</span>
+                <span class="msel-caret">▾</span>
+              </button>
+              <div class="msel-panel">
+                <input class="msel-search" id="colorSelectSearch" type="text" placeholder="Search columns…" oninput="buildControls()">
+                <div class="ssel-list" id="colorSelectList"></div>
+              </div>
+            </div>
+            <select id="colorSelect" onchange="onSelectionChange()" style="display:none;">
               <option value="">— none —</option>
             </select>
             <div id="colorWarn" style="display:none; margin-top:4px;"></div>
@@ -585,15 +723,43 @@
         <div id="barControls" style="display:none; flex-direction:column; gap:14px;">
           <div class="control-group">
             <label>X axis (category)</label>
-            <select id="barXSelect" onchange="buildBarControls()"></select>
+            <div class="msel" id="barXSelectDd">
+              <button type="button" class="msel-trigger" onclick="toggleMsel('barXSelectDd')">
+                <span class="msel-trigger-text msel-summary-empty" id="barXSelectSummary">— select —</span>
+                <span class="msel-caret">▾</span>
+              </button>
+              <div class="msel-panel">
+                <input class="msel-search" id="barXSelectSearch" type="text" placeholder="Search columns…" oninput="buildBarControls()">
+                <div class="ssel-list" id="barXSelectList"></div>
+              </div>
+            </div>
+            <select id="barXSelect" onchange="buildBarControls()" style="display:none;"></select>
           </div>
           <div class="control-group">
             <label>Split by <span style="color:var(--text-faint); font-weight:400;">(optional — clusters bars per condition, select 1+)</span></label>
-            <div class="bar-stack-list" id="barSplitList"></div>
+            <div class="msel" id="barSplitMsel">
+              <button type="button" class="msel-trigger" onclick="toggleMsel('barSplitMsel')">
+                <span class="msel-trigger-text msel-summary-empty" id="barSplitSummary">— none —</span>
+                <span class="msel-caret">▾</span>
+              </button>
+              <div class="msel-panel">
+                <input class="msel-search" id="barSplitSearch" type="text" placeholder="Search columns…" oninput="buildBarControls()">
+                <div class="bar-stack-list" id="barSplitList"></div>
+              </div>
+            </div>
           </div>
           <div class="control-group">
             <label>Stack columns <span style="color:var(--text-faint); font-weight:400;">(select 1 or more)</span></label>
-            <div class="bar-stack-list" id="barStackList"></div>
+            <div class="msel" id="barStackMsel">
+              <button type="button" class="msel-trigger" onclick="toggleMsel('barStackMsel')">
+                <span class="msel-trigger-text msel-summary-empty" id="barStackSummary">— select columns —</span>
+                <span class="msel-caret">▾</span>
+              </button>
+              <div class="msel-panel">
+                <input class="msel-search" id="barStackSearch" type="text" placeholder="Search columns…" oninput="buildBarControls()">
+                <div class="bar-stack-list" id="barStackList"></div>
+              </div>
+            </div>
           </div>
           <div class="control-group">
             <label>Aggregate replicates by</label>
@@ -606,6 +772,52 @@
             <input type="checkbox" id="barShowError" checked onchange="if(state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot()"> Show total ± SD error bars
           </label>
           <div class="strategy-hint">Rows sharing the same X (and split columns, if any) are treated as replicates and aggregated. Checks above the chart flag hidden condition variation, uneven replicate counts, missing segments, negative values, and totals that don't sum sensibly — dismiss (✕) any check you've already accounted for.</div>
+        </div>
+
+        <div id="distControls" style="display:none; flex-direction:column; gap:14px;">
+          <div class="control-group">
+            <label>Value columns <span style="color:var(--text-faint); font-weight:400;">(select 1 or more)</span></label>
+            <div class="msel" id="distValueMsel">
+              <button type="button" class="msel-trigger" onclick="toggleMsel('distValueMsel')">
+                <span class="msel-trigger-text msel-summary-empty" id="distValueSummary">— select columns —</span>
+                <span class="msel-caret">▾</span>
+              </button>
+              <div class="msel-panel">
+                <input class="msel-search" id="distValueSearch" type="text" placeholder="Search columns…" oninput="buildDistControls()">
+                <div class="bar-stack-list" id="distValueList"></div>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label>Group by <span style="color:var(--text-faint); font-weight:400;">(optional — one distribution per category)</span></label>
+            <div class="msel" id="distGroupSelectDd">
+              <button type="button" class="msel-trigger" onclick="toggleMsel('distGroupSelectDd')">
+                <span class="msel-trigger-text msel-summary-empty" id="distGroupSelectSummary">— none, pooled —</span>
+                <span class="msel-caret">▾</span>
+              </button>
+              <div class="msel-panel">
+                <input class="msel-search" id="distGroupSelectSearch" type="text" placeholder="Search columns…" oninput="buildDistControls()">
+                <div class="ssel-list" id="distGroupSelectList"></div>
+              </div>
+            </div>
+            <select id="distGroupSelect" onchange="onDistGroupChange()" style="display:none;"><option value="">— none, pooled —</option></select>
+          </div>
+          <div class="control-group">
+            <label>Chart style</label>
+            <div class="toggle-group">
+              <button class="toggle-btn active" data-dist="box" onclick="setDistStyle('box', this)">Box</button>
+              <button class="toggle-btn" data-dist="violin" onclick="setDistStyle('violin', this)">Violin</button>
+              <button class="toggle-btn" data-dist="histogram" onclick="setDistStyle('histogram', this)">Histogram</button>
+            </div>
+          </div>
+          <label style="display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-muted); cursor:pointer;">
+            <input type="checkbox" id="distShowPoints" checked onchange="if(state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot()"> Show individual points
+          </label>
+          <div class="control-group" id="distBinsRow" style="display:none;">
+            <label>Bins</label>
+            <input type="number" id="distBins" min="2" max="100" value="20" class="calc-input" style="width:100%;" onchange="if(state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot()">
+          </div>
+          <div class="strategy-hint">Points are shown automatically for any group with fewer than 10 replicates, since a box or violin summary alone can be misleading at low n. Histogram doesn't support Group by — it always pools all rows per value column.</div>
         </div>
 
         <button class="plot-btn" id="plotBtn" onclick="renderPlot()" disabled>Plot</button>
@@ -622,6 +834,34 @@
       <button class="calc-btn" id="calcBtn" onclick="toggleCalcPanel()">ƒ Calculator</button>
       <button class="colors-btn" id="colorsBtn" onclick="toggleColorsPanel()">🎨 Colors</button>
       <button class="stats-btn" id="statsBtn" onclick="toggleStatsPanel()">≡ Statistics</button>
+      <div style="position:relative; display:inline-block;">
+        <button class="export-fig-btn" id="figureExportBtn" onclick="toggleExportMenu()" disabled
+          title="Export this figure">⬇ Export ▾</button>
+        <div class="export-dropdown" id="exportDropdown">
+          <div class="export-name-warn" id="exportNameWarn">Enter your name in the sidebar ("Exported by") before exporting.</div>
+          <button class="export-action-btn" id="exportBundleBtn" onclick="exportFigure()">
+            <span>📦</span>
+            <span>
+              <div id="exportBundleLabel">Full export (HTML)</div>
+              <div class="export-action-sub">Image + exact plotted data + metadata</div>
+            </span>
+          </button>
+          <button class="export-action-btn" id="exportPngBtn" onclick="downloadFigurePNG()">
+            <span>⬇</span>
+            <span>
+              <div id="exportPngLabel">Download image (PNG)</div>
+              <div class="export-action-sub">Just the figure, no data or metadata</div>
+            </span>
+          </button>
+          <button class="export-action-btn" onclick="copyFigureToClipboard()">
+            <span>⧉</span>
+            <span>
+              <div>Copy image</div>
+              <div class="export-action-sub" id="copyImageSub">Paste directly into Word, Slides, etc.</div>
+            </span>
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Calculator dropdown panel -->
@@ -710,6 +950,7 @@
     </div>
 
     <div class="bar-warnings" id="barWarnings" style="display:none;"></div>
+    <div class="bar-warnings" id="distWarnings" style="display:none;"></div>
 
     <div class="viz-plot-area" style="position:relative;">
       <div class="viz-empty-state" id="emptyState">
@@ -718,6 +959,7 @@
         <div class="empty-sub">Confirm a merge on the previous screen to begin plotting.</div>
       </div>
       <div id="plotly-chart" style="display:none;"></div>
+      <div class="plot-busy-badge" id="plotBusyBadge"><span class="v4c-spinner"></span><span>Rendering…</span></div>
 
       <div class="stats-panel" id="statsPanel">
         <div class="stats-panel-header">
@@ -1069,14 +1311,20 @@ let state = {
   columns: [],
   plotType: 'scatter',
   nRows: 0,
-  fileName: ''
+  fileName: '',
+  lastPlot: null // set by renderPlot()/renderBarPlot() on a successful render; consumed by exportFigure()
 };
+
+// ── Figure export state (who's exporting — no login, so this is a simple
+// optional free-text field, kept in memory only for this page load) ──────
+let exportState = { exportedBy: '' };
 
 // bar plot config: xCol = bar category, splitCols = optional secondary
 // clustering columns (0+), stackCols = numeric columns stacked per bar,
 // agg = 'mean'|'median', dismissedWarnings = sanity-check keys the user
 // has acknowledged for this dataset (persists across replots).
 let barState = { xCol: '', splitCols: [], stackCols: [], agg: 'mean', dismissedWarnings: new Set() };
+let distState = { valueCols: [], groupCol: '', style: 'box' };
 let barWarnUI = { expanded: false };
 const BAR_WARN_CAP = 4;
 
@@ -1117,6 +1365,20 @@ function classifyColumns(data) {
 // ── Confirm & Visualize / Back to merge ──────────────────────────────────────
 function confirmAndVisualize() {
   if (mergeState.files.length === 0) return;
+  // Same defer-one-frame pattern as renderPlot(): show the busy button
+  // state, then let the browser paint it before the merge + classification
+  // work (which can take a moment on a large file) blocks the main thread.
+  const visBtn = document.getElementById('visualizeBtn');
+  setButtonBusy(visBtn, 'Loading\u2026');
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      confirmAndVisualizeImpl();
+      clearButtonBusy(visBtn);
+    }, 0);
+  });
+}
+
+function confirmAndVisualizeImpl() {
   const report = computeSchemaReport(mergeState.files);
   const { rows } = buildMergedRows(mergeState.files, report, mergeState.strategy);
 
@@ -1135,6 +1397,9 @@ function confirmAndVisualize() {
   calcState.open = false;
   barState = { xCol: '', splitCols: [], stackCols: [], agg: 'mean', dismissedWarnings: new Set() };
   barWarnUI.expanded = false;
+  distState = { valueCols: [], groupCol: '', style: 'box' };
+  state.lastPlot = null;
+  document.getElementById('figureExportBtn').disabled = true;
   colorState.overrides = {};
   colorState.auto = {};
   colorState.open = false;
@@ -1148,10 +1413,16 @@ function confirmAndVisualize() {
   document.getElementById('colorsBtn').classList.remove('active');
   document.getElementById('colorsPaletteSelect').value = colorState.palette;
   document.getElementById('barWarnings').style.display = 'none';
+  document.getElementById('distWarnings').style.display = 'none';
   document.querySelectorAll('.toggle-btn[data-type]').forEach(b => b.classList.toggle('active', b.dataset.type === 'scatter'));
   document.querySelectorAll('.toggle-btn[data-agg]').forEach(b => b.classList.toggle('active', b.dataset.agg === 'mean'));
+  document.querySelectorAll('.toggle-btn[data-dist]').forEach(b => b.classList.toggle('active', b.dataset.dist === 'box'));
+  document.getElementById('distBinsRow').style.display = 'none';
+  document.getElementById('distGroupSelect').disabled = false;
+  setSselDisabled('distGroupSelect', false);
   document.getElementById('scatterLineControls').style.display = 'flex';
   document.getElementById('barControls').style.display = 'none';
+  document.getElementById('distControls').style.display = 'none';
 
   document.getElementById('vizFileInfo').innerHTML = `<div class="file-info">
     <strong>${state.fileName}</strong>
@@ -1178,9 +1449,11 @@ function confirmAndVisualize() {
   document.getElementById('filterBtn').style.display = 'flex';
   document.getElementById('calcBtn').style.display = 'flex';
   document.getElementById('colorsBtn').style.display = 'flex';
+  document.getElementById('figureExportBtn').style.display = 'flex';
 
   buildControls();
   buildBarControls();
+  buildDistControls();
   updateFilterBadge();
 
   document.getElementById('plotly-chart').style.display = 'none';
@@ -1411,6 +1684,26 @@ function onCatToggle(colName, value, checked) {
   if (state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
 }
 
+// Select all / Clear all for a categorical filter's checklist — the
+// individual-checkbox flow gets impractical fast once a column has
+// dozens or hundreds of distinct values (e.g. run/job names).
+function onCatSelectAll(colName) {
+  const f = filterState.activeFilters[colName];
+  if (!f) return;
+  f.selected = new Set(f.all);
+  renderFilterControls();
+  updateFilterBadge();
+  if (state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
+}
+function onCatSelectNone(colName) {
+  const f = filterState.activeFilters[colName];
+  if (!f) return;
+  f.selected = new Set();
+  renderFilterControls();
+  updateFilterBadge();
+  if (state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
+}
+
 function applyFilters(data) {
   if (Object.keys(filterState.activeFilters).length === 0) return data;
   return data.filter(row => {
@@ -1522,6 +1815,10 @@ function renderFilterControls() {
           <span class="pill ${rc}">${rl}</span>
           <span style="font-family:var(--font-mono);font-size:10.5px">${colName}</span>
           <span style="font-size:10px;color:var(--text-faint);font-weight:400" id="cat-count-${safeId}">${f.selected.size}/${f.all.length} selected</span>
+          <span style="margin-left:auto; display:flex; gap:8px;">
+            <a href="#" onclick="onCatSelectAll('${colName.replace(/'/g,"\\'")}'); return false;" style="font-size:10px; font-weight:500; color:var(--accent); text-decoration:none;">Select all</a>
+            <a href="#" onclick="onCatSelectNone('${colName.replace(/'/g,"\\'")}'); return false;" style="font-size:10px; font-weight:500; color:var(--accent); text-decoration:none;">Clear all</a>
+          </span>
         </div>
         <div class="cat-check-list">${items}</div>
       </div>`;
@@ -1597,6 +1894,7 @@ function addDescriptor() {
   renderCalcDescriptors();
   buildControls();
   buildBarControls();
+  buildDistControls();
 }
 
 function removeDescriptor(name) {
@@ -1607,6 +1905,7 @@ function removeDescriptor(name) {
   renderCalcDescriptors();
   buildControls();
   buildBarControls();
+  buildDistControls();
   if (document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
 }
 
@@ -1773,6 +2072,136 @@ document.addEventListener('mousedown', e => {
   if (ac && !ac.contains(e.target)) closeAutocomplete();
 });
 
+// ── Multi-select dropdown ("msel") — closed-by-default column pickers ─────
+// Used by Bar's Stack columns and Distribution's Value columns. The trigger
+// button shows a one-line summary; clicking it opens a small popover with a
+// search box and the existing checkbox-list markup. Clicking outside any
+// open .msel closes it.
+function closeAllMsel() {
+  document.querySelectorAll('.msel.open').forEach(m => m.classList.remove('open'));
+}
+
+function toggleMsel(id) {
+  const el = document.getElementById(id);
+  const trigger = el.querySelector('.msel-trigger');
+  if (trigger && trigger.disabled) return;
+  const isOpen = el.classList.contains('open');
+  closeAllMsel();
+  if (!isOpen) {
+    el.classList.add('open');
+    const search = el.querySelector('.msel-search');
+    if (search) setTimeout(() => search.focus(), 0);
+  }
+}
+
+document.addEventListener('mousedown', e => {
+  document.querySelectorAll('.msel.open').forEach(m => {
+    if (!m.contains(e.target)) m.classList.remove('open');
+  });
+});
+
+function mselSummaryText(names, placeholder) {
+  if (!names || names.length === 0) return placeholder;
+  if (names.length <= 2) return names.join(', ');
+  return `${names.length} columns selected`;
+}
+
+// ── Searchable single-select dropdown ("ssel") ─────────────────────────────
+// Same visual shell as .msel above (closed by default, search box, popover
+// list) but picking a row selects it immediately and closes the popover,
+// instead of staying open for further checkbox toggles. The real <select>
+// (id === selectId) stays in the DOM, hidden, as the single source of truth:
+// every existing onchange="..." handler and .value read elsewhere keeps
+// working unchanged, since picking an option just sets select.value and
+// dispatches a real 'change' event on it.
+//
+// cfg: { selectId, options: [{value, label}], placeholder }
+// Convention: for a given selectId, the search/list/summary elements are
+// `${selectId}Search` / `${selectId}List` / `${selectId}Summary`.
+function renderSselOptions(selectId, options, placeholder) {
+  const sel = document.getElementById(selectId);
+  const listEl = document.getElementById(selectId + 'List');
+  const summaryEl = document.getElementById(selectId + 'Summary');
+  if (!sel || !listEl || !summaryEl) return;
+  const searchEl = document.getElementById(selectId + 'Search');
+  const query = (searchEl && searchEl.value || '').toLowerCase();
+  const visible = query ? options.filter(o => o.label.toLowerCase().includes(query)) : options;
+  const curVal = sel.value;
+
+  listEl.innerHTML = visible.length ? visible.map(o => {
+    const isSel = o.value === curVal;
+    const safeVal = o.value.replace(/'/g, "\\'");
+    const safeLabel = o.label.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    const titleLabel = o.label.replace(/"/g, '&quot;');
+    return `<div class="ssel-option${isSel ? ' selected' : ''}" onclick="pickSselOption('${selectId}', '${safeVal}', '${safeLabel}')">
+      <span class="ssel-option-name" title="${titleLabel}">${o.label}</span>
+      <span class="ssel-check">\u2713</span>
+    </div>`;
+  }).join('') : `<div class="filter-col-empty">${query ? `No columns match "${query.replace(/</g, '&lt;')}".` : 'No columns available.'}</div>`;
+
+  const curOpt = options.find(o => o.value === curVal);
+  summaryEl.textContent = curOpt ? curOpt.label : placeholder;
+  summaryEl.classList.toggle('msel-summary-empty', !curOpt || curOpt.value === '');
+}
+
+function pickSselOption(selectId, value, label) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  if (sel.value !== value) {
+    sel.value = value;
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  // The change handler above may already have rebuilt this ssel (e.g. bar's
+  // X axis and distribution's Group by trigger a full control rebuild), but
+  // for handlers that don't (scatter/line's onSelectionChange), reflect the
+  // pick directly so the trigger label updates either way.
+  const summaryEl = document.getElementById(selectId + 'Summary');
+  if (summaryEl) {
+    summaryEl.textContent = label;
+    summaryEl.classList.toggle('msel-summary-empty', value === '');
+  }
+  closeAllMsel();
+}
+
+function setSselDisabled(selectId, disabled) {
+  const sel = document.getElementById(selectId);
+  if (sel) sel.disabled = disabled;
+  const dd = document.getElementById(selectId + 'Dd') || document.getElementById(selectId + 'Msel');
+  const trigger = dd && dd.querySelector('.msel-trigger');
+  if (trigger) trigger.disabled = disabled;
+  if (disabled && dd) dd.classList.remove('open');
+}
+
+// ── Loading / busy indicators ─────────────────────────────────────────────
+// setButtonBusy/clearButtonBusy swap a button's own content for a spinner +
+// label (used by "Confirm & visualize" and "Plot"). showPlotBusyBadge/
+// hidePlotBusyBadge toggle a small pill in the corner of the plot area,
+// used for every renderPlot() call including automatic re-renders that
+// aren't a direct click on the Plot button (filter/color/split-by changes,
+// etc.) — see renderPlot()'s wrapper below.
+function setButtonBusy(btn, label) {
+  if (!btn || btn.dataset.v4cBusy === '1') return;
+  btn.dataset.v4cBusy = '1';
+  btn.dataset.v4cOrigHtml = btn.innerHTML;
+  btn.classList.add('busy');
+  btn.innerHTML = `<span class="v4c-spinner"></span><span>${label}</span>`;
+}
+function clearButtonBusy(btn) {
+  if (!btn || btn.dataset.v4cBusy !== '1') return;
+  btn.innerHTML = btn.dataset.v4cOrigHtml;
+  btn.classList.remove('busy');
+  delete btn.dataset.v4cBusy;
+  delete btn.dataset.v4cOrigHtml;
+}
+function showPlotBusyBadge() {
+  const badge = document.getElementById('plotBusyBadge');
+  if (badge) badge.classList.add('visible');
+}
+function hidePlotBusyBadge() {
+  const badge = document.getElementById('plotBusyBadge');
+  if (badge) badge.classList.remove('visible');
+}
+
 // ── Plot Controls ─────────────────────────────────────────────────────────
 function buildControls() {
   const computedNames = new Set(calcState.descriptors.map(d => d.name));
@@ -1804,6 +2233,15 @@ function buildControls() {
     }).join('');
   if (prevC && colorCols.find(c => c.name === prevC)) cSel.value = prevC;
 
+  // Mirror the same option data into the searchable ssel dropdowns.
+  const xyOptions = contCols.map(c => ({ value: c.name, label: c.name + (computedNames.has(c.name) ? ' ƒ' : '') }));
+  renderSselOptions('xSelect', xyOptions, '— select —');
+  renderSselOptions('ySelect', xyOptions, '— select —');
+  const colorOptions = [{ value: '', label: '— none —' }].concat(
+    colorCols.map(c => ({ value: c.name, label: c.name + (c.uniqueCount > 15 ? ' ⚠' : '') }))
+  );
+  renderSselOptions('colorSelect', colorOptions, '— none —');
+
   onSelectionChange();
 }
 
@@ -1834,9 +2272,12 @@ function setPlotType(type, btn) {
   document.querySelectorAll('.toggle-btn[data-type]').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   const isBar = type === 'bar';
-  document.getElementById('scatterLineControls').style.display = isBar ? 'none' : 'flex';
+  const isDist = type === 'distribution';
+  document.getElementById('scatterLineControls').style.display = (isBar || isDist) ? 'none' : 'flex';
   document.getElementById('barControls').style.display = isBar ? 'flex' : 'none';
+  document.getElementById('distControls').style.display = isDist ? 'flex' : 'none';
   if (isBar) buildBarControls();
+  else if (isDist) buildDistControls();
   else onSelectionChange();
   if (colorState.open) renderColorsList();
 }
@@ -1871,28 +2312,35 @@ function buildBarControls() {
   const stackScroll = stackListEl.scrollTop, splitScroll = splitListEl.scrollTop;
 
   const xSel = document.getElementById('barXSelect');
-  const prevX = barState.xCol;
+  const prevX = xSel.value || barState.xCol; // live DOM value first — see note above buildBarControls
   xSel.innerHTML = axisCols.map(c => `<option value="${c.name}">${optLabel(c)}</option>`).join('');
   if (prevX && axisCols.find(c => c.name === prevX)) xSel.value = prevX;
   const curX = xSel.value || '';
   barState.xCol = curX;
+  renderSselOptions('barXSelect', axisCols.map(c => ({ value: c.name, label: optLabel(c) })), '— select —');
 
-  // Split-by: multi-select checklist, mutually exclusive with X and stack cols
+
+  // Split-by: multi-select msel, mutually exclusive with X and stack cols
   const prevSplit = new Set(barState.splitCols);
   const splitCandidates = axisCols.filter(c => c.name !== curX && !barState.stackCols.includes(c.name));
   if (splitCandidates.length === 0) {
     splitListEl.innerHTML = `<div class="filter-col-empty">No other columns available.</div>`;
     barState.splitCols = [];
   } else {
-    splitListEl.innerHTML = splitCandidates.map(c => {
+    const splitQuery = (document.getElementById('barSplitSearch').value || '').toLowerCase();
+    const splitVisible = splitCandidates.filter(c => c.name.toLowerCase().includes(splitQuery));
+    splitListEl.innerHTML = splitVisible.length ? splitVisible.map(c => {
       const checked = prevSplit.has(c.name);
       return `<label class="filter-col-item">
         <input type="checkbox" ${checked ? 'checked' : ''} onchange="onBarSplitToggle('${c.name.replace(/'/g,"\\'")}', this.checked)">
         <span class="filter-col-item-name" title="${c.name}">${optLabel(c)}</span>
       </label>`;
-    }).join('');
+    }).join('') : `<div class="filter-col-empty">No columns match "${splitQuery.replace(/</g,'&lt;')}".</div>`;
     barState.splitCols = splitCandidates.filter(c => prevSplit.has(c.name)).map(c => c.name);
   }
+  const barSplitSummaryEl = document.getElementById('barSplitSummary');
+  barSplitSummaryEl.textContent = mselSummaryText(barState.splitCols, '— none —');
+  barSplitSummaryEl.classList.toggle('msel-summary-empty', barState.splitCols.length === 0);
 
   // Stack columns: numeric, mutually exclusive with X and split-by cols
   const numCols = state.columns.filter(c =>
@@ -1903,16 +2351,23 @@ function buildBarControls() {
     stackListEl.innerHTML = `<div class="filter-col-empty">No numeric columns available.</div>`;
     barState.stackCols = [];
   } else {
-    stackListEl.innerHTML = numCols.map(c => {
+    const stackQuery = (document.getElementById('barStackSearch').value || '').toLowerCase();
+    const stackVisible = numCols.filter(c => c.name.toLowerCase().includes(stackQuery));
+    stackListEl.innerHTML = stackVisible.length ? stackVisible.map(c => {
       const checked = prevStack.has(c.name);
       const tag = computedNames.has(c.name) ? ' ƒ' : '';
       return `<label class="filter-col-item">
         <input type="checkbox" ${checked ? 'checked' : ''} onchange="onBarStackToggle('${c.name.replace(/'/g,"\\'")}', this.checked)">
         <span class="filter-col-item-name" title="${c.name}">${c.name}${tag}</span>
       </label>`;
-    }).join('');
+    }).join('') : `<div class="filter-col-empty">No columns match "${stackQuery.replace(/</g,'&lt;')}".</div>`;
+    // Selection is derived from the full candidate list, not the search-
+    // filtered view, so a column stays checked even while hidden by a query.
     barState.stackCols = numCols.filter(c => prevStack.has(c.name)).map(c => c.name);
   }
+  const barStackSummaryEl = document.getElementById('barStackSummary');
+  barStackSummaryEl.textContent = mselSummaryText(barState.stackCols, '— select columns —');
+  barStackSummaryEl.classList.toggle('msel-summary-empty', barState.stackCols.length === 0);
 
   stackListEl.scrollTop = stackScroll;
   splitListEl.scrollTop = splitScroll;
@@ -1934,6 +2389,93 @@ function onBarSplitToggle(name, checked) {
   if (checked) { if (!barState.splitCols.includes(name)) barState.splitCols.push(name); }
   else { barState.splitCols = barState.splitCols.filter(n => n !== name); }
   buildBarControls();
+}
+
+// ── Distribution plot controls ───────────────────────────────────────────
+// Value columns: numeric, multi-select (like bar's stack columns). Group by:
+// optional, single column, any non-index role (same reasoning as bar's X —
+// a condition variable is often numeric with only a few real set points).
+// Histogram doesn't support Group by (small-multiples histograms are a
+// bigger feature than this needs), so the control is disabled in that mode
+// rather than silently ignored.
+function buildDistControls() {
+  if (!state.data) return;
+  const AXIS_ROLE_ORDER = { categorical: 0, dual: 1, continuous: 2 };
+  const axisCols = state.columns.filter(c => c.role !== 'index')
+    .sort((a, b) => (AXIS_ROLE_ORDER[a.role] ?? 3) - (AXIS_ROLE_ORDER[b.role] ?? 3));
+  const computedNames = new Set(calcState.descriptors.map(d => d.name));
+  const optLabel = c => `${c.name}${computedNames.has(c.name) ? ' ƒ' : ''}${c.uniqueCount > 15 ? ' ⚠' : ''}`;
+
+  const valueListEl = document.getElementById('distValueList');
+  const groupSel = document.getElementById('distGroupSelect');
+  const valueScroll = valueListEl.scrollTop;
+  const prevGroup = groupSel.value || distState.groupCol; // live DOM value first — same fix as buildBarControls' X select
+  const prevValues = new Set(distState.valueCols);
+
+  const groupCandidates = axisCols.filter(c => !distState.valueCols.includes(c.name));
+  groupSel.innerHTML = '<option value="">— none, pooled —</option>' +
+    groupCandidates.map(c => `<option value="${c.name}">${optLabel(c)}</option>`).join('');
+  if (prevGroup && groupCandidates.find(c => c.name === prevGroup)) groupSel.value = prevGroup;
+  distState.groupCol = groupSel.value || '';
+  const distGroupOptions = [{ value: '', label: '— none, pooled —' }].concat(
+    groupCandidates.map(c => ({ value: c.name, label: optLabel(c) }))
+  );
+  renderSselOptions('distGroupSelect', distGroupOptions, '— none, pooled —');
+
+  const numCols = state.columns.filter(c =>
+    (c.role === 'continuous' || c.role === 'dual') && c.name !== distState.groupCol
+  );
+  if (numCols.length === 0) {
+    valueListEl.innerHTML = `<div class="filter-col-empty">No numeric columns available.</div>`;
+    distState.valueCols = [];
+  } else {
+    const valueQuery = (document.getElementById('distValueSearch').value || '').toLowerCase();
+    const valueVisible = numCols.filter(c => c.name.toLowerCase().includes(valueQuery));
+    valueListEl.innerHTML = valueVisible.length ? valueVisible.map(c => {
+      const checked = prevValues.has(c.name);
+      const tag = computedNames.has(c.name) ? ' ƒ' : '';
+      return `<label class="filter-col-item">
+        <input type="checkbox" ${checked ? 'checked' : ''} onchange="onDistValueToggle('${c.name.replace(/'/g,"\\'")}', this.checked)">
+        <span class="filter-col-item-name" title="${c.name}">${c.name}${tag}</span>
+      </label>`;
+    }).join('') : `<div class="filter-col-empty">No columns match "${valueQuery.replace(/</g,'&lt;')}".</div>`;
+    // Selection is derived from the full candidate list, not the search-
+    // filtered view, so a column stays checked even while hidden by a query.
+    distState.valueCols = numCols.filter(c => prevValues.has(c.name)).map(c => c.name);
+  }
+  const distValueSummaryEl = document.getElementById('distValueSummary');
+  distValueSummaryEl.textContent = mselSummaryText(distState.valueCols, '— select columns —');
+  distValueSummaryEl.classList.toggle('msel-summary-empty', distState.valueCols.length === 0);
+  valueListEl.scrollTop = valueScroll;
+
+  document.getElementById('distBinsRow').style.display = distState.style === 'histogram' ? 'block' : 'none';
+  groupSel.disabled = distState.style === 'histogram';
+  setSselDisabled('distGroupSelect', distState.style === 'histogram');
+
+  if (state.plotType === 'distribution') {
+    document.getElementById('plotBtn').disabled = distState.valueCols.length === 0;
+  }
+  if (colorState.open) renderColorsList();
+}
+
+function onDistValueToggle(name, checked) {
+  if (checked) { if (!distState.valueCols.includes(name)) distState.valueCols.push(name); }
+  else { distState.valueCols = distState.valueCols.filter(n => n !== name); }
+  buildDistControls();
+}
+
+function onDistGroupChange() {
+  buildDistControls();
+}
+
+function setDistStyle(style, btn) {
+  distState.style = style;
+  btn.parentElement.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('distBinsRow').style.display = style === 'histogram' ? 'block' : 'none';
+  document.getElementById('distGroupSelect').disabled = style === 'histogram';
+  setSselDisabled('distGroupSelect', style === 'histogram');
+  if (state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
 }
 
 // ── Sample dataset ───────────────────────────────────────────────────────
@@ -2013,6 +2555,9 @@ function getCurrentColorEntries() {
   if (state.plotType === 'bar') {
     return barState.stackCols.map(c => ({ scope: 'stack', name: c, label: c }));
   }
+  if (state.plotType === 'distribution') {
+    return distState.valueCols.map(c => ({ scope: 'distvalue', name: c, label: c }));
+  }
   const cCol = document.getElementById('colorSelect') ? document.getElementById('colorSelect').value : '';
   if (cCol) {
     return uniqueColorByValues(cCol).map(v => ({ scope: `colorby:${cCol}`, name: v, label: v }));
@@ -2077,8 +2622,31 @@ function setColorPalette(name) {
 }
 
 function renderPlot() {
-  if (state.plotType === 'bar') { renderBarPlot(); return; }
+  // Defer the actual (synchronous, potentially slow on large datasets)
+  // render one frame so the browser can paint the busy state first —
+  // otherwise the spinner would never appear before the work blocks the
+  // main thread. Runs for every call, including automatic re-renders
+  // triggered by filter/color/split-by changes, not just a direct click.
+  const plotBtn = document.getElementById('plotBtn');
+  setButtonBusy(plotBtn, 'Rendering\u2026');
+  showPlotBusyBadge();
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      try {
+        renderPlotImpl();
+      } finally {
+        clearButtonBusy(plotBtn);
+        hidePlotBusyBadge();
+      }
+    }, 0);
+  });
+}
+
+function renderPlotImpl() {
   document.getElementById('barWarnings').style.display = 'none';
+  document.getElementById('distWarnings').style.display = 'none';
+  if (state.plotType === 'bar') { renderBarPlot(); return; }
+  if (state.plotType === 'distribution') { renderDistPlot(); return; }
 
   const xCol = document.getElementById('xSelect').value;
   const yCol = document.getElementById('ySelect').value;
@@ -2090,6 +2658,8 @@ function renderPlot() {
     document.getElementById('emptyState').querySelector('.empty-title').textContent = 'No data matches current filters';
     document.getElementById('emptyState').querySelector('.empty-sub').textContent = 'Adjust or reset your filters to see data.';
     document.getElementById('plotly-chart').style.display = 'none';
+    state.lastPlot = null;
+    document.getElementById('figureExportBtn').disabled = true;
     return;
   }
 
@@ -2136,7 +2706,7 @@ function renderPlot() {
   const totalPoints = traces.reduce((s, t) => s + t.x.length, 0);
 
   const layout = {
-    xaxis: { title: { text: xCol, font: { size: 12, color: '#6b6860' } }, gridcolor: '#e8e5de', linecolor: '#c8c4bc', tickfont: { size: 11, color: '#6b6860' }, automargin: true },
+    xaxis: { type: 'linear', title: { text: xCol, font: { size: 12, color: '#6b6860' } }, gridcolor: '#e8e5de', linecolor: '#c8c4bc', tickfont: { size: 11, color: '#6b6860' }, automargin: true },
     yaxis: { title: { text: yCol, font: { size: 12, color: '#6b6860' } }, gridcolor: '#e8e5de', linecolor: '#c8c4bc', tickfont: { size: 11, color: '#6b6860' }, automargin: true },
     paper_bgcolor: 'white', plot_bgcolor: '#fafaf8',
     margin: { t: 20, r: 20, b: 60, l: 70 },
@@ -2162,6 +2732,218 @@ function renderPlot() {
   titleEl.textContent = `${yCol} vs ${xCol}` + (cCol ? ` · grouped by ${cCol}` : '');
   const filterNote = data.length < state.nRows ? ` · ${data.length.toLocaleString()} / ${state.nRows.toLocaleString()} rows` : ` · ${state.nRows.toLocaleString()} rows`;
   statsEl.textContent = `${totalPoints.toLocaleString()} points · ${traces.length} series${filterNote}`;
+
+  // Capture exactly what was just plotted (same traces Plotly rendered, not
+  // recomputed from live control values) so exportFigure() can never drift
+  // from what's on screen — e.g. if the user changes a dropdown without
+  // clicking Plot again, the old rendered chart stays exportable, not a
+  // half-applied new selection.
+  state.lastPlot = {
+    type: state.plotType,
+    xCol, yCol, colorCol: cCol || null,
+    rows: traces.flatMap(t => t.x.map((x, i) => ({
+      series: t.name, legend: t.name, color: t.marker.color, x, y: t.y[i], xlabel: xCol, ylabel: yCol
+    }))),
+    rowColumns: ['series', 'legend', 'color', 'x', 'y', 'xlabel', 'ylabel'],
+    seriesColors: traces.map(t => ({ series: t.name, color: t.marker.color })),
+    rowsUsed: data.length, rowsTotal: state.nRows,
+    title: titleEl.textContent
+  };
+  document.getElementById('figureExportBtn').disabled = false;
+}
+
+function hexToRgba(hex, alpha) {
+  const h = (hex || '#1a5276').replace('#', '');
+  const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+  const n = parseInt(full, 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// ── Distribution plot rendering + sanity checks ──────────────────────────
+// Box/violin summaries get genuinely misleading at low replicate counts —
+// a violin built from 3 points implies a smooth density that isn't real.
+// So individual points are forced on (not just offered) whenever any group
+// in the current plot has fewer than DIST_SMALL_N points, regardless of the
+// user's toggle — the toggle can add points when they're not needed, but
+// can't hide the ones the data genuinely calls for.
+const DIST_SMALL_N = 10;
+
+function renderDistPlot() {
+  const ds = distState;
+  const valueCols = ds.valueCols;
+  const style = ds.style;
+  const groupCol = style === 'histogram' ? '' : ds.groupCol;
+  const showPointsPref = document.getElementById('distShowPoints').checked;
+  const rawData = applyFilters(state.data);
+
+  const emptyEl = document.getElementById('emptyState');
+  const chartEl = document.getElementById('plotly-chart');
+  const titleEl = document.getElementById('plotTitleText');
+  const statsEl = document.getElementById('plotStats');
+  const warnBox = document.getElementById('distWarnings');
+
+  if (valueCols.length === 0 || rawData.length === 0) {
+    emptyEl.style.display = 'flex';
+    const noNumericCols = !state.columns.some(c => c.role === 'continuous' || c.role === 'dual');
+    if (rawData.length === 0) {
+      emptyEl.querySelector('.empty-title').textContent = 'No data matches current filters';
+      emptyEl.querySelector('.empty-sub').textContent = 'Adjust or reset your filters to see data.';
+    } else if (noNumericCols) {
+      emptyEl.querySelector('.empty-title').textContent = 'No numeric columns found';
+      emptyEl.querySelector('.empty-sub').textContent = 'Numbers may be stored as text, mixed with units, or the table may have samples as columns and properties as rows. See the note in the sidebar.';
+    } else {
+      emptyEl.querySelector('.empty-title').textContent = 'Choose one or more value columns';
+      emptyEl.querySelector('.empty-sub').textContent = 'Pick at least one numeric column to see its distribution.';
+    }
+    chartEl.style.display = 'none';
+    warnBox.style.display = 'none';
+    titleEl.style.display = 'none';
+    statsEl.textContent = '';
+    state.lastPlot = null;
+    document.getElementById('figureExportBtn').disabled = true;
+    return;
+  }
+
+  // Bucket raw values by (value column, group) for both plotting and checks.
+  const buckets = new Map();
+  valueCols.forEach(col => {
+    rawData.forEach(row => {
+      const v = parseFloat(row[col]);
+      if (isNaN(v)) return;
+      const groupLabel = groupCol ? (row[groupCol] !== undefined && row[groupCol] !== '' ? String(row[groupCol]) : '(blank)') : col;
+      const key = `${col}␟${groupLabel}`;
+      if (!buckets.has(key)) buckets.set(key, { valueCol: col, groupLabel, values: [] });
+      buckets.get(key).values.push(v);
+    });
+  });
+
+  // Sanity checks
+  const issues = [];
+  if (groupCol) {
+    const groupColObj = state.columns.find(c => c.name === groupCol);
+    if (groupColObj && groupColObj.uniqueCount > 15) {
+      issues.push(`<code>${escapeHtml(groupCol)}</code> has ${groupColObj.uniqueCount} distinct values — this many side-by-side distributions may be unreadable. Consider filtering first.`);
+    }
+  }
+  valueCols.forEach(col => {
+    const ns = [...buckets.values()].filter(b => b.valueCol === col).map(b => b.values.length);
+    if (ns.length > 1) {
+      const minN = Math.min(...ns), maxN = Math.max(...ns);
+      if (maxN >= 3 && (minN === 1 || maxN / minN >= 3)) {
+        issues.push(`For <code>${escapeHtml(col)}</code>, group sizes range from n=${minN} to n=${maxN} — the smaller groups' summaries are much less certain than the larger ones.`);
+      }
+    }
+  });
+  const allNs = [...buckets.values()].map(b => b.values.length);
+  const minOverallN = allNs.length ? Math.min(...allNs) : 0;
+  const forcePoints = style !== 'histogram' && minOverallN > 0 && minOverallN < DIST_SMALL_N;
+  const effectiveShowPoints = showPointsPref || forcePoints;
+  if (forcePoints && !showPointsPref) {
+    issues.push(`Showing individual points automatically — at least one group has fewer than ${DIST_SMALL_N} replicates (n=${minOverallN}), where a ${escapeHtml(style)} summary alone can be misleading.`);
+  }
+  warnBox.innerHTML = issues.map(t => `<div class="warn-box">⚠ ${t}</div>`).join('');
+  warnBox.style.display = issues.length > 0 ? 'flex' : 'none';
+
+  // Build traces
+  let traces = [];
+  let bins = null;
+  if (style === 'histogram') {
+    bins = Math.max(2, parseInt(document.getElementById('distBins').value, 10) || 20);
+    traces = valueCols.map(col => {
+      const vals = rawData.map(r => parseFloat(r[col])).filter(v => !isNaN(v));
+      const color = getSeriesColor('distvalue', col);
+      const lo = vals.length ? Math.min(...vals) : 0, hi = vals.length ? Math.max(...vals) : 1;
+      const size = (hi - lo) / bins || 1;
+      return {
+        type: 'histogram', x: vals, name: col,
+        marker: { color, opacity: valueCols.length > 1 ? 0.6 : 0.85, line: { color, width: 1 } },
+        xbins: { start: lo, end: hi + size, size }
+      };
+    });
+  } else {
+    traces = valueCols.map(col => {
+      const color = getSeriesColor('distvalue', col);
+      const xs = [], ys = [];
+      rawData.forEach(row => {
+        const v = parseFloat(row[col]);
+        if (isNaN(v)) return;
+        const groupLabel = groupCol ? (row[groupCol] !== undefined && row[groupCol] !== '' ? String(row[groupCol]) : '(blank)') : col;
+        xs.push(groupLabel); ys.push(v);
+      });
+      const base = {
+        type: style, x: xs, y: ys, name: col,
+        marker: { color, size: 4, opacity: 0.6 },
+        line: { color },
+        fillcolor: hexToRgba(color, 0.35)
+      };
+      if (style === 'box') {
+        base.boxpoints = effectiveShowPoints ? 'all' : 'outliers';
+        base.jitter = 0.5; base.pointpos = 0;
+      } else {
+        base.points = effectiveShowPoints ? 'all' : false;
+        base.jitter = 0.5; base.pointpos = 0;
+        base.box = { visible: true };
+        base.meanline = { visible: false };
+      }
+      return base;
+    });
+  }
+
+  const xAxisType = style === 'histogram' ? 'linear' : 'category';
+  const xAxisTitle = style === 'histogram'
+    ? (valueCols.length > 1 ? 'value' : valueCols[0])
+    : (groupCol || (valueCols.length > 1 ? 'value column' : valueCols[0]));
+  const yAxisTitle = style === 'histogram' ? 'count' : (valueCols.length > 1 ? 'value' : valueCols[0]);
+
+  const layout = {
+    boxmode: 'group', violinmode: 'group', barmode: 'overlay',
+    xaxis: { type: xAxisType, title: { text: xAxisTitle, font: { size: 12, color: '#6b6860' } }, gridcolor: '#e8e5de', linecolor: '#c8c4bc', tickfont: { size: 11, color: '#6b6860' }, automargin: true },
+    yaxis: { title: { text: yAxisTitle, font: { size: 12, color: '#6b6860' } }, gridcolor: '#e8e5de', linecolor: '#c8c4bc', tickfont: { size: 11, color: '#6b6860' }, automargin: true },
+    paper_bgcolor: 'white', plot_bgcolor: '#fafaf8',
+    margin: { t: 30, r: 20, b: 70, l: 70 },
+    legend: valueCols.length > 1 ? { font: { size: 11 }, bgcolor: 'rgba(255,255,255,0.9)', bordercolor: '#e0ddd6', borderwidth: 1 } : { visible: false },
+    hovermode: 'closest', font: { family: 'Inter, -apple-system, sans-serif' }
+  };
+
+  const config = {
+    responsive: true, displayModeBar: true, modeBarButtonsToRemove: ['select2d', 'lasso2d', 'autoScale2d'],
+    displaylogo: false, toImageButtonOptions: { format: 'png', filename: 'vis4cat_distribution_plot', scale: 2 }
+  };
+
+  emptyEl.style.display = 'none';
+  chartEl.style.display = 'block';
+  Plotly.react('plotly-chart', traces, layout, config);
+  if (style !== 'histogram' && groupCol && typeof Plotly.relayout === 'function') {
+    // Same defensive nudge as the bar-plot fix — force Plotly to redo the
+    // tick-label layout pass immediately rather than risk it only painting
+    // after the first hover/zoom.
+    requestAnimationFrame(() => Plotly.relayout('plotly-chart', {}));
+  }
+
+  titleEl.style.display = 'block';
+  const styleLabel = style === 'box' ? 'Box plot' : style === 'violin' ? 'Violin plot' : 'Histogram';
+  titleEl.textContent = `${styleLabel}: ${valueCols.join(', ')}` + (groupCol ? ` by ${groupCol}` : '');
+  const totalPoints = [...buckets.values()].reduce((s, b) => s + b.values.length, 0);
+  const nGroups = new Set([...buckets.values()].map(b => b.groupLabel)).size;
+  statsEl.textContent = style === 'histogram'
+    ? `${totalPoints.toLocaleString()} points · ${valueCols.length} column${valueCols.length > 1 ? 's' : ''}`
+    : `${totalPoints.toLocaleString()} points · ${nGroups} group${nGroups > 1 ? 's' : ''} · ${valueCols.length} column${valueCols.length > 1 ? 's' : ''}`;
+
+  state.lastPlot = {
+    type: 'distribution',
+    style, valueCols: [...valueCols], groupCol: groupCol || null,
+    showPoints: effectiveShowPoints, bins,
+    rows: [...buckets.values()].flatMap(b => b.values.map(v => ({
+      series: b.valueCol, legend: b.valueCol, color: getSeriesColor('distvalue', b.valueCol),
+      group: b.groupLabel, value: v
+    }))),
+    rowColumns: ['series', 'legend', 'color', 'group', 'value'],
+    seriesColors: valueCols.map(col => ({ series: col, color: getSeriesColor('distvalue', col) })),
+    rowsUsed: totalPoints, rowsTotal: state.nRows,
+    title: titleEl.textContent
+  };
+  document.getElementById('figureExportBtn').disabled = false;
 }
 
 // ── Bar plot rendering + sanity checks ───────────────────────────────────
@@ -2171,6 +2953,18 @@ function renderPlot() {
 // variable like temperature or pressure), and not a replicate/run/id column
 // (those are *expected* to take a different value on every row).
 const REPLICATE_NAME_RE = /replicate|\brep\b|rep_?no|rep_?id|\brun\b|trial|\bid\b|\bindex\b/i;
+
+// Shared by the bar-plot renderer and the figure-export builder so the two
+// can never disagree on how mean/median/std are computed.
+function aggregateValues(vals, agg) {
+  const mean = vals.reduce((s, v) => s + v, 0) / vals.length;
+  const sorted = [...vals].sort((a, b) => a - b);
+  const median = sorted.length % 2 === 0
+    ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
+    : sorted[Math.floor(sorted.length / 2)];
+  const variance = vals.reduce((s, v) => s + (v - mean) ** 2, 0) / vals.length;
+  return { value: agg === 'median' ? median : mean, std: Math.sqrt(variance) };
+}
 
 function renderBarPlot() {
   const bs = barState;
@@ -2191,14 +2985,22 @@ function renderBarPlot() {
     } else if (noNumericCols) {
       emptyEl.querySelector('.empty-title').textContent = 'No numeric columns found';
       emptyEl.querySelector('.empty-sub').textContent = 'Numbers may be stored as text, mixed with units, or the table may have samples as columns and properties as rows. See the note in the sidebar.';
-    } else {
+    } else if (!xCol && stackCols.length === 0) {
       emptyEl.querySelector('.empty-title').textContent = 'Choose an X axis and at least one stack column';
       emptyEl.querySelector('.empty-sub').textContent = 'Pick a category column for X and one or more numeric columns to stack.';
+    } else if (!xCol) {
+      emptyEl.querySelector('.empty-title').textContent = 'Choose an X axis';
+      emptyEl.querySelector('.empty-sub').textContent = `You've picked stack column${stackCols.length > 1 ? 's' : ''} — now pick a category column for the X axis.`;
+    } else {
+      emptyEl.querySelector('.empty-title').textContent = 'Choose at least one stack column';
+      emptyEl.querySelector('.empty-sub').textContent = `X is set to "${xCol}" — now pick one or more numeric columns to stack on top of each other.`;
     }
     chartEl.style.display = 'none';
     document.getElementById('barWarnings').style.display = 'none';
     titleEl.style.display = 'none';
     statsEl.textContent = '';
+    state.lastPlot = null;
+    document.getElementById('figureExportBtn').disabled = true;
     return;
   }
 
@@ -2248,14 +3050,7 @@ function renderBarPlot() {
         if (!missByCol.has(col)) missByCol.set(col, []);
         missByCol.get(col).push(label);
       } else {
-        const mean = vals.reduce((s, v) => s + v, 0) / vals.length;
-        const sorted = [...vals].sort((a, b) => a - b);
-        const median = sorted.length % 2 === 0
-          ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
-          : sorted[Math.floor(sorted.length / 2)];
-        const variance = vals.reduce((s, v) => s + (v - mean) ** 2, 0) / vals.length;
-        const std = Math.sqrt(variance);
-        const value = agg === 'median' ? median : mean;
+        const { value, std } = aggregateValues(vals, agg);
         segs[col] = { value, std, n: vals.length, missing: false };
         total += value;
       }
@@ -2368,7 +3163,10 @@ function renderBarPlot() {
 
   const layout = {
     barmode: 'stack',
-    xaxis: { title: { text: xCol, font: { size: 12, color: '#6b6860' } }, gridcolor: '#e8e5de', linecolor: '#c8c4bc', tickfont: { size: 11, color: '#6b6860' }, automargin: true },
+    xaxis: {
+      type: splitCols.length ? 'multicategory' : 'category',
+      title: { text: xCol, font: { size: 12, color: '#6b6860' } }, gridcolor: '#e8e5de', linecolor: '#c8c4bc', tickfont: { size: 11, color: '#6b6860' }, automargin: true
+    },
     yaxis: { title: { text: stackCols.length > 1 ? 'stacked value' : stackCols[0], font: { size: 12, color: '#6b6860' } }, gridcolor: '#e8e5de', linecolor: '#c8c4bc', tickfont: { size: 11, color: '#6b6860' }, automargin: true },
     paper_bgcolor: 'white', plot_bgcolor: '#fafaf8',
     margin: { t: 30, r: 20, b: 70, l: 70 },
@@ -2385,12 +3183,46 @@ function renderBarPlot() {
   emptyEl.style.display = 'none';
   chartEl.style.display = 'block';
   Plotly.react('plotly-chart', traces, layout, config);
+  if (splitCols.length && typeof Plotly.relayout === 'function') {
+    // Multicategory second-level tick labels can fail to paint on the
+    // first draw for a given axis shape and only appear once the chart is
+    // interacted with (hover/zoom/resize) — a known Plotly.js quirk. A
+    // follow-up no-op relayout, deferred a frame, forces it to redo the
+    // tick-label layout pass immediately instead of waiting for that.
+    requestAnimationFrame(() => Plotly.relayout('plotly-chart', {}));
+  }
 
   titleEl.style.display = 'block';
   titleEl.textContent = `${stackCols.join(' + ')} by ${xCol}` + (splitCols.length ? ` · split by ${splitCols.join(', ')}` : '') + ` (${agg})`;
   const totalRows = groups.size ? [...groups.values()].reduce((s, g) => s + g.rows.length, 0) : 0;
   const filterNote = totalRows < state.nRows ? ` · ${totalRows.toLocaleString()} / ${state.nRows.toLocaleString()} rows` : ` · ${state.nRows.toLocaleString()} rows`;
   statsEl.textContent = `${sortedKeys.length.toLocaleString()} bars · ${stackCols.length} segment${stackCols.length > 1 ? 's' : ''}${filterNote}`;
+
+  // Same rationale as the scatter/line branch: capture what was actually
+  // aggregated and drawn (segs/groupAgg), not a re-derivation from live
+  // control state.
+  state.lastPlot = {
+    type: 'bar',
+    xCol, splitCols: [...splitCols], stackCols: [...stackCols], aggregate: agg,
+    showErrorBars: showError,
+    dismissedWarnings: [...barState.dismissedWarnings],
+    unresolvedWarnings: visibleIssues.map(i => i.text.replace(/<[^>]+>/g, '')),
+    rows: sortedKeys.flatMap(k => {
+      const g = groupAgg.get(k);
+      return stackCols.map(col => ({
+        category: g.xVal, split: g.splitVal, stack_column: col,
+        legend: col, color: getSeriesColor('stack', col),
+        value: g.segs[col].missing ? null : g.segs[col].value,
+        std: g.segs[col].missing ? null : g.segs[col].std,
+        n: g.segs[col].n, missing: g.segs[col].missing
+      }));
+    }),
+    rowColumns: ['category', 'split', 'stack_column', 'legend', 'color', 'value', 'std', 'n', 'missing'],
+    seriesColors: stackCols.map(col => ({ series: col, color: getSeriesColor('stack', col) })),
+    rowsUsed: totalRows, rowsTotal: state.nRows,
+    title: titleEl.textContent
+  };
+  document.getElementById('figureExportBtn').disabled = false;
 }
 
 // ── Bar-plot warning panel: caps how many checks are shown at once, lets
@@ -2435,6 +3267,315 @@ function dismissBarWarning(key) {
 function resetBarWarnings() {
   barState.dismissedWarnings.clear();
   renderPlot();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ── Figure export: bundles the currently-rendered figure (state.lastPlot)
+//    into one self-contained HTML "export card" — image + exact plotted
+//    data + metadata — modeled on the FID Browser archive format so these
+//    exports can later be read by, or folded into, that same viewer.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const EXPORT_TABLE_PREVIEW_CAP = 500;
+
+function genExportId() {
+  const now = new Date();
+  const p = n => String(n).padStart(2, '0');
+  const ts = `${now.getFullYear()}${p(now.getMonth() + 1)}${p(now.getDate())}${p(now.getHours())}${p(now.getMinutes())}${p(now.getSeconds())}`;
+  let rand;
+  if (window.crypto && crypto.getRandomValues) {
+    rand = Array.from(crypto.getRandomValues(new Uint8Array(5))).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+  } else {
+    rand = Math.random().toString(16).slice(2, 12).toUpperCase();
+  }
+  return `VID-${ts}-${rand}`;
+}
+
+// Plain-object snapshot of active filters (Sets aren't JSON-serializable).
+function serializeFiltersForExport() {
+  const out = {};
+  Object.entries(filterState.activeFilters).forEach(([col, f]) => {
+    if (f.type === 'range') {
+      out[col] = { type: 'range', min: f.min, max: f.max, data_min: f.dataMin, data_max: f.dataMax };
+    } else {
+      out[col] = { type: 'categorical', selected: [...f.selected].sort(), total_options: f.all.length };
+    }
+  });
+  return out;
+}
+
+// Single seam for exporter identity. Right now it just reads the sidebar
+// input; once Vis4Cat is integrated into the Dataverse repository, this is
+// the one place to swap in the authenticated username instead.
+function getExporterName() {
+  return (exportState.exportedBy || '').trim();
+}
+
+// Blocks an export action when no exporter name is set, surfacing the
+// warning in the export dropdown and focusing the sidebar field. Returns
+// true when it's safe to proceed.
+function requireExporterName() {
+  if (getExporterName()) {
+    document.getElementById('exportNameWarn').style.display = 'none';
+    return true;
+  }
+  document.getElementById('exportNameWarn').style.display = 'block';
+  const input = document.getElementById('exportedByInput');
+  input.style.borderColor = 'var(--error-text)';
+  input.focus();
+  return false;
+}
+
+function onExportedByInput(v) {
+  exportState.exportedBy = v;
+  if (v.trim()) {
+    document.getElementById('exportedByInput').style.borderColor = '';
+    document.getElementById('exportNameWarn').style.display = 'none';
+  }
+}
+
+// Column names actually mapped to something visual in the current figure —
+// used to trim exported metadata down to just what's relevant, rather than
+// listing every column in the merged dataset regardless of whether it's on
+// screen (columns touched only by a filter are already covered separately
+// under active_filters).
+function getPlotColumnNames(lp) {
+  if (lp.type === 'bar') return [lp.xCol, ...lp.splitCols, ...lp.stackCols].filter(Boolean);
+  if (lp.type === 'distribution') return [...lp.valueCols, lp.groupCol].filter(Boolean);
+  return [lp.xCol, lp.yCol, lp.colorCol].filter(Boolean);
+}
+
+// "Recipe" metadata: everything about how this figure was configured, minus
+// the row-level plotted data itself (that travels separately as lastPlot.rows
+// so the visible metadata panel in the export stays short and readable).
+function buildExportMetadata() {
+  const lp = state.lastPlot;
+  const plotConfig = lp.type === 'bar'
+    ? {
+        plot_type: 'bar', x: lp.xCol, split_by: lp.splitCols, stack_columns: lp.stackCols,
+        aggregate: lp.aggregate, show_error_bars: lp.showErrorBars,
+        dismissed_warnings: lp.dismissedWarnings, unresolved_warnings_at_export: lp.unresolvedWarnings
+      }
+    : lp.type === 'distribution'
+    ? {
+        plot_type: 'distribution', chart_style: lp.style, value_columns: lp.valueCols,
+        group_by: lp.groupCol, show_points: lp.showPoints, bins: lp.bins
+      }
+    : { plot_type: lp.type, x: lp.xCol, y: lp.yCol, color_by: lp.colorCol };
+
+  const usedNames = new Set(getPlotColumnNames(lp));
+  const computedNames = new Set(calcState.descriptors.map(d => d.name));
+
+  return {
+    id: genExportId(),
+    generated_at: new Date().toISOString(),
+    exported_by: getExporterName() || null,
+    app: { name: 'Vis4Cat', view: 'Data Merge (basic)' },
+    title: lp.title,
+    dataset: {
+      source_files: mergeState.files.map(f => f.name),
+      merge_strategy: mergeState.files.length > 1 ? mergeState.strategy : null,
+      row_count_total: state.nRows,
+      column_count_total: state.columns.length,
+      // Only the columns actually used by this figure (x/y/color, or
+      // x/split/stack for bar) — not every column in the merged dataset.
+      columns_used: state.columns
+        .filter(c => usedNames.has(c.name))
+        .map(c => ({ name: c.name, dtype: c.dtype, role: c.role, is_calculated: computedNames.has(c.name) }))
+    },
+    calculated_descriptors: calcState.descriptors.map(d => ({ name: d.name, formula: d.formula })),
+    active_filters: serializeFiltersForExport(),
+    rows_plotted: lp.rows.length,
+    rows_used: lp.rowsUsed,
+    rows_total: lp.rowsTotal,
+    series_colors: lp.seriesColors,
+    color_palette: colorState.palette,
+    color_overrides: { ...colorState.overrides },
+    plot_config: plotConfig,
+    // Reserved: once Vis4Cat is wired into the Dataverse repository, this
+    // will carry dataset-level metadata (DOI, title, authors, ...) read
+    // from the dataset's own directory. Left null until that integration.
+    dataset_metadata: null
+  };
+}
+
+// Neutralizes any closing script-tag sequence so the JSON can sit inside
+// a script element safely (that literal sequence in the source — even
+// inside a JS string or comment — would end the enclosing tag early,
+// since the HTML parser scans script content as raw text).
+function jsonToSafeScriptText(obj) {
+  return JSON.stringify(obj, null, 2).replace(/</g, '\\u003c');
+}
+
+function exportRowsToTableHTML(rows, columns) {
+  const thead = `<tr>${columns.map(c => `<th>${escapeHtml(c)}</th>`).join('')}</tr>`;
+  const tbody = rows.map(r => `<tr>${columns.map(c => {
+    const v = r[c];
+    if (v === null || v === undefined || v === '') return `<td class="na">—</td>`;
+    if (typeof v === 'number') return `<td>${fmtNum(v)}</td>`;
+    return `<td>${escapeHtml(String(v))}</td>`;
+  }).join('')}</tr>`).join('');
+  return `<table><thead>${thead}</thead><tbody>${tbody}</tbody></table>`;
+}
+
+function renderExportCardHTML(metadata, lastPlot, imgDataUrl) {
+  const previewRows = lastPlot.rows.slice(0, EXPORT_TABLE_PREVIEW_CAP);
+  const truncated = lastPlot.rows.length > EXPORT_TABLE_PREVIEW_CAP;
+  const metaJsonPretty = escapeHtml(JSON.stringify(metadata, null, 2));
+  const embeddedJson = jsonToSafeScriptText({ metadata, rows: lastPlot.rows });
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHtml(metadata.id)} — Vis4Cat export</title>
+<style>
+  :root { --bg:#f7f7f5; --surface:#fff; --border:#e0ddd6; --text:#1a1a18; --muted:#6b6860; --faint:#9e9b94; --accent:#1a5276; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: Inter, -apple-system, 'Segoe UI', sans-serif; background:var(--bg); color:var(--text); }
+  header { padding:20px 28px; background:var(--surface); border-bottom:1px solid var(--border); }
+  h1 { margin:0 0 4px; font-size:20px; }
+  .sub { color:var(--muted); font-size:13px; }
+  main { max-width:1100px; margin:0 auto; padding:24px 28px 60px; }
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:18px 20px; margin-bottom:18px; }
+  .card h2 { font-size:14px; margin:0 0 12px; }
+  .preview { text-align:center; }
+  .preview img { max-width:100%; max-height:560px; }
+  table { border-collapse:collapse; width:100%; font-size:12.5px; }
+  th, td { border:1px solid var(--border); padding:6px 9px; text-align:left; }
+  th { background:var(--bg); font-weight:600; position:sticky; top:0; }
+  td.na { color:var(--faint); font-style:italic; }
+  .table-wrap { max-height:420px; overflow:auto; border:1px solid var(--border); border-radius:6px; }
+  pre { background:#0b1020; color:#f2f4f7; padding:14px; border-radius:8px; overflow:auto; font-size:12px; max-height:480px; }
+  .note { color:var(--faint); font-size:12px; margin-top:8px; }
+  details summary { cursor:pointer; font-weight:600; font-size:14px; margin-bottom:10px; }
+  .swatches { display:flex; flex-wrap:wrap; gap:8px; }
+  .swatch { display:flex; align-items:center; gap:6px; font-size:12px; padding:3px 9px; border:1px solid var(--border); border-radius:20px; }
+  .dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>${escapeHtml(metadata.id)}</h1>
+  <div class="sub">${escapeHtml(metadata.title || '')} · generated ${escapeHtml(metadata.generated_at)}${metadata.exported_by ? ' · exported by ' + escapeHtml(metadata.exported_by) : ''}</div>
+</header>
+<main>
+  <div class="card preview">
+    <img src="${imgDataUrl}" alt="${escapeHtml(metadata.title || 'Exported figure')}">
+  </div>
+
+  <div class="card">
+    <h2>Series / legend colors</h2>
+    <div class="swatches">
+      ${metadata.series_colors.map(s => `<span class="swatch"><span class="dot" style="background:${escapeHtml(s.color)}"></span>${escapeHtml(s.series)}</span>`).join('')}
+    </div>
+  </div>
+
+  <div class="card">
+    <details open>
+      <summary>Plotted data (${lastPlot.rows.length.toLocaleString()} rows)</summary>
+      <div class="table-wrap">${exportRowsToTableHTML(previewRows, lastPlot.rowColumns)}</div>
+      ${truncated ? `<div class="note">Showing first ${EXPORT_TABLE_PREVIEW_CAP.toLocaleString()} of ${lastPlot.rows.length.toLocaleString()} rows in this table — the complete data is embedded below in the metadata JSON.</div>` : ''}
+    </details>
+  </div>
+
+  <div class="card">
+    <details>
+      <summary>Full metadata (JSON)</summary>
+      <pre>${metaJsonPretty}</pre>
+    </details>
+  </div>
+</main>
+<script type="application/json" id="vis4cat-export-data">${embeddedJson}<\/script>
+</body>
+</html>`;
+}
+
+function toggleExportMenu() {
+  document.getElementById('exportDropdown').classList.toggle('open');
+}
+
+function closeExportMenu() {
+  document.getElementById('exportDropdown').classList.remove('open');
+}
+
+async function exportFigure() {
+  if (!state.lastPlot) return;
+  if (!requireExporterName()) return;
+  const label = document.getElementById('exportBundleLabel');
+  const original = label.textContent;
+  document.getElementById('exportBundleBtn').disabled = true;
+  label.textContent = 'Exporting…';
+  try {
+    const imgDataUrl = await Plotly.toImage('plotly-chart', { format: 'png', scale: 2 });
+    const metadata = buildExportMetadata();
+    const html = renderExportCardHTML(metadata, state.lastPlot, imgDataUrl);
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${metadata.id}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+    closeExportMenu();
+  } catch (err) {
+    alert('Export failed: ' + err.message);
+  } finally {
+    document.getElementById('exportBundleBtn').disabled = false;
+    label.textContent = original;
+  }
+}
+
+// Image-only export: same PNG snapshot as the full bundle, without the
+// data/metadata — for pasting into slides, reports, etc. where the extra
+// context isn't wanted.
+async function downloadFigurePNG() {
+  if (!state.lastPlot) return;
+  if (!requireExporterName()) return;
+  const label = document.getElementById('exportPngLabel');
+  const original = label.textContent;
+  document.getElementById('exportPngBtn').disabled = true;
+  label.textContent = 'Preparing…';
+  try {
+    const imgDataUrl = await Plotly.toImage('plotly-chart', { format: 'png', scale: 2 });
+    const a = document.createElement('a');
+    a.href = imgDataUrl;
+    a.download = `${genExportId()}.png`;
+    a.click();
+    closeExportMenu();
+  } catch (err) {
+    alert('Download failed: ' + err.message);
+  } finally {
+    document.getElementById('exportPngBtn').disabled = false;
+    label.textContent = original;
+  }
+}
+
+// Copies the figure straight to the clipboard as an image so it can be
+// pasted directly into another document. Needs the Clipboard API (image
+// writes), which wants a secure context — reliable once Vis4Cat is served
+// over HTTPS via Dataverse, but can be inconsistent when the page is just
+// opened as a local file:// document depending on the browser. Falls back
+// to pointing the user at "Download image" rather than failing silently.
+async function copyFigureToClipboard() {
+  if (!state.lastPlot) return;
+  if (!requireExporterName()) return;
+  const subEl = document.getElementById('copyImageSub');
+  const original = subEl.textContent;
+  try {
+    if (!window.ClipboardItem || !navigator.clipboard || !navigator.clipboard.write) {
+      throw new Error('Clipboard image copy is not supported in this browser.');
+    }
+    const imgDataUrl = await Plotly.toImage('plotly-chart', { format: 'png', scale: 2 });
+    const blob = await (await fetch(imgDataUrl)).blob();
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    subEl.textContent = 'Copied — paste with Ctrl+V / Cmd+V.';
+    setTimeout(() => { subEl.textContent = original; closeExportMenu(); }, 1400);
+  } catch (err) {
+    subEl.textContent = 'Copy failed — try "Download image" instead.';
+    setTimeout(() => { subEl.textContent = original; }, 2400);
+  }
 }
 
 setupUpload();
