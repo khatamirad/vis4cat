@@ -43,7 +43,7 @@ vis4cat/
 No installation required. Download any file from `demos/` and open it in a browser:
 
 ```bash
-open demos/vis4cat\_demo\_v1.html
+open demos/vis4cat_Reaction.html
 ```
 
 Upload a CSV or XLSX file. The tool runs entirely client-side — no server, no dependencies.
