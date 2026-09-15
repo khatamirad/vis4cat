@@ -92,7 +92,7 @@
     transition: background .12s, color .12s;
   }
   .strategy-btn.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
-  .strategy-hint { font-size: 12px; color: var(--text-faint); line-height: 1.5; margin-top: 6px; }
+  .strategy-hint { font-size: 10.5px; color: var(--text-faint); line-height: 1.5; margin-top: 6px; }
 
   .export-btn {
     width: 100%; padding: 10px; background: var(--accent); color: #fff; border: none; border-radius: 5px;
@@ -276,7 +276,7 @@
   }
   .export-btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
   .export-btn-secondary:disabled { opacity: .35; cursor: not-allowed; }
-  .action-hint { font-size: 12px; color: var(--text-faint); line-height: 1.5; text-align: center; }
+  .action-hint { font-size: 10.5px; color: var(--text-faint); line-height: 1.5; text-align: center; }
   .back-btn {
     display: flex; align-items: center; gap: 6px; padding: 7px 10px; background: var(--bg);
     border: 1px solid var(--border-strong); border-radius: 5px; font-family: var(--font); font-size: 12px;
@@ -387,7 +387,7 @@
     padding: 8px 10px; margin-bottom: 14px; font-size: 11.5px; color: var(--accent); line-height: 1.5;
   }
   .shared-session-banner-dismiss {
-    background: none; border: none; color: inherit; cursor: pointer; font-size: 16px; flex-shrink: 0; padding: 0 2px; line-height: 1;
+    background: none; border: none; color: inherit; cursor: pointer; font-size: 12px; flex-shrink: 0; padding: 0; line-height: 1;
   }
   .share-info-box { font-size: 11.5px; color: var(--text-muted); line-height: 1.6; padding: 2px 9px 10px; }
   .export-dropdown {
@@ -427,8 +427,8 @@
   }
   .stats-download-btn:hover { border-color: var(--accent); color: var(--accent); }
   .stats-close-btn {
-    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none;
-    background: none; font-size: 20px; color: var(--text-muted); cursor: pointer; border-radius: 4px; transition: background .12s, color .12s;
+    width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border: none;
+    background: none; font-size: 16px; color: var(--text-faint); cursor: pointer; border-radius: 4px; transition: background .12s, color .12s;
   }
   .stats-close-btn:hover { background: var(--bg); color: var(--text); }
   .stats-sort-bar { display: flex; align-items: center; gap: 8px; padding: 8px 18px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--bg); }
@@ -550,10 +550,6 @@
     flex: 1; min-width: 0; font-family: var(--font); font-size: 11.5px; color: var(--text); background: var(--surface);
     border: 1px solid var(--border-strong); border-radius: 4px; padding: 5px 7px;
   }
-  /* Sort by (color + size, side by side) and Point size (Advanced Visualization Options). */
-  .sort-by-row { display: flex; gap: 8px; }
-  .sort-by-col { flex: 1; min-width: 0; }
-  .size-legend-box { font-size: 10.5px; color: var(--text-faint); line-height: 1.5; margin-top: 6px; }
   .filter-col-selector { width: 260px; border-right: 1px solid var(--border); display: flex; flex-direction: column; max-height: 340px; flex-shrink: 0; }
   .filter-search-wrap { padding: 10px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
   .filter-search { width: 100%; font-family: var(--font); font-size: 12px; padding: 5px 9px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--bg); color: var(--text); outline: none; transition: border-color .15s; }
@@ -583,7 +579,7 @@
 
   .calc-header { display: flex; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--border); gap: 10px; background: var(--bg); flex-shrink: 0; }
   .calc-header-title { font-size: 12px; font-weight: 600; color: var(--text); flex: 1; }
-  .calc-header-sub { font-size: 12px; color: var(--text-faint); }
+  .calc-header-sub { font-size: 11px; color: var(--text-faint); }
   .calc-body { display: flex; gap: 0; min-height: 200px; max-height: 340px; }
   .calc-col-ref { width: 220px; border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
   .calc-col-ref-header { padding: 8px 12px; font-size: 10px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--text-faint); border-bottom: 1px solid var(--border); background: var(--bg); }
@@ -592,7 +588,7 @@
   .calc-col-ref-item:hover { background: var(--accent-light); }
   .calc-col-ref-item:hover .calc-col-ref-name { color: var(--accent); }
   .calc-col-ref-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .calc-col-ref-hint { font-size: 11.5px; color: var(--text-faint); padding: 6px 12px; border-top: 1px solid var(--border); line-height: 1.5; }
+  .calc-col-ref-hint { font-size: 9px; color: var(--text-faint); padding: 6px 12px; border-top: 1px solid var(--border); line-height: 1.5; }
   .calc-form-area { flex: 1; display: flex; flex-direction: column; gap: 0; padding: 16px 20px; overflow-y: auto; }
   .calc-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
   .calc-field label { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: .03em; }
@@ -603,8 +599,8 @@
   .calc-formula-input { padding: 8px 10px; min-height: 60px; resize: vertical; }
   .calc-input:focus, .calc-formula-input:focus { border-color: var(--accent); background: var(--surface); }
   .calc-input.error, .calc-formula-input.error { border-color: #c0392b; background: var(--error); }
-  .calc-hint { font-size: 12px; color: var(--text-faint); line-height: 1.5; margin-top: 2px; }
-  .calc-hint code { font-family: var(--font-mono); font-size: 11px; background: var(--bg); border: 1px solid var(--border); padding: 1px 4px; border-radius: 3px; color: var(--text-muted); }
+  .calc-hint { font-size: 10.5px; color: var(--text-faint); line-height: 1.5; margin-top: 2px; }
+  .calc-hint code { font-family: var(--font-mono); font-size: 10px; background: var(--bg); border: 1px solid var(--border); padding: 1px 4px; border-radius: 3px; color: var(--text-muted); }
   .calc-error-msg { font-size: 11px; color: #c0392b; background: var(--error); border: 1px solid #f5b7b1; border-radius: 4px; padding: 6px 10px; margin-bottom: 10px; display: none; }
   .calc-add-btn { padding: 8px 18px; background: var(--accent); color: white; border: none; border-radius: 5px; font-family: var(--font); font-size: 12px; font-weight: 600; cursor: pointer; transition: opacity .15s; align-self: flex-start; }
   .calc-add-btn:hover { opacity: .88; }
@@ -752,6 +748,7 @@
         <input type="text" id="exportedByInput" placeholder="Your name (required to export)" autocomplete="off"
           oninput="onExportedByInput(this.value)"
           style="width:100%; font-family:var(--font); font-size:13px; color:var(--text); background:var(--surface); border:1px solid var(--border-strong); border-radius:5px; padding:7px 10px;">
+        <div class="strategy-hint" style="margin-top:2px;">Required before exporting — once Vis4Cat is integrated with Dataverse, this will be filled in automatically from your login.</div>
       </div>
       <button class="back-btn" onclick="backToMerge()">← Back to merge</button>
     </div>
@@ -799,41 +796,22 @@
             <select id="ySelect" onchange="onSelectionChange()" style="display:none;"></select>
           </div>
           <div class="control-group">
-            <label>Sort by <span style="color:var(--text-faint); font-weight:400;">(optional)</span></label>
-            <div class="sort-by-row">
-              <div class="sort-by-col">
-                <div class="msel" id="colorSelectDd">
-                  <button type="button" class="msel-trigger" onclick="toggleMsel('colorSelectDd')">
-                    <span class="msel-trigger-text msel-summary-empty" id="colorSelectSummary">Sort color by…</span>
-                    <span class="msel-caret">▾</span>
-                  </button>
-                  <div class="msel-panel">
-                    <input class="msel-search" id="colorSelectSearch" type="text" placeholder="Search columns…" oninput="buildControls()">
-                    <div class="ssel-list" id="colorSelectList"></div>
-                  </div>
-                </div>
-                <select id="colorSelect" onchange="onSelectionChange()" style="display:none;">
-                  <option value="">— none —</option>
-                </select>
-                <div id="colorWarn" style="display:none; margin-top:4px;"></div>
-              </div>
-              <div class="sort-by-col">
-                <div class="msel" id="sizeSelectDd">
-                  <button type="button" class="msel-trigger" onclick="toggleMsel('sizeSelectDd')">
-                    <span class="msel-trigger-text msel-summary-empty" id="sizeSelectSummary">Sort size by…</span>
-                    <span class="msel-caret">▾</span>
-                  </button>
-                  <div class="msel-panel">
-                    <input class="msel-search" id="sizeSelectSearch" type="text" placeholder="Search columns…" oninput="buildControls()">
-                    <div class="ssel-list" id="sizeSelectList"></div>
-                  </div>
-                </div>
-                <select id="sizeSelect" onchange="onSizeColumnChange(this.value)" style="display:none;">
-                  <option value="">— none —</option>
-                </select>
-                <div class="size-legend-box" id="sizeLegendBox" style="display:none;"></div>
+            <label>Color / group by <span style="color:var(--text-faint); font-weight:400;">(optional)</span></label>
+            <div class="msel" id="colorSelectDd">
+              <button type="button" class="msel-trigger" onclick="toggleMsel('colorSelectDd')">
+                <span class="msel-trigger-text msel-summary-empty" id="colorSelectSummary">— none —</span>
+                <span class="msel-caret">▾</span>
+              </button>
+              <div class="msel-panel">
+                <input class="msel-search" id="colorSelectSearch" type="text" placeholder="Search columns…" oninput="buildControls()">
+                <div class="ssel-list" id="colorSelectList"></div>
               </div>
             </div>
+            <select id="colorSelect" onchange="onSelectionChange()" style="display:none;">
+              <option value="">— none —</option>
+            </select>
+            <div id="colorWarn" style="display:none; margin-top:4px;"></div>
+            <div class="strategy-hint" style="margin-top:2px;">Tip: group by <code>source_file</code> to see which dataset each point came from.</div>
           </div>
 
           <div class="control-group">
@@ -842,15 +820,9 @@
               <span class="msel-caret" id="advAxesCaret">▾</span>
             </button>
             <div class="adv-axes-panel" id="advAxesPanel" style="display:none;">
-              <div class="control-group" style="margin:0;">
-                <label>Point size <span style="color:var(--text-faint); font-weight:400;">(overall)</span></label>
-                <div class="adv-axes-minmax-row" style="align-items:center;">
-                  <input type="range" id="sizeScaleSlider" min="0.5" max="3" step="0.1" value="1" oninput="setSizeScale(this.value)" style="flex:1; min-width:0;">
-                  <span class="range-val" id="sizeScaleLabel" style="width:48px; flex-shrink:0;">100%</span>
-                </div>
-              </div>
               <div id="advAxesList"></div>
               <button type="button" class="palette-editor-add" onclick="addExtraAxis()">+ Add axis</button>
+              <div class="strategy-hint">A Y axis (left/right) plots another column against the current X, on its own scale. An X axis (top) plots the current Y column against a different X column instead. Extra-axis series aren't split by Color/group by.</div>
             </div>
           </div>
         </div>
@@ -871,7 +843,7 @@
             <select id="barXSelect" onchange="buildBarControls()" style="display:none;"></select>
           </div>
           <div class="control-group">
-            <label>Split by <span style="color:var(--text-faint); font-weight:400;">(optional)</span></label>
+            <label>Split by <span style="color:var(--text-faint); font-weight:400;">(optional — clusters bars per condition, select 1+)</span></label>
             <div class="msel" id="barSplitMsel">
               <button type="button" class="msel-trigger" onclick="toggleMsel('barSplitMsel')">
                 <span class="msel-trigger-text msel-summary-empty" id="barSplitSummary">— none —</span>
@@ -906,6 +878,7 @@
           <label style="display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-muted); cursor:pointer;">
             <input type="checkbox" id="barShowError" checked onchange="if(state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot()"> Show total ± SD error bars
           </label>
+          <div class="strategy-hint">Rows sharing the same X (and split columns, if any) are treated as replicates and aggregated. Checks above the chart flag hidden condition variation, uneven replicate counts, missing segments, negative values, and totals that don't sum sensibly — dismiss (✕) any check you've already accounted for.</div>
         </div>
 
         <div id="distControls" style="display:none; flex-direction:column; gap:14px;">
@@ -923,7 +896,7 @@
             </div>
           </div>
           <div class="control-group">
-            <label>Group by <span style="color:var(--text-faint); font-weight:400;">(optional)</span></label>
+            <label>Group by <span style="color:var(--text-faint); font-weight:400;">(optional — one distribution per category)</span></label>
             <div class="msel" id="distGroupSelectDd">
               <button type="button" class="msel-trigger" onclick="toggleMsel('distGroupSelectDd')">
                 <span class="msel-trigger-text msel-summary-empty" id="distGroupSelectSummary">— none, pooled —</span>
@@ -951,6 +924,7 @@
             <label>Bins</label>
             <input type="number" id="distBins" min="2" max="100" value="20" class="calc-input" style="width:100%;" onchange="if(state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot()">
           </div>
+          <div class="strategy-hint">Points are shown automatically for any group with fewer than 10 replicates, since a box or violin summary alone can be misleading at low n. Histogram doesn't support Group by — it always pools all rows per value column.</div>
         </div>
 
         <button class="plot-btn" id="plotBtn" onclick="renderPlot()" disabled>Plot</button>
@@ -1487,19 +1461,6 @@ const BAR_WARN_CAP = 4;
 let extraAxesState = [];
 let extraAxesUI = { expanded: false, nextId: 1 };
 
-// Sort size by (also "Advanced Visualization Options", scatter/line only).
-// Independent of Color/group-by ("Sort color by") — maps a column to
-// per-point marker size on top of whatever Color/group-by is already doing,
-// and applies to the primary trace AND any extra axes (their points come
-// from the same underlying rows). Any column can be picked (same "all
-// columns" set as Sort color by), but sizing only actually changes when the
-// column has numeric values — a text/category column leaves sizes as-is.
-// `scale` is the separate "Point size" overall multiplier: applied on top
-// of both the flat default size and the min/max mapped range, so increasing
-// it enlarges everything uniformly without disturbing the relative sizes
-// Sort size by already assigned.
-let sizeState = { column: '', min: 4, max: 20, scale: 1 };
-
 function classifyColumns(data) {
   if (!data || data.length === 0) return [];
   const keys = Object.keys(data[0]);
@@ -1574,12 +1535,6 @@ function confirmAndVisualizeImpl() {
   extraAxesUI.expanded = false;
   document.getElementById('advAxesPanel').style.display = 'none';
   document.getElementById('advAxesCaret').style.transform = 'none';
-  sizeState = { column: '', min: 4, max: 20, scale: 1 };
-  document.getElementById('sizeLegendBox').style.display = 'none';
-  const sizeScaleSliderEl = document.getElementById('sizeScaleSlider');
-  const sizeScaleLabelEl = document.getElementById('sizeScaleLabel');
-  if (sizeScaleSliderEl) sizeScaleSliderEl.value = 1;
-  if (sizeScaleLabelEl) sizeScaleLabelEl.textContent = '100%';
   state.lastPlot = null;
   document.getElementById('figureExportBtn').disabled = true;
   colorState.overrides = {};
@@ -2392,19 +2347,11 @@ function hidePlotBusyBadge() {
 function buildControls() {
   const computedNames = new Set(calcState.descriptors.map(d => d.name));
   const contCols = state.columns.filter(c => c.role === 'continuous' || c.role === 'dual');
-  // Color/group-by accepts ANY column, not just categorical/dual — a
-  // continuous column is a perfectly valid (if unusual) grouping key, and
-  // restricting it hid variables users expected to see. Order so the most
-  // likely candidates (categorical/dual) sort first, continuous next, and
-  // the monotonic index column last (still offered, per "ALL variables").
-  const COLOR_ROLE_ORDER = { categorical: 0, dual: 1, continuous: 2, index: 3 };
-  const colorCols = state.columns.slice()
-    .sort((a, b) => (COLOR_ROLE_ORDER[a.role] ?? 4) - (COLOR_ROLE_ORDER[b.role] ?? 4));
+  const colorCols = state.columns.filter(c => c.role === 'categorical' || c.role === 'dual');
 
   const xSel = document.getElementById('xSelect');
   const ySel = document.getElementById('ySelect');
   const cSel = document.getElementById('colorSelect');
-  const sizeSel = document.getElementById('sizeSelect');
 
   const optionHTML = (c) => {
     const tag = computedNames.has(c.name) ? ' ƒ' : '';
@@ -2427,84 +2374,17 @@ function buildControls() {
     }).join('');
   if (prevC && colorCols.find(c => c.name === prevC)) cSel.value = prevC;
 
-  // Sort size by: same "all columns" set as Sort color by — the dropdown
-  // lists everything, but a text/category column simply won't change point
-  // sizes at render time (see updateSizeLegend/renderPlotImpl). Source of
-  // truth is sizeState.column itself (not the previous DOM value) — this is
-  // what lets restoreSharedSession() just set sizeState and call
-  // buildControls(), same pattern as barState/distState.
-  if (sizeSel) {
-    sizeSel.innerHTML = '<option value="">— none —</option>' +
-      colorCols.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-    sizeSel.value = (sizeState.column && colorCols.find(c => c.name === sizeState.column)) ? sizeState.column : '';
-    if (sizeSel.value !== sizeState.column) sizeState.column = sizeSel.value; // column no longer valid (e.g. new dataset) — clear stale state
-  }
-
-  const sizeScaleSliderEl = document.getElementById('sizeScaleSlider');
-  const sizeScaleLabelEl = document.getElementById('sizeScaleLabel');
-  if (sizeScaleSliderEl) sizeScaleSliderEl.value = sizeState.scale;
-  if (sizeScaleLabelEl) sizeScaleLabelEl.textContent = Math.round(sizeState.scale * 100) + '%';
-
   // Mirror the same option data into the searchable ssel dropdowns.
   const xyOptions = contCols.map(c => ({ value: c.name, label: c.name + (computedNames.has(c.name) ? ' ƒ' : '') }));
   renderSselOptions('xSelect', xyOptions, '— select —');
   renderSselOptions('ySelect', xyOptions, '— select —');
-  // The empty option's own label (not the renderSselOptions placeholder
-  // param, which only applies if no option at all matches the current
-  // value — never true here since '' is always in the list) is what shows
-  // once a selection has been cleared, so it carries the "Sort ... by…"
-  // wording the user actually sees.
-  const colorOptions = [{ value: '', label: 'Sort color by…' }].concat(
+  const colorOptions = [{ value: '', label: '— none —' }].concat(
     colorCols.map(c => ({ value: c.name, label: c.name + (c.uniqueCount > 15 ? ' ⚠' : '') }))
   );
-  renderSselOptions('colorSelect', colorOptions, 'Sort color by…');
-  const sizeOptions = [{ value: '', label: 'Sort size by…' }].concat(
-    colorCols.map(c => ({ value: c.name, label: c.name }))
-  );
-  renderSselOptions('sizeSelect', sizeOptions, 'Sort size by…');
+  renderSselOptions('colorSelect', colorOptions, '— none —');
 
   renderExtraAxesList();
   onSelectionChange();
-}
-
-function onSizeColumnChange(col) {
-  sizeState.column = col;
-  if (state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
-}
-
-// The overall "Point size" slider (Advanced Visualization Options) — a
-// multiplier applied uniformly to the flat default marker size AND to the
-// Sort-size-by mapped min/max range, so nudging it up/down changes overall
-// visibility without disturbing the relative sizes Sort size by assigned.
-function setSizeScale(val) {
-  const n = parseFloat(val);
-  sizeState.scale = (isNaN(n) || n <= 0) ? 1 : n;
-  const label = document.getElementById('sizeScaleLabel');
-  if (label) label.textContent = Math.round(sizeState.scale * 100) + '%';
-  if (state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
-}
-
-// Legend for Sort size by — Plotly's own legend only reflects trace splits
-// (Sort color by), not a per-point size array, so this small box is the
-// only place the value↔size mapping is visible to the user.
-function updateSizeLegend(data) {
-  const sizeBox = document.getElementById('sizeLegendBox');
-  if (!sizeBox) return;
-  if (!sizeState.column) {
-    sizeBox.style.display = 'none';
-    sizeBox.textContent = '';
-    return;
-  }
-  const vals = data.map(r => parseFloat(r[sizeState.column])).filter(v => !isNaN(v));
-  sizeBox.style.display = 'block';
-  if (vals.length) {
-    const lo = Math.min(...vals), hi = Math.max(...vals);
-    const fmt = (v) => Number.isInteger(v) ? v : v.toFixed(2);
-    const effMin = sizeState.min * sizeState.scale, effMax = sizeState.max * sizeState.scale;
-    sizeBox.textContent = `Size: ${sizeState.column} (${fmt(lo)}–${fmt(hi)} → ${fmt(effMin)}–${fmt(effMax)}px)`;
-  } else {
-    sizeBox.textContent = `"${sizeState.column}" has no numeric values — point size unchanged.`;
-  }
 }
 
 function onSelectionChange() {
@@ -3050,6 +2930,7 @@ function renderPaletteEditor() {
         <label>Palette name</label>
         <input class="palette-editor-name" type="text" placeholder="e.g. BASF C2 project" value="${escapeHtml(st.name)}" oninput="updatePaletteEditorName(this.value)">
       </div>
+      <div class="palette-editor-hint">Each row maps a product/compound key to a color. A data column matches if its name <em>contains</em> the key — e.g. key <code>ethanol</code> matches both <code>S_ethanol</code> and <code>R_ethanol</code>.</div>
       <div class="palette-editor-rows">
         ${st.rows.map((r, i) => `
           <div class="palette-editor-row">
@@ -3309,49 +3190,16 @@ function renderPlotImpl() {
   let traces = [];
   let traceMeta = []; // parallel to traces: {xlabel, ylabel} per trace, for export rows
   const mode = state.plotType === 'line' ? 'lines+markers' : 'markers';
-  // "Point size" (sizeState.scale) is the overall multiplier from Advanced
-  // Visualization Options — applied to the flat default here, and to the
-  // Sort-size-by mapped min/max below, so it scales everything uniformly.
-  const markerSize = (state.plotType === 'line' ? 4 : 6) * sizeState.scale;
-
-  // ── Sort size by (Advanced Visualization Options) ───────────────────────
-  // Maps a column to per-point marker size, independent of Sort color by
-  // (which only decides trace grouping) — built as a parallel per-point
-  // array alongside x/y, not as extra traces. Scale is computed once over
-  // the whole filtered dataset so bubble sizes stay comparable across color
-  // groups and extra axes. If the column has no numeric values (a text/
-  // category column), sizeScaleFn stays null and every point silently keeps
-  // the flat default size — no visual change, per design.
-  const sizeCol = sizeState.column;
-  let sizeScaleFn = null;
-  if (sizeCol) {
-    const nums = data.map(r => parseFloat(r[sizeCol])).filter(v => !isNaN(v));
-    if (nums.length) {
-      const effMin = sizeState.min * sizeState.scale, effMax = sizeState.max * sizeState.scale;
-      const lo = Math.min(...nums), hi = Math.max(...nums);
-      sizeScaleFn = (v) => {
-        if (isNaN(v)) return effMin;
-        if (hi === lo) return (effMin + effMax) / 2;
-        return effMin + ((v - lo) / (hi - lo)) * (effMax - effMin);
-      };
-    }
-  }
-  const pointSize = (row) => sizeScaleFn ? sizeScaleFn(parseFloat(row[sizeCol])) : markerSize;
-  // A thin outline reads as a bubble-chart convention, so it only shows up
-  // when sizes are actually varying — not for a flat/no-op size selection.
-  const sizeMarkerExtra = () => (sizeScaleFn ? { line: { width: 0.5, color: 'rgba(0,0,0,0.25)' } } : {});
+  const markerSize = state.plotType === 'line' ? 4 : 6;
 
   if (cCol) {
     const groups = {};
     data.forEach(row => {
       const key = row[cCol] !== undefined && row[cCol] !== '' ? String(row[cCol]) : '(blank)';
-      if (!groups[key]) groups[key] = { x: [], y: [], size: [] };
+      if (!groups[key]) groups[key] = { x: [], y: [] };
       const xv = parseFloat(row[xCol]);
       const yv = parseFloat(row[yCol]);
-      if (!isNaN(xv) && !isNaN(yv)) {
-        groups[key].x.push(xv); groups[key].y.push(yv);
-        groups[key].size.push(pointSize(row));
-      }
+      if (!isNaN(xv) && !isNaN(yv)) { groups[key].x.push(xv); groups[key].y.push(yv); }
     });
     const sortedKeys = Object.keys(groups).sort((a, b) => {
       const na = parseFloat(a), nb = parseFloat(b);
@@ -3359,28 +3207,24 @@ function renderPlotImpl() {
     });
     traces = sortedKeys.map((key, i) => {
       const color = getSeriesColor(`colorby:${cCol}`, key);
-      const g = groups[key];
       return {
-        x: g.x, y: g.y, mode, type: 'scatter', name: key,
-        marker: Object.assign({ size: sizeScaleFn ? g.size : markerSize, color, opacity: 0.85 }, sizeMarkerExtra()),
+        x: groups[key].x, y: groups[key].y, mode, type: 'scatter', name: key,
+        marker: { size: markerSize, color, opacity: 0.85 },
         line: { color, width: 1.5 }
       };
     });
     traceMeta = sortedKeys.map(() => ({ xlabel: xCol, ylabel: yCol }));
   } else {
-    const xs = [], ys = [], sizes = [];
+    const xs = [], ys = [];
     data.forEach(row => {
       const xv = parseFloat(row[xCol]);
       const yv = parseFloat(row[yCol]);
-      if (!isNaN(xv) && !isNaN(yv)) {
-        xs.push(xv); ys.push(yv);
-        sizes.push(pointSize(row));
-      }
+      if (!isNaN(xv) && !isNaN(yv)) { xs.push(xv); ys.push(yv); }
     });
     const singleColor = getSeriesColor('series', yCol);
     traces = [{
       x: xs, y: ys, mode, type: 'scatter', name: yCol,
-      marker: Object.assign({ size: sizeScaleFn ? sizes : markerSize, color: singleColor, opacity: 0.75 }, sizeMarkerExtra()),
+      marker: { size: markerSize, color: singleColor, opacity: 0.75 },
       line: { color: singleColor, width: 1.5 }
     }];
     traceMeta = [{ xlabel: xCol, ylabel: yCol }];
@@ -3403,24 +3247,19 @@ function renderPlotImpl() {
   // standard Plotly dual-X-axis pattern. Either way it's always a single
   // trace over the whole filtered dataset — extra-axis series aren't split
   // by Color/group by, so this can't silently multiply into many traces.
-  // Sort size by and Point size still apply per-point, same as the primary
-  // trace, since they read off the row rather than off which axis it's on.
   let rightAxisCount = 0, leftAxisCount = 0, topAxisUsed = false, axisNum = 2;
   extraAxesState.filter(ax => ax.column).forEach(ax => {
     const n = axisNum++;
     if (ax.axisType === 'xTop') {
-      const exs = [], eys = [], esizes = [];
+      const exs = [], eys = [];
       data.forEach(row => {
         const xv = parseFloat(row[ax.column]);
         const yv = parseFloat(row[yCol]);
-        if (!isNaN(xv) && !isNaN(yv)) {
-          exs.push(xv); eys.push(yv);
-          esizes.push(pointSize(row));
-        }
+        if (!isNaN(xv) && !isNaN(yv)) { exs.push(xv); eys.push(yv); }
       });
       traces.push({
         x: exs, y: eys, mode, type: 'scatter', name: ax.column,
-        marker: Object.assign({ size: sizeScaleFn ? esizes : markerSize, color: ax.color, opacity: 0.85 }, sizeMarkerExtra()),
+        marker: { size: markerSize, color: ax.color, opacity: 0.85 },
         line: { color: ax.color, width: 1.5 },
         xaxis: 'x' + n
       });
@@ -3434,21 +3273,18 @@ function renderPlotImpl() {
       };
       topAxisUsed = true;
     } else {
-      const exs = [], eys = [], esizes = [];
+      const exs = [], eys = [];
       data.forEach(row => {
         const xv = parseFloat(row[xCol]);
         const yv = parseFloat(row[ax.column]);
-        if (!isNaN(xv) && !isNaN(yv)) {
-          exs.push(xv); eys.push(yv);
-          esizes.push(pointSize(row));
-        }
+        if (!isNaN(xv) && !isNaN(yv)) { exs.push(xv); eys.push(yv); }
       });
       const side = ax.axisType === 'yLeft' ? 'left' : 'right';
       const idx = side === 'right' ? rightAxisCount++ : leftAxisCount++;
       const position = side === 'right' ? (1 - 0.09 * idx) : (0.09 * (idx + 1));
       traces.push({
         x: exs, y: eys, mode, type: 'scatter', name: ax.column,
-        marker: Object.assign({ size: sizeScaleFn ? esizes : markerSize, color: ax.color, opacity: 0.85 }, sizeMarkerExtra()),
+        marker: { size: markerSize, color: ax.color, opacity: 0.85 },
         line: { color: ax.color, width: 1.5 },
         yaxis: 'y' + n
       });
@@ -3494,23 +3330,18 @@ function renderPlotImpl() {
   state.lastPlot = {
     type: state.plotType,
     xCol, yCol, colorCol: cCol || null,
-    sizeCol: sizeScaleFn ? sizeCol : null,
-    sizeRange: sizeScaleFn ? [sizeState.min * sizeState.scale, sizeState.max * sizeState.scale] : null,
-    sizeScale: sizeState.scale,
     extraAxes: extraAxesState.filter(ax => ax.column).map(ax => ({
       column: ax.column, axis_type: ax.axisType, color: ax.color, min: ax.min, max: ax.max
     })),
     rows: traces.flatMap((t, ti) => t.x.map((x, i) => ({
       series: t.name, legend: t.name, color: t.marker.color, x, y: t.y[i],
-      xlabel: traceMeta[ti].xlabel, ylabel: traceMeta[ti].ylabel,
-      size: Array.isArray(t.marker.size) ? t.marker.size[i] : t.marker.size
+      xlabel: traceMeta[ti].xlabel, ylabel: traceMeta[ti].ylabel
     }))),
-    rowColumns: ['series', 'legend', 'color', 'x', 'y', 'xlabel', 'ylabel', 'size'],
+    rowColumns: ['series', 'legend', 'color', 'x', 'y', 'xlabel', 'ylabel'],
     seriesColors: traces.map(t => ({ series: t.name, color: t.marker.color })),
     rowsUsed: data.length, rowsTotal: state.nRows,
     title: titleEl.textContent
   };
-  updateSizeLegend(data);
   document.getElementById('figureExportBtn').disabled = false;
 }
 
@@ -4112,7 +3943,7 @@ function onExportedByInput(v) {
 function getPlotColumnNames(lp) {
   if (lp.type === 'bar') return [lp.xCol, ...lp.splitCols, ...lp.stackCols].filter(Boolean);
   if (lp.type === 'distribution') return [...lp.valueCols, lp.groupCol].filter(Boolean);
-  return [lp.xCol, lp.yCol, lp.colorCol, lp.sizeCol, ...(lp.extraAxes || []).map(a => a.column)].filter(Boolean);
+  return [lp.xCol, lp.yCol, lp.colorCol, ...(lp.extraAxes || []).map(a => a.column)].filter(Boolean);
 }
 
 // "Recipe" metadata: everything about how this figure was configured, minus
@@ -4131,11 +3962,7 @@ function buildExportMetadata() {
         plot_type: 'distribution', chart_style: lp.style, value_columns: lp.valueCols,
         group_by: lp.groupCol, show_points: lp.showPoints, bins: lp.bins
       }
-    : {
-        plot_type: lp.type, x: lp.xCol, y: lp.yCol, color_by: lp.colorCol,
-        size_by: lp.sizeCol || null, size_range_px: lp.sizeRange || null, point_size_scale: lp.sizeScale,
-        extra_axes: lp.extraAxes || []
-      };
+    : { plot_type: lp.type, x: lp.xCol, y: lp.yCol, color_by: lp.colorCol, extra_axes: lp.extraAxes || [] };
 
   const usedNames = new Set(getPlotColumnNames(lp));
   const computedNames = new Set(calcState.descriptors.map(d => d.name));
@@ -4458,7 +4285,6 @@ function buildShareSnapshot() {
     },
     extraAxesState: extraAxesState.map(ax => ({ ...ax })),
     extraAxesUI: { nextId: extraAxesUI.nextId },
-    sizeState: { column: sizeState.column, min: sizeState.min, max: sizeState.max, scale: sizeState.scale },
     colorState: {
       overrides: colorState.overrides,
       auto: colorState.auto,
@@ -4626,12 +4452,6 @@ function restoreSharedSession(snapshot) {
 
   extraAxesState = (snapshot.extraAxesState || []).map(ax => ({ ...ax }));
   extraAxesUI = { expanded: false, nextId: (snapshot.extraAxesUI && snapshot.extraAxesUI.nextId) || (extraAxesState.reduce((m, a) => Math.max(m, a.id || 0), 0) + 1) };
-
-  // sizeState is set here (not via the "selection" DOM hack used for X/Y/
-  // Color) because, unlike those, it's already first-class state —
-  // buildControls() below reads sizeState.column directly as the source of
-  // truth when it repopulates the Sort size by select and Point size slider.
-  sizeState = Object.assign({ column: '', min: 4, max: 20, scale: 1 }, snapshot.sizeState || {});
 
   colorState.overrides = (snapshot.colorState && snapshot.colorState.overrides) || {};
   colorState.auto = (snapshot.colorState && snapshot.colorState.auto) || {};
