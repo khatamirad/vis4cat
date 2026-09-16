@@ -477,6 +477,7 @@
     color: var(--text-muted); cursor: pointer; font-size: 12px; transition: border-color .15s, color .15s;
   }
   .colors-icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .colors-icon-btn-wide { width: auto; padding: 0 8px; font-size: 10.5px; font-weight: 500; white-space: nowrap; }
 
   /* ── Custom (keyword-matched) color palette editor ──────────────────────
      A palette here is a { name, colors: {key: hex} } dict. A data column
@@ -516,6 +517,10 @@
     font-size: 11px; color: var(--text-muted); line-height: 1.5; margin: 8px 20px 0;
   }
   .palette-unmatched-box code { font-family: var(--font-mono); font-size: 10.5px; background: var(--surface); padding: 1px 4px; border-radius: 3px; }
+  .palette-unmatched-box.palette-import-error { border-color: var(--error-text); }
+  .palette-import-swatch {
+    width: 26px; height: 26px; border: 1px solid var(--border-strong); border-radius: 4px; flex-shrink: 0; display: inline-block;
+  }
 
   /* ── Advanced Visualization Options (extra axes) ── */
   .adv-axes-toggle {
@@ -536,9 +541,9 @@
     background: none; border: none; color: var(--text-faint); cursor: pointer; font-size: 13px; border-radius: 4px;
   }
   .adv-axes-remove:hover { color: var(--error-text); background: var(--error); }
-  .adv-axes-type-toggle { display: flex; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 5px; padding: 2px; gap: 2px; }
+  .adv-axes-type-toggle { display: flex; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 5px; padding: 2px; gap: 2px; }
   .adv-axes-type-btn {
-    flex: 1; padding: 4px 6px; font-family: var(--font); font-size: 10.5px; font-weight: 500; border: none;
+    flex: 1 1 40%; padding: 4px 6px; font-family: var(--font); font-size: 10.5px; font-weight: 500; border: none;
     border-radius: 3px; cursor: pointer; background: transparent; color: var(--text-muted); transition: background .12s, color .12s;
   }
   .adv-axes-type-btn.active { background: var(--accent); color: #fff; }
@@ -549,6 +554,10 @@
   .adv-axes-minmax-row input[type=number] {
     flex: 1; min-width: 0; font-family: var(--font); font-size: 11.5px; color: var(--text); background: var(--surface);
     border: 1px solid var(--border-strong); border-radius: 4px; padding: 5px 7px;
+  }
+  .adv-axes-symbol-select {
+    flex: 1.4; min-width: 0; font-family: var(--font); font-size: 11px; color: var(--text); background: var(--surface);
+    border: 1px solid var(--border-strong); border-radius: 4px; padding: 5px 4px; cursor: pointer;
   }
   /* Sort by (color + size, side by side) and Point size (Advanced Visualization Options). */
   .sort-by-row { display: flex; gap: 8px; }
@@ -845,6 +854,7 @@
               <div class="control-group" style="margin:0;">
                 <label>Point size <span style="color:var(--text-faint); font-weight:400;">(overall)</span></label>
                 <div class="adv-axes-minmax-row" style="align-items:center;">
+                  <input type="number" id="sizeBaseInput" min="1" max="200" step="1" value="6" title="Default point size (px) — the % slider multiplies this" onchange="setSizeBase(this.value)" style="width:52px; flex-shrink:0;">
                   <input type="range" id="sizeScaleSlider" min="0.5" max="3" step="0.1" value="1" oninput="setSizeScale(this.value)" style="flex:1; min-width:0;">
                   <span class="range-val" id="sizeScaleLabel" style="width:48px; flex-shrink:0;">100%</span>
                 </div>
@@ -1065,10 +1075,11 @@
           </select>
         </span>
         <span class="colors-panel-actions">
+          <button class="colors-icon-btn colors-icon-btn-wide" title="Download a CSV template — prefilled with product names guessed from your current data — to fill in and import back" onclick="downloadPaletteTemplate()">Template</button>
           <button class="colors-icon-btn" id="paletteEditBtn" style="display:none;" title="Edit this palette" onclick="openPaletteEditor(colorState.palette)">✎</button>
           <button class="colors-icon-btn" id="paletteExportBtn" style="display:none;" title="Export this palette as JSON" onclick="exportPaletteJSON(colorState.palette)">⬇</button>
-          <button class="colors-icon-btn" title="Import a palette from JSON" onclick="document.getElementById('paletteImportInput').click()">⬆</button>
-          <input type="file" id="paletteImportInput" accept="application/json,.json" style="display:none;" onchange="importPaletteJSON(event)">
+          <button class="colors-icon-btn" title="Import a palette — JSON, or a CSV/XLSX with a legend/key column and a color column" onclick="document.getElementById('paletteImportInput').click()">⬆</button>
+          <input type="file" id="paletteImportInput" accept=".json,.csv,.xlsx,.xls,application/json,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" style="display:none;" onchange="handlePaletteImportFile(event)">
         </span>
         <button class="stats-close-btn" onclick="toggleColorsPanel()" title="Close">✕</button>
       </div>
@@ -1483,7 +1494,9 @@ let barWarnUI = { expanded: false };
 const BAR_WARN_CAP = 4;
 
 // Extra-axes state ("Advanced Visualization Options", scatter/line only).
-// Each entry: { id, column, axisType: 'yRight'|'yLeft'|'xTop', color, min, max }
+// Each entry: { id, column, axisType: 'yRight'|'yLeft'|'xTop'|'xBottom', color,
+// mode: 'scatter'|'line', symbol, size }. Range is never stored — axes always
+// auto-fit and the user drags/zooms manually instead.
 let extraAxesState = [];
 let extraAxesUI = { expanded: false, nextId: 1 };
 
@@ -1497,8 +1510,11 @@ let extraAxesUI = { expanded: false, nextId: 1 };
 // `scale` is the separate "Point size" overall multiplier: applied on top
 // of both the flat default size and the min/max mapped range, so increasing
 // it enlarges everything uniformly without disturbing the relative sizes
-// Sort size by already assigned.
-let sizeState = { column: '', min: 4, max: 20, scale: 1 };
+// Sort size by already assigned. `size` is the primary trace's own flat
+// default point size (px, editable), analogous to each extra axis's `size`
+// field — it's what `scale` (50–300%) multiplies, so raising `size` itself
+// is how to reach a bigger point than the slider alone can reach.
+let sizeState = { column: '', min: 4, max: 20, scale: 1, size: 6 };
 
 function classifyColumns(data) {
   if (!data || data.length === 0) return [];
@@ -1574,12 +1590,14 @@ function confirmAndVisualizeImpl() {
   extraAxesUI.expanded = false;
   document.getElementById('advAxesPanel').style.display = 'none';
   document.getElementById('advAxesCaret').style.transform = 'none';
-  sizeState = { column: '', min: 4, max: 20, scale: 1 };
+  sizeState = { column: '', min: 4, max: 20, scale: 1, size: 6 };
   document.getElementById('sizeLegendBox').style.display = 'none';
   const sizeScaleSliderEl = document.getElementById('sizeScaleSlider');
   const sizeScaleLabelEl = document.getElementById('sizeScaleLabel');
   if (sizeScaleSliderEl) sizeScaleSliderEl.value = 1;
   if (sizeScaleLabelEl) sizeScaleLabelEl.textContent = '100%';
+  const sizeBaseInputEl = document.getElementById('sizeBaseInput');
+  if (sizeBaseInputEl) sizeBaseInputEl.value = 6;
   state.lastPlot = null;
   document.getElementById('figureExportBtn').disabled = true;
   colorState.overrides = {};
@@ -2444,6 +2462,8 @@ function buildControls() {
   const sizeScaleLabelEl = document.getElementById('sizeScaleLabel');
   if (sizeScaleSliderEl) sizeScaleSliderEl.value = sizeState.scale;
   if (sizeScaleLabelEl) sizeScaleLabelEl.textContent = Math.round(sizeState.scale * 100) + '%';
+  const sizeBaseInputEl = document.getElementById('sizeBaseInput');
+  if (sizeBaseInputEl) sizeBaseInputEl.value = sizeState.size;
 
   // Mirror the same option data into the searchable ssel dropdowns.
   const xyOptions = contCols.map(c => ({ value: c.name, label: c.name + (computedNames.has(c.name) ? ' ƒ' : '') }));
@@ -2481,6 +2501,18 @@ function setSizeScale(val) {
   sizeState.scale = (isNaN(n) || n <= 0) ? 1 : n;
   const label = document.getElementById('sizeScaleLabel');
   if (label) label.textContent = Math.round(sizeState.scale * 100) + '%';
+  if (state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
+}
+
+// The primary trace's own flat default point size (px) — was a hardcoded
+// 6 (scatter) / 4 (line), now user-editable so the achievable point size
+// isn't capped by the Point size slider's 300% ceiling (e.g. 20px base ×
+// 300% reaches 60px, well past the old fixed-6px-base's 18px cap). The
+// slider itself is unchanged — this is a separate, adjacent control that
+// sets what the slider multiplies.
+function setSizeBase(val) {
+  const n = parseFloat(val);
+  sizeState.size = (isNaN(n) || n <= 0) ? sizeState.size : Math.min(200, n);
   if (state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
 }
 
@@ -2776,6 +2808,19 @@ const COLOR_PALETTES = {
 };
 const VIZ_PALETTE = COLOR_PALETTES.default; // kept as alias — some older call sites may still reference it
 
+// Marker shapes offered for Advanced Visualization Options extra axes —
+// a small, visually distinct subset of Plotly's symbol set.
+const AXIS_MARKER_SYMBOLS = [
+  { value: 'circle', label: 'Circle', glyph: '●' },
+  { value: 'square', label: 'Square', glyph: '■' },
+  { value: 'diamond', label: 'Diamond', glyph: '◆' },
+  { value: 'triangle-up', label: 'Triangle', glyph: '▲' },
+  { value: 'cross', label: 'Cross', glyph: '✚' },
+  { value: 'x', label: 'X', glyph: '✕' },
+  { value: 'star', label: 'Star', glyph: '★' },
+  { value: 'pentagon', label: 'Pentagon', glyph: '⬠' }
+];
+
 // ── Color assignment: stable per-category identity, not per-render index ──
 // Colors are keyed by "scope::name" (e.g. "colorby:catalyst::Pt/Al2O3" or
 // "stack::S_CH4") so the same category keeps the same color across filters,
@@ -2876,7 +2921,7 @@ function toggleColorsPanel() {
   colorState.open = !colorState.open;
   document.getElementById('colorsDropdown').classList.toggle('open', colorState.open);
   document.getElementById('colorsBtn').classList.toggle('active', colorState.open);
-  if (colorState.open) { paletteEditorState.open = false; renderColorsList(); }
+  if (colorState.open) { paletteEditorState.open = false; paletteImportPreviewState.open = false; renderColorsList(); }
 }
 
 // Every series/column currently in play that a custom palette could be
@@ -2931,6 +2976,14 @@ function onPaletteSelectChange(sel) {
 
 function renderColorsList() {
   const footer = document.querySelector('#colorsDropdown .filter-footer');
+  if (paletteImportPreviewState.open) {
+    if (footer) footer.style.display = 'none';
+    document.getElementById('colorsUnmatchedArea').innerHTML = '';
+    document.getElementById('paletteEditBtn').style.display = 'none';
+    document.getElementById('paletteExportBtn').style.display = 'none';
+    renderPaletteImportPreview();
+    return;
+  }
   if (paletteEditorState.open) {
     if (footer) footer.style.display = 'none';
     document.getElementById('colorsUnmatchedArea').innerHTML = '';
@@ -3003,6 +3056,13 @@ function setColorPalette(name) {
 // plumbing as the rest of the Colors panel.
 let paletteEditorState = { open: false, id: null, name: '', rows: [], confirmingDelete: false };
 
+// Renders inline in the same spot as paletteEditorState (see renderColorsList)
+// once a CSV/XLSX file has been parsed — a preview/confirm step before
+// anything is actually saved, so a bad header match or an unparseable
+// color cell is caught before it becomes a saved palette. See
+// handlePaletteImportFile() / importPaletteSheet() / buildPaletteImportPreview().
+let paletteImportPreviewState = { open: false, fileName: '', name: '', rows: [] };
+
 function openPaletteEditor(existingId) {
   if (existingId && colorState.customPalettes[existingId]) {
     const pal = colorState.customPalettes[existingId];
@@ -3018,6 +3078,7 @@ function openPaletteEditor(existingId) {
       confirmingDelete: false
     };
   }
+  paletteImportPreviewState.open = false;
   colorState.open = true;
   document.getElementById('colorsDropdown').classList.add('open');
   document.getElementById('colorsBtn').classList.add('active');
@@ -3137,6 +3198,231 @@ function importPaletteJSON(event) {
   reader.readAsText(file);
 }
 
+// ── Palette import: CSV/XLSX (non-coder-friendly entry point) ───────────
+// A JSON import (above) is taken as-is, no preview — it's already
+// structured data written by the app itself (or by someone comfortable
+// hand-editing JSON). A CSV/XLSX, by contrast, is free-typed by a person
+// in a spreadsheet, so it goes through a parse → normalize → preview step
+// (see buildPaletteImportPreview/renderPaletteImportPreview) before
+// anything is actually saved to colorState.customPalettes — a bad header
+// match or an unparseable color cell should be caught before it becomes a
+// saved palette, not after.
+function handlePaletteImportFile(event) {
+  const file = event.target.files[0];
+  if (!file) { event.target.value = ''; return; }
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  if (ext === 'json') { importPaletteJSON(event); return; }
+  if (ext === 'csv' || ext === 'xlsx' || ext === 'xls') { importPaletteSheet(event, ext); return; }
+  event.target.value = '';
+  alert('Unsupported file type — please choose a .json, .csv, or .xlsx file.');
+}
+
+const PALETTE_IMPORT_KEY_HEADERS = ['legend', 'key', 'product', 'name'];
+const PALETTE_IMPORT_COLOR_HEADERS = ['color', 'colour', 'hex'];
+
+function importPaletteSheet(event, ext) {
+  const file = event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onerror = () => alert('Could not read this file.');
+  if (ext === 'csv') {
+    reader.onload = () => {
+      try {
+        const parsed = Papa.parse(reader.result, { header: true, skipEmptyLines: true });
+        buildPaletteImportPreview(file.name, parsed.data);
+      } catch (err) { alert('Could not read this CSV: ' + err.message); }
+    };
+    reader.readAsText(file);
+  } else {
+    reader.onload = () => {
+      try {
+        const wb = XLSX.read(reader.result, { type: 'array' });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+        buildPaletteImportPreview(file.name, rows);
+      } catch (err) { alert('Could not read this spreadsheet: ' + err.message); }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+}
+
+// Accepts hex (with or without '#'), a CSS/X11 color name, rgb()/rgba()
+// function syntax, or a bare "r,g,b"/"r g b" triplet — normalizes each to
+// a value Plotly's marker.color accepts directly. Returns { value, ok };
+// ok:false means the cell didn't parse as any of these, so the row gets
+// flagged in the import preview rather than silently defaulted.
+function normalizeColorValue(raw) {
+  const s = String(raw == null ? '' : raw).trim();
+  if (!s) return { value: null, ok: false };
+  const hexMatch = s.match(/^#?([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/);
+  if (hexMatch) return { value: '#' + hexMatch[1], ok: true };
+  if (/^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*[\d.]+\s*)?\)$/i.test(s)) return { value: s, ok: true };
+  const tripletMatch = s.match(/^(\d{1,3})[\s,]+(\d{1,3})[\s,]+(\d{1,3})$/);
+  if (tripletMatch) {
+    const rgb = tripletMatch.slice(1, 4).map(Number);
+    if (rgb.every(n => n >= 0 && n <= 255)) return { value: `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`, ok: true };
+  }
+  if (/^[a-zA-Z]+$/.test(s) && isValidCssColorName(s)) return { value: s.toLowerCase(), ok: true };
+  return { value: null, ok: false };
+}
+
+// A CSS/X11 color-name check via the canvas 2D context, which resolves any
+// name the browser itself recognizes — the same set Plotly would accept —
+// rather than us maintaining our own name list. Setting fillStyle to an
+// invalid name is a silent no-op (the context keeps its prior value), so
+// resetting to a known baseline first and checking whether it moved is
+// the standard way to validate a candidate name this way.
+let __paletteColorNameCtx = null;
+function isValidCssColorName(name) {
+  if (!__paletteColorNameCtx) __paletteColorNameCtx = document.createElement('canvas').getContext('2d');
+  __paletteColorNameCtx.fillStyle = '#000000';
+  __paletteColorNameCtx.fillStyle = name;
+  return __paletteColorNameCtx.fillStyle.toLowerCase() !== '#000000' || name.toLowerCase() === 'black';
+}
+
+function buildPaletteImportPreview(fileName, rawRows) {
+  if (!rawRows || !rawRows.length) {
+    alert('That file has no data rows — expected a header row plus one row per legend/color pair.');
+    return;
+  }
+  const headers = Object.keys(rawRows[0]);
+  const keyHeader = headers.find(h => PALETTE_IMPORT_KEY_HEADERS.includes(String(h).trim().toLowerCase()));
+  const colorHeader = headers.find(h => PALETTE_IMPORT_COLOR_HEADERS.includes(String(h).trim().toLowerCase()));
+  if (!keyHeader || !colorHeader) {
+    alert(`Could not find the expected columns in "${fileName}". Expected one column named "legend" (or "key"/"product"/"name") and another named "color" (or "colour"/"hex") — found: ${headers.join(', ') || '(no headers)'}.`);
+    return;
+  }
+  const rows = rawRows
+    .map((r, i) => ({ rowNum: i + 2, key: String(r[keyHeader] == null ? '' : r[keyHeader]).trim(), raw: r[colorHeader] }))
+    .filter(r => r.key !== '' || (r.raw != null && String(r.raw).trim() !== ''))
+    .map(r => {
+      const norm = normalizeColorValue(r.raw);
+      return { rowNum: r.rowNum, key: r.key, raw: r.raw, color: norm.value, ok: norm.ok && !!r.key };
+    });
+  paletteImportPreviewState = {
+    open: true, fileName, name: fileName.replace(/\.(csv|xlsx|xls)$/i, ''), rows
+  };
+  paletteEditorState.open = false;
+  colorState.open = true;
+  document.getElementById('colorsDropdown').classList.add('open');
+  document.getElementById('colorsBtn').classList.add('active');
+  renderColorsList();
+}
+
+function updatePaletteImportName(val) { paletteImportPreviewState.name = val; }
+
+function cancelPaletteImportPreview() {
+  paletteImportPreviewState.open = false;
+  renderColorsList();
+}
+
+function confirmPaletteImportPreview() {
+  const st = paletteImportPreviewState;
+  const name = st.name.trim() || 'Imported palette';
+  const colors = {};
+  st.rows.filter(r => r.ok).forEach(r => { colors[r.key] = r.color; });
+  if (Object.keys(colors).length === 0) { alert('No valid color rows to import.'); return; }
+  const id = `custom:${Date.now().toString(36)}${Math.floor(Math.random() * 1000).toString(36)}`;
+  colorState.customPalettes[id] = { name, colors };
+  saveCustomPalettesToStorage();
+  colorState.palette = id;
+  paletteImportPreviewState.open = false;
+  renderColorsList();
+  if (state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
+}
+
+function renderPaletteImportPreview() {
+  const area = document.getElementById('colorsListArea');
+  const st = paletteImportPreviewState;
+  const validRows = st.rows.filter(r => r.ok);
+  const invalidRows = st.rows.filter(r => !r.ok);
+
+  // A live preview of the match, before anything is saved — the same
+  // matchCustomPaletteColor() engine used for real, run against a
+  // temporary dict built from the rows parsed so far.
+  const dict = {};
+  validRows.forEach(r => { dict[r.key] = r.color; });
+  const checkEntries = getUnmatchedCheckEntries();
+  const seen = new Set();
+  let matchedCount = 0;
+  const unmatchedNames = [];
+  checkEntries.forEach(e => {
+    if (seen.has(e.name)) return;
+    seen.add(e.name);
+    if (matchCustomPaletteColor(dict, e.name)) matchedCount++; else unmatchedNames.push(e.name);
+  });
+
+  area.innerHTML = `
+    <div class="palette-editor">
+      <div class="palette-editor-hint">Imported from <code>${escapeHtml(st.fileName)}</code> — ${validRows.length} color${validRows.length === 1 ? '' : 's'} parsed${invalidRows.length ? `, ${invalidRows.length} row${invalidRows.length === 1 ? '' : 's'} skipped (below)` : ''}. Nothing is saved until you click Import.</div>
+      <div class="control-group">
+        <label>Palette name</label>
+        <input class="palette-editor-name" type="text" value="${escapeHtml(st.name)}" oninput="updatePaletteImportName(this.value)">
+      </div>
+      <div class="palette-editor-rows">
+        ${validRows.length ? validRows.map(r => `
+          <div class="palette-editor-row">
+            <span class="palette-import-swatch" style="background:${escapeHtml(r.color)};" title="${escapeHtml(r.color)}"></span>
+            <span class="palette-editor-key" style="border:none; background:none; padding:6px 0;">${escapeHtml(r.key)}</span>
+          </div>`).join('') : `<div class="filter-empty-hint">No valid rows parsed.</div>`}
+      </div>
+      ${invalidRows.length ? `
+        <div class="palette-unmatched-box palette-import-error">
+          ⚠ Couldn't use ${invalidRows.length} row${invalidRows.length === 1 ? '' : 's'} — skipped:
+          ${invalidRows.map(r => `<code>row ${r.rowNum}: "${escapeHtml(String(r.raw == null ? '' : r.raw))}"</code>`).join(', ')}
+        </div>` : ''}
+      ${checkEntries.length ? `
+        <div class="palette-unmatched-box">
+          Matches ${matchedCount} of ${checkEntries.length} series/columns in your current plot${unmatchedNames.length ? ` — no match for ${unmatchedNames.map(n => `<code>${escapeHtml(n)}</code>`).join(', ')}` : '.'}
+        </div>` : ''}
+      <div class="palette-editor-footer">
+        <span></span>
+        <span style="display:flex; gap:8px;">
+          <button class="palette-editor-cancel" onclick="cancelPaletteImportPreview()">Cancel</button>
+          <button class="palette-editor-save" onclick="confirmPaletteImportPreview()"${validRows.length === 0 ? ' disabled' : ''}>Import palette</button>
+        </span>
+      </div>
+    </div>`;
+  document.getElementById('colorsActiveLabel').textContent = '';
+}
+
+// Downloadable starter CSV — a candidate key per continuous/dual column
+// with a common metric prefix/suffix (S_, Y_, X_, conversion, selectivity,
+// yield, ...) stripped off, so a "products" template is a closer starting
+// point than a blank file. It's a guess, not authoritative: the point is
+// keying by product (matched across S_/Y_/X_-prefixed legend variants via
+// the substring match in matchCustomPaletteColor()), not by the exact
+// column name — the user edits/removes rows before importing regardless.
+const PALETTE_TEMPLATE_AFFIXES = /^(s|y|x|r|c|w|n)_|_(pct|percent|conv|conversion|sel|selectivity|yield|frac|fraction)$/i;
+function guessPaletteTemplateKeys() {
+  if (!state.columns) return [];
+  const seen = new Set();
+  const keys = [];
+  state.columns.forEach(c => {
+    if (c.role !== 'continuous' && c.role !== 'dual') return;
+    let base = c.name.replace(PALETTE_TEMPLATE_AFFIXES, '').replace(/^_+|_+$/g, '') || c.name;
+    const k = base.toLowerCase();
+    if (seen.has(k)) return;
+    seen.add(k);
+    keys.push(base);
+  });
+  return keys;
+}
+
+function downloadPaletteTemplate() {
+  const keys = guessPaletteTemplateKeys();
+  const rows = (keys.length ? keys : ['ethanol', 'CO2', 'propane']).map(k => [k, '']);
+  const csv = Papa.unparse({ fields: ['legend', 'color'], data: rows });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'vis4cat_palette_template.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 // ── Advanced Visualization Options: extra axes (scatter/line only) ──────
 // Each axis row plots one more column onto the current figure. A Y axis
 // (left/right) shares the primary X; an X axis (top) shares the primary Y
@@ -3162,12 +3448,15 @@ function addExtraAxis() {
   const used = new Set(extraAxesState.map(a => a.column).concat([xSel ? xSel.value : '', ySel ? ySel.value : '']));
   const firstFree = opts.find(o => !used.has(o.value));
   const column = firstFree ? firstFree.value : '';
+  const mode = state.plotType === 'line' ? 'line' : 'scatter';
   extraAxesState.push({
     id: extraAxesUI.nextId++,
     column,
     axisType: 'yRight',
     color: column ? getSeriesColor('axis', column) : COLOR_PALETTES.default[extraAxesState.length % COLOR_PALETTES.default.length],
-    min: null, max: null
+    symbol: 'circle',
+    mode,
+    size: mode === 'line' ? 4 : 6
   });
   if (!extraAxesUI.expanded) {
     extraAxesUI.expanded = true;
@@ -3208,11 +3497,26 @@ function setExtraAxisColor(id, hex) {
   if (state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
 }
 
-function setExtraAxisRange(id, which, val) {
+function setExtraAxisMode(id, mode) {
   const ax = extraAxesState.find(a => a.id === id);
   if (!ax) return;
-  const n = val === '' ? null : parseFloat(val);
-  ax[which] = (n === null || isNaN(n)) ? null : n;
+  ax.mode = mode;
+  renderExtraAxesList();
+  if (state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
+}
+
+function setExtraAxisSymbol(id, symbol) {
+  const ax = extraAxesState.find(a => a.id === id);
+  if (!ax) return;
+  ax.symbol = symbol;
+  if (state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
+}
+
+function setExtraAxisSize(id, val) {
+  const ax = extraAxesState.find(a => a.id === id);
+  if (!ax) return;
+  const n = parseFloat(val);
+  ax.size = (isNaN(n) || n <= 0) ? ax.size : Math.min(40, n);
   if (state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
 }
 
@@ -3246,11 +3550,18 @@ function renderExtraAxesList() {
         <button type="button" class="adv-axes-type-btn${ax.axisType === 'yLeft' ? ' active' : ''}" onclick="setExtraAxisType(${ax.id}, 'yLeft')">Y · left</button>
         <button type="button" class="adv-axes-type-btn${ax.axisType === 'yRight' ? ' active' : ''}" onclick="setExtraAxisType(${ax.id}, 'yRight')">Y · right</button>
         <button type="button" class="adv-axes-type-btn${ax.axisType === 'xTop' ? ' active' : ''}" onclick="setExtraAxisType(${ax.id}, 'xTop')">X · top</button>
+        <button type="button" class="adv-axes-type-btn${ax.axisType === 'xBottom' ? ' active' : ''}" onclick="setExtraAxisType(${ax.id}, 'xBottom')">X · bottom</button>
+      </div>
+      <div class="adv-axes-type-toggle">
+        <button type="button" class="adv-axes-type-btn${ax.mode !== 'line' ? ' active' : ''}" onclick="setExtraAxisMode(${ax.id}, 'scatter')">Scatter</button>
+        <button type="button" class="adv-axes-type-btn${ax.mode === 'line' ? ' active' : ''}" onclick="setExtraAxisMode(${ax.id}, 'line')">Line</button>
       </div>
       <div class="adv-axes-minmax-row">
         <input type="color" value="${ax.color}" onchange="setExtraAxisColor(${ax.id}, this.value)" title="Axis color">
-        <input type="number" placeholder="min (auto)" value="${ax.min ?? ''}" onchange="setExtraAxisRange(${ax.id}, 'min', this.value)">
-        <input type="number" placeholder="max (auto)" value="${ax.max ?? ''}" onchange="setExtraAxisRange(${ax.id}, 'max', this.value)">
+        <select class="adv-axes-symbol-select" onchange="setExtraAxisSymbol(${ax.id}, this.value)" title="Marker shape">
+          ${AXIS_MARKER_SYMBOLS.map(s => `<option value="${s.value}"${ax.symbol === s.value ? ' selected' : ''}>${s.glyph} ${s.label}</option>`).join('')}
+        </select>
+        <input type="number" min="1" max="40" step="1" value="${ax.size}" title="Point size" onchange="setExtraAxisSize(${ax.id}, this.value)">
       </div>
     </div>`;
   }).join('');
@@ -3310,9 +3621,10 @@ function renderPlotImpl() {
   let traceMeta = []; // parallel to traces: {xlabel, ylabel} per trace, for export rows
   const mode = state.plotType === 'line' ? 'lines+markers' : 'markers';
   // "Point size" (sizeState.scale) is the overall multiplier from Advanced
-  // Visualization Options — applied to the flat default here, and to the
-  // Sort-size-by mapped min/max below, so it scales everything uniformly.
-  const markerSize = (state.plotType === 'line' ? 4 : 6) * sizeState.scale;
+  // Visualization Options — applied to sizeState.size (the primary trace's
+  // own editable flat default, px) here, and to the Sort-size-by mapped
+  // min/max below, so it scales everything uniformly.
+  const markerSize = sizeState.size * sizeState.scale;
 
   // ── Sort size by (Advanced Visualization Options) ───────────────────────
   // Maps a column to per-point marker size, independent of Sort color by
@@ -3398,41 +3710,77 @@ function renderPlotImpl() {
 
   // ── Advanced Visualization Options: extra axes ──────────────────────────
   // A Y axis (left/right) plots another column against the shared X, on its
-  // own scale (e.g. temperature alongside conversion %). An X axis (top)
-  // plots the *same* Y column against a different X column instead — the
-  // standard Plotly dual-X-axis pattern. Either way it's always a single
+  // own scale (e.g. temperature alongside conversion %). An X axis (top or
+  // bottom) plots the *same* Y column against a different X column instead —
+  // the standard Plotly dual-axis pattern. Either way it's always a single
   // trace over the whole filtered dataset — extra-axis series aren't split
   // by Color/group by, so this can't silently multiply into many traces.
-  // Sort size by and Point size still apply per-point, same as the primary
-  // trace, since they read off the row rather than off which axis it's on.
-  let rightAxisCount = 0, leftAxisCount = 0, topAxisUsed = false, axisNum = 2;
+  // Sort size by still applies per-point, same as the primary trace, since
+  // it reads off the row rather than off which axis it's on; when no column
+  // is assigned, each axis falls back to its own default point size instead
+  // of the primary trace's, so axes stay visually distinguishable. Range is
+  // always left to Plotly's auto-fit — the user drags/zooms manually instead.
+  //
+  // Y·right and X·top have no primary axis already occupying that side, so
+  // they can simply sit at the plot's own edge (position 1 / side:'top')
+  // and let the outer margin grow around them — nothing to collide with.
+  // Y·left and X·bottom are different: the *primary* y-/x-axis already
+  // lives on that side, so a free axis placed there needs its own reserved
+  // strip of room — carved out of the plot's own domain (the standard
+  // Plotly "shrink the domain, then position free axes in the freed strip"
+  // pattern) — otherwise it draws right on top of the primary axis instead
+  // of stacking outside it.
+  const AXIS_SLOT = 0.11; // paper-fraction reserved per stacked Y·left / X·bottom axis
+  const leftExtraTotal = extraAxesState.filter(ax => ax.column && ax.axisType === 'yLeft').length;
+  const bottomExtraTotal = extraAxesState.filter(ax => ax.column && ax.axisType === 'xBottom').length;
+  const leftDomainPad = leftExtraTotal * AXIS_SLOT;
+  const bottomDomainPad = bottomExtraTotal * AXIS_SLOT;
+  if (leftExtraTotal > 0) layout.xaxis.domain = [leftDomainPad, 1];
+  if (bottomExtraTotal > 0) layout.yaxis.domain = [bottomDomainPad, 1];
+
+  let rightAxisCount = 0, leftAxisCount = 0, bottomAxisCount = 0, topAxisUsed = false, axisNum = 2;
   extraAxesState.filter(ax => ax.column).forEach(ax => {
     const n = axisNum++;
-    if (ax.axisType === 'xTop') {
+    const axMode = ax.mode === 'line' ? 'lines+markers' : 'markers';
+    const axFlatSize = ax.size * sizeState.scale;
+    const axPointSize = (row) => sizeScaleFn ? sizeScaleFn(parseFloat(row[sizeCol])) : axFlatSize;
+    if (ax.axisType === 'xTop' || ax.axisType === 'xBottom') {
       const exs = [], eys = [], esizes = [];
       data.forEach(row => {
         const xv = parseFloat(row[ax.column]);
         const yv = parseFloat(row[yCol]);
         if (!isNaN(xv) && !isNaN(yv)) {
           exs.push(xv); eys.push(yv);
-          esizes.push(pointSize(row));
+          esizes.push(axPointSize(row));
         }
       });
+      const side = ax.axisType === 'xTop' ? 'top' : 'bottom';
       traces.push({
-        x: exs, y: eys, mode, type: 'scatter', name: ax.column,
-        marker: Object.assign({ size: sizeScaleFn ? esizes : markerSize, color: ax.color, opacity: 0.85 }, sizeMarkerExtra()),
+        x: exs, y: eys, mode: axMode, type: 'scatter', name: ax.column,
+        marker: Object.assign({ size: sizeScaleFn ? esizes : axFlatSize, color: ax.color, symbol: ax.symbol, opacity: 0.85 }, sizeMarkerExtra()),
         line: { color: ax.color, width: 1.5 },
         xaxis: 'x' + n
       });
       traceMeta.push({ xlabel: ax.column, ylabel: yCol });
-      layout['xaxis' + n] = {
-        overlaying: 'x', side: 'top',
+      const axisLayout = {
+        overlaying: 'x', side,
         title: { text: ax.column, font: { size: 11, color: ax.color } },
         tickfont: { size: 10, color: ax.color },
-        range: (ax.min != null && ax.max != null) ? [ax.min, ax.max] : undefined,
+        automargin: true,
         showgrid: false
       };
-      topAxisUsed = true;
+      if (side === 'bottom') {
+        // Free + positioned inside the domain-shrunk gap below the plot
+        // (bottomDomainPad, computed above) — X·top has no such conflict
+        // (nothing else occupies the top side) so it stays non-free and
+        // lets Plotly place it automatically, same as it always has.
+        const idx = bottomAxisCount++;
+        axisLayout.anchor = 'free';
+        axisLayout.position = bottomDomainPad - AXIS_SLOT * (idx + 0.5);
+      } else {
+        topAxisUsed = true;
+      }
+      layout['xaxis' + n] = axisLayout;
     } else {
       const exs = [], eys = [], esizes = [];
       data.forEach(row => {
@@ -3440,15 +3788,19 @@ function renderPlotImpl() {
         const yv = parseFloat(row[ax.column]);
         if (!isNaN(xv) && !isNaN(yv)) {
           exs.push(xv); eys.push(yv);
-          esizes.push(pointSize(row));
+          esizes.push(axPointSize(row));
         }
       });
       const side = ax.axisType === 'yLeft' ? 'left' : 'right';
       const idx = side === 'right' ? rightAxisCount++ : leftAxisCount++;
-      const position = side === 'right' ? (1 - 0.09 * idx) : (0.09 * (idx + 1));
+      // Right stays at/beyond the plot's own edge (position 1, growing
+      // outward via margin) since nothing else is there. Left instead uses
+      // the domain-shrunk gap (leftDomainPad, computed above) so it stacks
+      // outside the primary y-axis rather than over it.
+      const position = side === 'right' ? (1 - 0.09 * idx) : (leftDomainPad - AXIS_SLOT * (idx + 0.5));
       traces.push({
-        x: exs, y: eys, mode, type: 'scatter', name: ax.column,
-        marker: Object.assign({ size: sizeScaleFn ? esizes : markerSize, color: ax.color, opacity: 0.85 }, sizeMarkerExtra()),
+        x: exs, y: eys, mode: axMode, type: 'scatter', name: ax.column,
+        marker: Object.assign({ size: sizeScaleFn ? esizes : axFlatSize, color: ax.color, symbol: ax.symbol, opacity: 0.85 }, sizeMarkerExtra()),
         line: { color: ax.color, width: 1.5 },
         yaxis: 'y' + n
       });
@@ -3457,14 +3809,21 @@ function renderPlotImpl() {
         overlaying: 'y', side, anchor: 'free', position,
         title: { text: ax.column, font: { size: 11, color: ax.color } },
         tickfont: { size: 10, color: ax.color },
-        range: (ax.min != null && ax.max != null) ? [ax.min, ax.max] : undefined,
+        automargin: true,
         showgrid: false
       };
     }
   });
-  // Extra axes need room outside the main plot area for their tick labels —
-  // grow the margin per side rather than letting Plotly clip them.
-  layout.margin = { t: 20 + (topAxisUsed ? 34 : 0), r: 20 + rightAxisCount * 46, b: 60, l: 70 + leftAxisCount * 46 };
+  // Y·right/X·top still grow the outer margin per axis (nothing to overlap,
+  // so no domain shrink needed there). Y·left/X·bottom instead borrowed
+  // their room from the plot's own domain above, so the base margin is
+  // enough for them — no extra growth needed on those two sides.
+  layout.margin = {
+    t: 20 + (topAxisUsed ? 34 : 0),
+    r: 20 + rightAxisCount * 46,
+    b: 60,
+    l: 70
+  };
 
   const totalPoints = traces.reduce((s, t) => s + t.x.length, 0);
 
@@ -3497,8 +3856,9 @@ function renderPlotImpl() {
     sizeCol: sizeScaleFn ? sizeCol : null,
     sizeRange: sizeScaleFn ? [sizeState.min * sizeState.scale, sizeState.max * sizeState.scale] : null,
     sizeScale: sizeState.scale,
+    sizeBase: sizeState.size,
     extraAxes: extraAxesState.filter(ax => ax.column).map(ax => ({
-      column: ax.column, axis_type: ax.axisType, color: ax.color, min: ax.min, max: ax.max
+      column: ax.column, axis_type: ax.axisType, color: ax.color, mode: ax.mode, symbol: ax.symbol, size: ax.size
     })),
     rows: traces.flatMap((t, ti) => t.x.map((x, i) => ({
       series: t.name, legend: t.name, color: t.marker.color, x, y: t.y[i],
@@ -4134,6 +4494,7 @@ function buildExportMetadata() {
     : {
         plot_type: lp.type, x: lp.xCol, y: lp.yCol, color_by: lp.colorCol,
         size_by: lp.sizeCol || null, size_range_px: lp.sizeRange || null, point_size_scale: lp.sizeScale,
+        point_size_base_px: lp.sizeBase,
         extra_axes: lp.extraAxes || []
       };
 
@@ -4458,7 +4819,7 @@ function buildShareSnapshot() {
     },
     extraAxesState: extraAxesState.map(ax => ({ ...ax })),
     extraAxesUI: { nextId: extraAxesUI.nextId },
-    sizeState: { column: sizeState.column, min: sizeState.min, max: sizeState.max, scale: sizeState.scale },
+    sizeState: { column: sizeState.column, min: sizeState.min, max: sizeState.max, scale: sizeState.scale, size: sizeState.size },
     colorState: {
       overrides: colorState.overrides,
       auto: colorState.auto,
@@ -4624,14 +4985,22 @@ function restoreSharedSession(snapshot) {
 
   distState = Object.assign({ valueCols: [], groupCol: '', style: 'box' }, snapshot.distState || {});
 
-  extraAxesState = (snapshot.extraAxesState || []).map(ax => ({ ...ax }));
+  // Older shared snapshots predate mode/symbol/size (and carried min/max,
+  // now unused) — default the new fields rather than restoring undefined.
+  extraAxesState = (snapshot.extraAxesState || []).map(ax => ({
+    id: ax.id, column: ax.column, axisType: ax.axisType === 'xBottom' ? 'xBottom' : (ax.axisType || 'yRight'),
+    color: ax.color,
+    mode: ax.mode === 'line' ? 'line' : 'scatter',
+    symbol: ax.symbol || 'circle',
+    size: (typeof ax.size === 'number' && ax.size > 0) ? ax.size : (ax.mode === 'line' ? 4 : 6)
+  }));
   extraAxesUI = { expanded: false, nextId: (snapshot.extraAxesUI && snapshot.extraAxesUI.nextId) || (extraAxesState.reduce((m, a) => Math.max(m, a.id || 0), 0) + 1) };
 
   // sizeState is set here (not via the "selection" DOM hack used for X/Y/
   // Color) because, unlike those, it's already first-class state —
   // buildControls() below reads sizeState.column directly as the source of
   // truth when it repopulates the Sort size by select and Point size slider.
-  sizeState = Object.assign({ column: '', min: 4, max: 20, scale: 1 }, snapshot.sizeState || {});
+  sizeState = Object.assign({ column: '', min: 4, max: 20, scale: 1, size: 6 }, snapshot.sizeState || {});
 
   colorState.overrides = (snapshot.colorState && snapshot.colorState.overrides) || {};
   colorState.auto = (snapshot.colorState && snapshot.colorState.auto) || {};
