@@ -916,6 +916,54 @@
           <label style="display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-muted); cursor:pointer;">
             <input type="checkbox" id="barShowError" checked onchange="if(state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot()"> Show total ± SD error bars
           </label>
+
+          <div class="control-group">
+            <button type="button" class="adv-axes-toggle" id="barOverlayToggle" onclick="toggleBarOverlay()">
+              <span>⚙ Overlay axis (optional)</span>
+              <span class="msel-caret" id="barOverlayCaret">▾</span>
+            </button>
+            <div class="adv-axes-panel" id="barOverlayPanel" style="display:none;">
+              <div class="control-group" style="margin:0;">
+                <label>Column</label>
+                <div class="msel" id="barOverlaySelectDd">
+                  <button type="button" class="msel-trigger" onclick="toggleMsel('barOverlaySelectDd')">
+                    <span class="msel-trigger-text msel-summary-empty" id="barOverlaySelectSummary">— none —</span>
+                    <span class="msel-caret">▾</span>
+                  </button>
+                  <div class="msel-panel">
+                    <input class="msel-search" id="barOverlaySelectSearch" type="text" placeholder="Search columns…" oninput="buildBarControls()">
+                    <div class="ssel-list" id="barOverlaySelectList"></div>
+                  </div>
+                </div>
+                <select id="barOverlaySelect" onchange="onBarOverlayColumnChange(this.value)" style="display:none;"><option value="">— none —</option></select>
+              </div>
+              <div id="barOverlayModeRow" style="display:none; flex-direction:column; gap:10px;">
+                <div class="control-group" style="margin:0;">
+                  <label>Color &amp; point size</label>
+                  <div class="adv-axes-minmax-row">
+                    <input type="color" id="barOverlayColorInput" value="#1a5276" title="Overlay axis color" onchange="setBarOverlayColor(this.value)">
+                    <input type="number" id="barOverlaySizeInput" min="1" max="40" step="1" value="6" title="Point size" onchange="setBarOverlaySize(this.value)">
+                  </div>
+                </div>
+                <div class="control-group" style="margin:0;">
+                  <label>Show as</label>
+                  <div class="toggle-group toggle-group-wrap">
+                    <button class="toggle-btn" data-ovl="box" onclick="setBarOverlayMode('box', this)">Box</button>
+                    <button class="toggle-btn" data-ovl="violin" onclick="setBarOverlayMode('violin', this)">Violin</button>
+                    <button class="toggle-btn active" data-ovl="mean" onclick="setBarOverlayMode('mean', this)">Mean</button>
+                    <button class="toggle-btn" data-ovl="median" onclick="setBarOverlayMode('median', this)">Median</button>
+                    <button class="toggle-btn" data-ovl="points" onclick="setBarOverlayMode('points', this)">Points</button>
+                  </div>
+                </div>
+                <label id="barOverlayErrorRow" style="display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-muted); cursor:pointer;">
+                  <input type="checkbox" id="barOverlayShowError" checked onchange="if(state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot()"> Show ± SD error bar
+                </label>
+                <label id="barOverlayPointsRow" style="display:none; align-items:center; gap:7px; font-size:12px; color:var(--text-muted); cursor:pointer;">
+                  <input type="checkbox" id="barOverlayShowPoints" checked onchange="if(state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot()"> Show individual points
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div id="distControls" style="display:none; flex-direction:column; gap:14px;">
@@ -1492,6 +1540,16 @@ let barState = { xCol: '', splitCols: [], stackCols: [], agg: 'mean', dismissedW
 let distState = { valueCols: [], groupCol: '', style: 'box' };
 let barWarnUI = { expanded: false };
 const BAR_WARN_CAP = 4;
+// Bar plot: single optional overlay axis (right side) — see renderBarPlot().
+// mode: 'box' | 'violin' | 'mean' | 'median' | 'points'. color: a fixed hex
+// for the whole overlay axis (like each extra axis's own color swatch,
+// §1) — seeded from getSeriesColor() when the column is picked, then
+// sticky (independent of colorState.overrides) until the user repicks it.
+// size: marker/point px, independent per-axis field like each extra axis's
+// own size field — used for the mean/median marker and for the box/violin/
+// points dot size alike, whichever the current mode renders.
+let barOverlayState = { column: '', mode: 'mean', showError: true, showPoints: true, color: '', size: 6 };
+let barOverlayUI = { expanded: false };
 
 // Extra-axes state ("Advanced Visualization Options", scatter/line only).
 // Each entry: { id, column, axisType: 'yRight'|'yLeft'|'xTop'|'xBottom', color,
@@ -1585,6 +1643,10 @@ function confirmAndVisualizeImpl() {
   calcState.open = false;
   barState = { xCol: '', splitCols: [], stackCols: [], agg: 'mean', dismissedWarnings: new Set() };
   barWarnUI.expanded = false;
+  barOverlayState = { column: '', mode: 'mean', showError: true, showPoints: true, color: '', size: 6 };
+  barOverlayUI.expanded = false;
+  document.getElementById('barOverlayPanel').style.display = 'none';
+  document.getElementById('barOverlayCaret').style.transform = 'none';
   distState = { valueCols: [], groupCol: '', style: 'box' };
   extraAxesState = [];
   extraAxesUI.expanded = false;
@@ -2587,6 +2649,58 @@ function setBarAgg(agg, btn) {
   btn.classList.add('active');
 }
 
+// ── Bar plot: overlay axis (single, optional, right side) ───────────────
+// Plots one more numeric column against the same per-bar x positions as
+// the stacked bars — respecting Split by's grouped-bar offsets — either as
+// a single mean/median ± SD marker per bar (reusing aggregateValues(), the
+// same function the bars' own aggregation uses) or as a box/violin/points
+// distribution per bar (reusing the Distribution plot type's conventions).
+// See the overlay block inside renderBarPlot().
+function toggleBarOverlay() {
+  barOverlayUI.expanded = !barOverlayUI.expanded;
+  document.getElementById('barOverlayPanel').style.display = barOverlayUI.expanded ? 'flex' : 'none';
+  document.getElementById('barOverlayCaret').style.transform = barOverlayUI.expanded ? 'rotate(180deg)' : 'none';
+}
+
+function onBarOverlayColumnChange(column) {
+  barOverlayState.column = column || '';
+  // Reseed from the active palette on every column change — same
+  // reasoning/behavior as onExtraAxisColChange() for scatter/line's extra
+  // axes (§1): picks up a custom-palette match automatically, otherwise the
+  // next slot in whatever palette is active.
+  if (barOverlayState.column) barOverlayState.color = getSeriesColor('baroverlay', barOverlayState.column);
+  buildBarControls();
+  if (state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
+}
+
+function setBarOverlayColor(hex) {
+  barOverlayState.color = hex;
+  if (state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
+}
+
+function setBarOverlaySize(val) {
+  const n = parseFloat(val);
+  barOverlayState.size = (isNaN(n) || n <= 0) ? barOverlayState.size : Math.min(40, n);
+  if (state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
+}
+
+function setBarOverlayMode(mode, btn) {
+  barOverlayState.mode = mode;
+  btn.parentElement.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateBarOverlayModeRows();
+  if (state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
+}
+
+// Shows the ± SD error-bar toggle only for mean/median, and the "show
+// individual points" toggle only for box/violin (points mode always shows
+// every point, so there's nothing to toggle there).
+function updateBarOverlayModeRows() {
+  const mode = barOverlayState.mode;
+  document.getElementById('barOverlayErrorRow').style.display = (mode === 'mean' || mode === 'median') ? 'flex' : 'none';
+  document.getElementById('barOverlayPointsRow').style.display = (mode === 'box' || mode === 'violin') ? 'flex' : 'none';
+}
+
 function buildBarControls() {
   if (!state.data) return;
   // categorical/dual columns first (best bar-category candidates), then
@@ -2666,6 +2780,33 @@ function buildBarControls() {
   stackListEl.scrollTop = stackScroll;
   splitListEl.scrollTop = splitScroll;
   barWarnUI.expanded = false;
+
+  // Overlay axis column: numeric, excludes X and Split by (same reasoning
+  // as stack columns) but may overlap with a stack column — overlaying the
+  // per-replicate spread of a column that's also stacked is legitimate.
+  const overlaySel = document.getElementById('barOverlaySelect');
+  const prevOverlay = overlaySel.value || barOverlayState.column;
+  const overlayCandidates = numCols;
+  overlaySel.innerHTML = '<option value="">— none —</option>' +
+    overlayCandidates.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+  if (prevOverlay && overlayCandidates.find(c => c.name === prevOverlay)) overlaySel.value = prevOverlay;
+  barOverlayState.column = overlaySel.value || '';
+  // Fallback seed for cases that set barOverlayState.column directly rather
+  // than through onBarOverlayColumnChange() (e.g. an older Share Session
+  // snapshot with a column but no color) — onBarOverlayColumnChange() has
+  // already seeded it for a live column pick, so this is a no-op there.
+  if (barOverlayState.column && !barOverlayState.color) {
+    barOverlayState.color = getSeriesColor('baroverlay', barOverlayState.column);
+  }
+  const overlayOptions = [{ value: '', label: '— none —' }].concat(overlayCandidates.map(c => ({ value: c.name, label: c.name })));
+  renderSselOptions('barOverlaySelect', overlayOptions, '— none —');
+  const barOverlayModeRowEl = document.getElementById('barOverlayModeRow');
+  if (barOverlayModeRowEl) barOverlayModeRowEl.style.display = barOverlayState.column ? 'flex' : 'none';
+  const barOverlayColorInputEl = document.getElementById('barOverlayColorInput');
+  if (barOverlayColorInputEl && barOverlayState.color) barOverlayColorInputEl.value = barOverlayState.color;
+  const barOverlaySizeInputEl = document.getElementById('barOverlaySizeInput');
+  if (barOverlaySizeInputEl) barOverlaySizeInputEl.value = barOverlayState.size;
+  updateBarOverlayModeRows();
 
   if (state.plotType === 'bar') {
     document.getElementById('plotBtn').disabled = !(barState.xCol && barState.stackCols.length > 0);
@@ -2904,6 +3045,12 @@ function uniqueColorByValues(col) {
 function getCurrentColorEntries() {
   if (!state.data) return [];
   if (state.plotType === 'bar') {
+    // The overlay axis (if any) is NOT included here — like an extra axis
+    // (§1's 'axis' scope), it has its own dedicated color swatch in the
+    // Overlay axis panel rather than a Colors-panel entry, so there's a
+    // single source of truth for its color instead of two that could
+    // disagree. It still participates in custom-palette match-checking —
+    // see getUnmatchedCheckEntries().
     return barState.stackCols.map(c => ({ scope: 'stack', name: c, label: c }));
   }
   if (state.plotType === 'distribution') {
@@ -2932,6 +3079,9 @@ function getUnmatchedCheckEntries() {
   const entries = getCurrentColorEntries();
   if (state.plotType !== 'bar' && state.plotType !== 'distribution') {
     extraAxesState.forEach(ax => { if (ax.column) entries.push({ scope: 'axis', name: ax.column, label: ax.column }); });
+  }
+  if (state.plotType === 'bar' && barOverlayState.column) {
+    entries.push({ scope: 'baroverlay', name: barOverlayState.column, label: barOverlayState.column });
   }
   return entries;
 }
@@ -4283,6 +4433,105 @@ function renderBarPlot() {
     return { x: g.xVal, y: yPos, text: `n=${g.rowCount}`, showarrow: false, yshift: 10, font: { size: 9, color: '#9e9b94' } };
   }) : [];
 
+  // ── Overlay axis (single, optional) ────────────────────────────────────
+  // A second Y axis, right side, plotting one more numeric column aligned
+  // to the *same per-bar x positions* as the stacked bars above — reusing
+  // groups/groupAgg (built in steps 1 & 3) so a bar and its overlay always
+  // agree on which raw rows belong together, including Split by's grouped
+  // offsets via the same xTrace multicategory encoding. Right side only —
+  // like Y·right for scatter/line, nothing else already occupies that side,
+  // so it just grows the outer margin (no domain-shrink needed there).
+  const overlayCol = barOverlayState.column;
+  let overlayActive = false;
+  let overlayColorForAxis = null;
+  if (overlayCol) {
+    const overlayMode = barOverlayState.mode;
+    // A fixed color for the whole overlay axis, editable via the Overlay
+    // axis panel's own swatch — falls back to a palette-seeded color for a
+    // snapshot/state set programmatically without ever going through that
+    // swatch (buildBarControls() also backfills this, belt-and-suspenders).
+    const overlayColor = barOverlayState.color || getSeriesColor('baroverlay', overlayCol);
+    if (overlayMode === 'mean' || overlayMode === 'median') {
+      const oy = [], oerr = [], ocustom = [];
+      let anyVal = false;
+      sortedKeys.forEach(k => {
+        const g = groupAgg.get(k);
+        const vals = groups.get(k).rows.map(r => parseFloat(r[overlayCol])).filter(v => !isNaN(v));
+        if (vals.length === 0) { oy.push(null); oerr.push(0); ocustom.push('not measured'); return; }
+        anyVal = true;
+        const { value, std } = aggregateValues(vals, overlayMode);
+        oy.push(value); oerr.push(std); ocustom.push(`n=${vals.length} · SD=${fmtNum(std)}`);
+      });
+      if (anyVal) {
+        overlayActive = true;
+        overlayColorForAxis = overlayColor;
+        const showOverlayError = document.getElementById('barOverlayShowError').checked;
+        traces.push({
+          x: xTrace, y: oy, type: 'scatter', mode: 'markers', name: overlayCol,
+          marker: { color: overlayColor, size: barOverlayState.size, symbol: 'diamond', line: { width: 1, color: 'white' } },
+          error_y: { type: 'data', array: oerr, visible: showOverlayError, color: overlayColor, thickness: 1.4, width: 3 },
+          customdata: ocustom,
+          hovertemplate: `<b>%{x}</b><br>${escapeHtml(overlayCol)}: %{y:.3g}<br>%{customdata}<extra></extra>`,
+          yaxis: 'y2'
+        });
+      }
+    } else {
+      // box / violin / points — one point per raw row, aligned to the same
+      // (xVal, splitVal) pair as the bar it belongs to.
+      const xOuter = [], xInner = [], oy = [];
+      sortedKeys.forEach(k => {
+        const g = groupAgg.get(k);
+        groups.get(k).rows.forEach(r => {
+          const v = parseFloat(r[overlayCol]);
+          if (isNaN(v)) return;
+          xOuter.push(g.xVal);
+          if (splitCols.length) xInner.push(g.splitVal);
+          oy.push(v);
+        });
+      });
+      if (oy.length > 0) {
+        overlayActive = true;
+        overlayColorForAxis = overlayColor;
+        const xArrOverlay = splitCols.length ? [xOuter, xInner] : xOuter;
+        if (overlayMode === 'points') {
+          // "All points on a vertical line" — a box trace with the box/
+          // whiskers hidden and no jitter, so every point stacks straight
+          // up at its bar's x position instead of spreading sideways.
+          traces.push({
+            x: xArrOverlay, y: oy, type: 'box', name: overlayCol,
+            marker: { color: overlayColor, size: barOverlayState.size, opacity: 0.75 },
+            line: { color: 'rgba(0,0,0,0)', width: 0 },
+            fillcolor: 'rgba(0,0,0,0)',
+            whiskerwidth: 0, boxpoints: 'all', jitter: 0, pointpos: 0,
+            hoverinfo: 'y+name',
+            yaxis: 'y2'
+          });
+        } else {
+          // Reuses the Distribution plot type's own box/violin trace shape
+          // (see renderDistPlot()) so the two feel like the same feature.
+          const showOverlayPoints = document.getElementById('barOverlayShowPoints').checked;
+          const base = {
+            x: xArrOverlay, y: oy, type: overlayMode, name: overlayCol,
+            marker: { color: overlayColor, size: barOverlayState.size, opacity: 0.6 },
+            line: { color: overlayColor },
+            fillcolor: hexToRgba(overlayColor, 0.35),
+            yaxis: 'y2'
+          };
+          if (overlayMode === 'box') {
+            base.boxpoints = showOverlayPoints ? 'all' : 'outliers';
+            base.jitter = 0.5; base.pointpos = 0;
+          } else {
+            base.points = showOverlayPoints ? 'all' : false;
+            base.jitter = 0.5; base.pointpos = 0;
+            base.box = { visible: true };
+            base.meanline = { visible: false };
+          }
+          traces.push(base);
+        }
+      }
+    }
+  }
+
   const layout = {
     barmode: 'stack',
     xaxis: {
@@ -4296,6 +4545,16 @@ function renderBarPlot() {
     hovermode: 'closest', font: { family: 'Inter, -apple-system, sans-serif' },
     annotations
   };
+
+  if (overlayActive) {
+    layout.yaxis2 = {
+      overlaying: 'y', side: 'right', anchor: 'free', position: 1,
+      title: { text: overlayCol, font: { size: 11, color: overlayColorForAxis } },
+      tickfont: { size: 10, color: overlayColorForAxis },
+      automargin: true, showgrid: false
+    };
+    layout.margin.r = 20 + 46;
+  }
 
   const config = {
     responsive: true, displayModeBar: true, modeBarButtonsToRemove: ['select2d', 'lasso2d', 'autoScale2d'],
@@ -4342,7 +4601,14 @@ function renderBarPlot() {
     rowColumns: ['category', 'split', 'stack_column', 'legend', 'color', 'value', 'std', 'n', 'missing'],
     seriesColors: stackCols.map(col => ({ series: col, color: getSeriesColor('stack', col) })),
     rowsUsed: totalRows, rowsTotal: state.nRows,
-    title: titleEl.textContent
+    title: titleEl.textContent,
+    overlay: overlayActive ? {
+      column: overlayCol, mode: barOverlayState.mode, color: overlayColorForAxis, size: barOverlayState.size,
+      showErrorBars: (barOverlayState.mode === 'mean' || barOverlayState.mode === 'median')
+        ? document.getElementById('barOverlayShowError').checked : null,
+      showPoints: (barOverlayState.mode === 'box' || barOverlayState.mode === 'violin')
+        ? document.getElementById('barOverlayShowPoints').checked : null
+    } : null
   };
   document.getElementById('figureExportBtn').disabled = false;
 }
@@ -4470,7 +4736,7 @@ function onExportedByInput(v) {
 // screen (columns touched only by a filter are already covered separately
 // under active_filters).
 function getPlotColumnNames(lp) {
-  if (lp.type === 'bar') return [lp.xCol, ...lp.splitCols, ...lp.stackCols].filter(Boolean);
+  if (lp.type === 'bar') return [lp.xCol, ...lp.splitCols, ...lp.stackCols, lp.overlay ? lp.overlay.column : null].filter(Boolean);
   if (lp.type === 'distribution') return [...lp.valueCols, lp.groupCol].filter(Boolean);
   return [lp.xCol, lp.yCol, lp.colorCol, lp.sizeCol, ...(lp.extraAxes || []).map(a => a.column)].filter(Boolean);
 }
@@ -4484,7 +4750,8 @@ function buildExportMetadata() {
     ? {
         plot_type: 'bar', x: lp.xCol, split_by: lp.splitCols, stack_columns: lp.stackCols,
         aggregate: lp.aggregate, show_error_bars: lp.showErrorBars,
-        dismissed_warnings: lp.dismissedWarnings, unresolved_warnings_at_export: lp.unresolvedWarnings
+        dismissed_warnings: lp.dismissedWarnings, unresolved_warnings_at_export: lp.unresolvedWarnings,
+        overlay_axis: lp.overlay || null
       }
     : lp.type === 'distribution'
     ? {
@@ -4812,6 +5079,11 @@ function buildShareSnapshot() {
       dismissedWarnings: [...barState.dismissedWarnings],
       showErrorBars: document.getElementById('barShowError').checked
     },
+    barOverlayState: {
+      column: barOverlayState.column, mode: barOverlayState.mode, color: barOverlayState.color, size: barOverlayState.size,
+      showError: document.getElementById('barOverlayShowError').checked,
+      showPoints: document.getElementById('barOverlayShowPoints').checked
+    },
     distState: {
       valueCols: distState.valueCols, groupCol: distState.groupCol, style: distState.style,
       showPoints: document.getElementById('distShowPoints').checked,
@@ -4983,6 +5255,10 @@ function restoreSharedSession(snapshot) {
   barState.dismissedWarnings = new Set((snapshot.barState && snapshot.barState.dismissedWarnings) || []);
   barWarnUI = { expanded: false };
 
+  // Older shared snapshots predate the overlay axis — default to "off".
+  barOverlayState = Object.assign({ column: '', mode: 'mean', showError: true, showPoints: true, color: '', size: 6 }, snapshot.barOverlayState || {});
+  barOverlayUI = { expanded: false };
+
   distState = Object.assign({ valueCols: [], groupCol: '', style: 'box' }, snapshot.distState || {});
 
   // Older shared snapshots predate mode/symbol/size (and carried min/max,
@@ -5076,6 +5352,10 @@ function restoreSharedSession(snapshot) {
   }
   document.getElementById('barShowError').checked = (snapshot.barState && snapshot.barState.showErrorBars !== undefined) ? snapshot.barState.showErrorBars : true;
   document.getElementById('distShowPoints').checked = (snapshot.distState && snapshot.distState.showPoints !== undefined) ? snapshot.distState.showPoints : true;
+  document.querySelectorAll('.toggle-btn[data-ovl]').forEach(b => b.classList.toggle('active', b.dataset.ovl === barOverlayState.mode));
+  document.getElementById('barOverlayShowError').checked = (snapshot.barOverlayState && snapshot.barOverlayState.showError !== undefined) ? snapshot.barOverlayState.showError : true;
+  document.getElementById('barOverlayShowPoints').checked = (snapshot.barOverlayState && snapshot.barOverlayState.showPoints !== undefined) ? snapshot.barOverlayState.showPoints : true;
+  updateBarOverlayModeRows();
 
   buildControls();
   const xSel = document.getElementById('xSelect'), ySel = document.getElementById('ySelect'), cSel = document.getElementById('colorSelect');
