@@ -208,7 +208,7 @@
   .msel { position: relative; }
   .msel-trigger {
     width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px;
-    font-family: var(--font); font-size: 13px; color: var(--text); background: var(--surface);
+    font-family: var(--font); font-size: 14px; color: var(--text); background: var(--surface);
     border: 1px solid var(--border-strong); border-radius: 5px; padding: 7px 10px; cursor: pointer;
     text-align: left; transition: border-color .15s;
   }
@@ -286,7 +286,7 @@
 
   /* ── Visualization screen (ported from vis4cat basic demo) ── */
   .control-group { display: flex; flex-direction: column; gap: 6px; }
-  .control-group label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+  .control-group label { font-size: 13px; font-weight: 500; color: var(--text-muted); }
 
   select, .toggle-group {
     width: 100%; font-family: var(--font); font-size: 13px; color: var(--text); background: var(--surface);
@@ -299,7 +299,7 @@
 
   .toggle-group { display: flex; background: var(--bg); border: 1px solid var(--border-strong); border-radius: 5px; padding: 3px; gap: 3px; background-image: none; }
   .toggle-btn {
-    flex: 1; padding: 5px 8px; font-family: var(--font); font-size: 12px; font-weight: 500; border: none;
+    flex: 1; padding: 5px 8px; font-family: var(--font); font-size: 13px; font-weight: 500; border: none;
     border-radius: 3px; cursor: pointer; background: transparent; color: var(--text-muted); transition: background .12s, color .12s;
   }
   .toggle-btn.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
@@ -316,7 +316,7 @@
 
   .plot-btn {
     width: 100%; padding: 10px; background: var(--accent); color: white; border: none; border-radius: 5px;
-    font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity .15s; letter-spacing: .01em;
+    font-family: var(--font); font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity .15s; letter-spacing: .01em;
   }
   .plot-btn:hover { opacity: .88; }
   .plot-btn:disabled { opacity: .35; cursor: not-allowed; }
@@ -361,7 +361,7 @@
     display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--text-muted); min-height: 44px; position: relative;
   }
   .plot-title-text { font-weight: 500; color: var(--text); font-size: 13px; }
-  .plot-stats { margin-left: auto; font-size: 11px; color: var(--text-faint); font-family: var(--font-mono); }
+  .plot-stats { margin-left: auto; font-size: 12.5px; color: var(--text-faint); font-family: var(--font-mono); }
   .viz-plot-area { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
   #plotly-chart { width: 100%; height: 100%; }
 
@@ -370,13 +370,23 @@
   .viz-empty-state .empty-title { font-size: 15px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
   .viz-empty-state .empty-sub { font-size: 12px; color: var(--text-faint); max-width: 260px; margin: 0 auto; line-height: 1.6; }
 
-  .stats-btn, .filter-btn, .calc-btn, .colors-btn, .share-btn, .export-fig-btn {
+  .stats-btn, .filter-btn, .calc-btn, .colors-btn, .share-btn, .export-fig-btn, .reports-btn {
     display: none; align-items: center; gap: 6px; padding: 5px 12px; background: var(--bg);
-    border: 1px solid var(--border-strong); border-radius: 5px; font-family: var(--font); font-size: 12px;
+    border: 1px solid var(--border-strong); border-radius: 5px; font-family: var(--font); font-size: 13px;
     font-weight: 500; color: var(--text-muted); cursor: pointer; transition: border-color .15s, color .15s;
   }
-  .stats-btn:hover, .filter-btn:hover, .calc-btn:hover, .colors-btn:hover, .share-btn:hover, .export-fig-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .stats-btn.active, .calc-btn.active, .colors-btn.active { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+  .stats-btn:hover, .filter-btn:hover, .calc-btn:hover, .colors-btn:hover, .share-btn:hover, .export-fig-btn:hover, .reports-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .stats-btn.active, .calc-btn.active, .colors-btn.active, .reports-btn.active { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+  .reports-count-badge { background: var(--accent); color: white; font-size: 11px; font-weight: 700; padding: 1px 5px; border-radius: 3px; margin-left: 2px; }
+  /* ── Bar-plot data-quality checks: collapsed by default behind this one
+     small toggle, so the detailed list only takes up space when asked for ── */
+  .bar-warn-toggle {
+    display: none; align-items: center; gap: 5px; padding: 4px 10px; background: var(--warn);
+    border: 1px solid #f0d070; border-radius: 5px; font-family: var(--font); font-size: 12px;
+    font-weight: 500; color: var(--warn-text); cursor: pointer; transition: opacity .15s;
+  }
+  .bar-warn-toggle:hover { opacity: .8; }
+  .bar-warn-toggle.has-errors { background: var(--error); border-color: #f5b7b1; color: var(--error-text); }
   .share-btn { margin-left: 8px; }
   .export-fig-btn { margin-left: 8px; }
   .export-fig-btn:disabled { opacity: .35; cursor: not-allowed; }
@@ -418,8 +428,8 @@
   }
   .stats-panel.open { transform: translateX(0); }
   .stats-panel-header { display: flex; align-items: center; padding: 12px 18px; border-bottom: 1px solid var(--border); gap: 10px; flex-shrink: 0; }
-  .stats-panel-title { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
-  .stats-panel-meta { font-size: 11px; color: var(--text-faint); font-family: var(--font-mono); }
+  .stats-panel-title { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+  .stats-panel-meta { font-size: 12px; color: var(--text-faint); font-family: var(--font-mono); }
   .stats-download-btn {
     display: flex; align-items: center; gap: 5px; padding: 5px 10px; background: var(--bg);
     border: 1px solid var(--border-strong); border-radius: 4px; font-family: var(--font); font-size: 11px;
@@ -431,6 +441,39 @@
     background: none; font-size: 20px; color: var(--text-muted); cursor: pointer; border-radius: 4px; transition: background .12s, color .12s;
   }
   .stats-close-btn:hover { background: var(--bg); color: var(--text); }
+
+  /* ── Report / Template builder ── */
+  .report-slot { border: 1px solid var(--border); border-radius: 7px; padding: 9px 10px; margin-bottom: 8px; cursor: pointer; transition: border-color .12s, background .12s; }
+  .report-slot:hover { border-color: var(--accent); }
+  .report-slot.active { border-color: var(--accent); background: var(--accent-light); }
+  .report-slot-top { display: flex; align-items: center; gap: 7px; }
+  .report-slot-badge { font-size: 10px; font-weight: 700; color: var(--text-faint); font-family: var(--font-mono); flex-shrink: 0; width: 16px; }
+  .report-slot-label { flex: 1; font-size: 13.5px; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .report-slot-status { font-size: 14px; flex-shrink: 0; }
+  .report-slot-sub { font-size: 11.5px; color: var(--text-faint); margin-top: 4px; padding-left: 23px; line-height: 1.4; }
+  .report-slot-actions { display: flex; gap: 4px; margin-top: 7px; padding-left: 23px; }
+  .report-slot-actions button { font-size: 11.5px; padding: 2px 7px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--bg); color: var(--text-muted); cursor: pointer; }
+  .report-slot-actions button:hover { border-color: var(--accent); color: var(--accent); }
+  .report-nav { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 6px 0 14px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+  .report-nav button { width: 28px; height: 28px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--bg); cursor: pointer; font-size: 14px; color: var(--text-muted); }
+  .report-nav button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .report-nav button:disabled { opacity: .35; cursor: not-allowed; }
+  .report-nav-count { font-size: 12.5px; color: var(--text-muted); font-family: var(--font-mono); min-width: 56px; text-align: center; }
+  .report-cta-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px; background: var(--accent); color: white; border: none; border-radius: 6px; font-family: var(--font); font-size: 13.5px; font-weight: 600; cursor: pointer; margin-bottom: 12px; }
+  .report-cta-btn:hover { opacity: .9; }
+  .report-cta-btn:disabled { opacity: .35; cursor: not-allowed; }
+  .report-secondary-row { display: flex; gap: 8px; margin-top: 10px; }
+  .report-secondary-row button { flex: 1; padding: 7px 8px; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--bg); color: var(--text-muted); font-family: var(--font); font-size: 12.5px; font-weight: 500; cursor: pointer; }
+  .report-secondary-row button:hover { border-color: var(--accent); color: var(--accent); }
+  .report-empty-hint { text-align: center; color: var(--text-faint); font-size: 12px; padding: 22px 6px; line-height: 1.6; }
+  .report-save-field { margin-bottom: 12px; }
+  .report-save-field label { display: block; font-size: 10px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 5px; }
+  .report-save-field input[type=text] { width: 100%; padding: 7px 9px; border: 1px solid var(--border-strong); border-radius: 5px; font-family: var(--font); font-size: 12.5px; box-sizing: border-box; }
+  .report-load-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; margin-bottom: 7px; cursor: pointer; }
+  .report-load-row:hover { border-color: var(--accent); }
+  .report-load-row-meta { font-size: 10.5px; color: var(--text-faint); margin-top: 1px; }
+  .viz-empty-state.report-error-state .empty-title { color: var(--error-text); }
+  .viz-empty-state.report-error-state .empty-sub { color: var(--error-text); max-width: 360px; }
   .stats-sort-bar { display: flex; align-items: center; gap: 8px; padding: 8px 18px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--bg); }
   .stats-sort-label { font-size: 11px; color: var(--text-faint); }
   .sort-btn {
@@ -477,7 +520,7 @@
     color: var(--text-muted); cursor: pointer; font-size: 12px; transition: border-color .15s, color .15s;
   }
   .colors-icon-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .colors-icon-btn-wide { width: auto; padding: 0 8px; font-size: 10.5px; font-weight: 500; white-space: nowrap; }
+  .colors-icon-btn-wide { width: auto; height: auto; padding: 5px 10px; font-size: 12.5px; font-weight: 500; white-space: nowrap; gap: 5px; }
 
   /* ── Custom (keyword-matched) color palette editor ──────────────────────
      A palette here is a { name, colors: {key: hex} } dict. A data column
@@ -939,10 +982,9 @@
               </div>
               <div id="barOverlayModeRow" style="display:none; flex-direction:column; gap:10px;">
                 <div class="control-group" style="margin:0;">
-                  <label>Color &amp; point size</label>
+                  <label>Color</label>
                   <div class="adv-axes-minmax-row">
                     <input type="color" id="barOverlayColorInput" value="#1a5276" title="Overlay axis color" onchange="setBarOverlayColor(this.value)">
-                    <input type="number" id="barOverlaySizeInput" min="1" max="40" step="1" value="6" title="Point size" onchange="setBarOverlaySize(this.value)">
                   </div>
                 </div>
                 <div class="control-group" style="margin:0;">
@@ -1021,10 +1063,12 @@
     <div class="plot-toolbar" id="plotToolbar">
       <span id="plotTitleText" class="plot-title-text" style="display:none;"></span>
       <span id="plotStats" class="plot-stats"></span>
+      <button class="bar-warn-toggle" id="barWarnToggle" onclick="toggleBarWarnPanel()" style="display:none;" title="Show data-quality checks for this plot"><span>⚠</span><span id="barWarnToggleLabel">0 checks</span></button>
       <button class="filter-btn" id="filterBtn" onclick="toggleFilterPanel()">⊘ Filter <span class="filter-count" id="filterCount">0</span></button>
       <button class="calc-btn" id="calcBtn" onclick="toggleCalcPanel()">ƒ Calculator</button>
       <button class="colors-btn" id="colorsBtn" onclick="toggleColorsPanel()">🎨 Colors</button>
       <button class="stats-btn" id="statsBtn" onclick="toggleStatsPanel()">≡ Statistics</button>
+      <button class="reports-btn" id="reportsBtn" onclick="toggleReportPanel()" title="Build a reusable multi-plot report you can reapply to a new data batch">🗂 Reports<span class="reports-count-badge" id="reportsCount" style="display:none;">0</span></button>
       <div style="position:relative; display:inline-block;">
         <button class="share-btn" id="shareSessionBtn" onclick="toggleShareMenu()" title="Share a working copy of this session">⤴ Share session</button>
         <div class="export-dropdown" id="shareDropdown">
@@ -1056,6 +1100,13 @@
             <span>
               <div id="exportPngLabel">Download image (PNG)</div>
               <div class="export-action-sub">Just the figure, no data or metadata</div>
+            </span>
+          </button>
+          <button class="export-action-btn" id="exportSvgBtn" onclick="downloadFigureSVG()">
+            <span>⬇</span>
+            <span>
+              <div id="exportSvgLabel">Download image (SVG)</div>
+              <div class="export-action-sub">Vector — stays sharp at any size, best for publication figures</div>
             </span>
           </button>
           <button class="export-action-btn" onclick="copyFigureToClipboard()">
@@ -1123,10 +1174,10 @@
           </select>
         </span>
         <span class="colors-panel-actions">
-          <button class="colors-icon-btn colors-icon-btn-wide" title="Download a CSV template — prefilled with product names guessed from your current data — to fill in and import back" onclick="downloadPaletteTemplate()">Template</button>
+          <button class="colors-icon-btn colors-icon-btn-wide" title="Download a CSV template — prefilled with product names guessed from your current data — to fill in and import back" onclick="downloadPaletteTemplate()">💾 Save Template</button>
           <button class="colors-icon-btn" id="paletteEditBtn" style="display:none;" title="Edit this palette" onclick="openPaletteEditor(colorState.palette)">✎</button>
           <button class="colors-icon-btn" id="paletteExportBtn" style="display:none;" title="Export this palette as JSON" onclick="exportPaletteJSON(colorState.palette)">⬇</button>
-          <button class="colors-icon-btn" title="Import a palette — JSON, or a CSV/XLSX with a legend/key column and a color column" onclick="document.getElementById('paletteImportInput').click()">⬆</button>
+          <button class="colors-icon-btn colors-icon-btn-wide" title="Import a palette — JSON, or a CSV/XLSX with a legend/key column and a color column" onclick="document.getElementById('paletteImportInput').click()">⬆ Import existing template</button>
           <input type="file" id="paletteImportInput" accept=".json,.csv,.xlsx,.xls,application/json,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" style="display:none;" onchange="handlePaletteImportFile(event)">
         </span>
         <button class="stats-close-btn" onclick="toggleColorsPanel()" title="Close">✕</button>
@@ -1199,6 +1250,16 @@
             <tbody id="statsTableBody"></tbody>
           </table>
         </div>
+      </div>
+
+      <!-- Report / Template builder drawer -->
+      <div class="stats-panel" id="reportPanel" style="width:380px;">
+        <div class="stats-panel-header">
+          <span class="stats-panel-title">🗂 Report Builder</span>
+          <span class="stats-panel-meta" id="reportPanelMeta"></span>
+          <button class="stats-close-btn" onclick="toggleReportPanel()" title="Close">✕</button>
+        </div>
+        <div id="reportPanelBody" style="flex:1; overflow-y:auto; padding:16px 18px;"></div>
       </div>
     </div>
   </main>
@@ -1538,17 +1599,14 @@ let exportState = { exportedBy: '' };
 // has acknowledged for this dataset (persists across replots).
 let barState = { xCol: '', splitCols: [], stackCols: [], agg: 'mean', dismissedWarnings: new Set() };
 let distState = { valueCols: [], groupCol: '', style: 'box' };
-let barWarnUI = { expanded: false };
+let barWarnUI = { expanded: false, panelOpen: false };
 const BAR_WARN_CAP = 4;
 // Bar plot: single optional overlay axis (right side) — see renderBarPlot().
 // mode: 'box' | 'violin' | 'mean' | 'median' | 'points'. color: a fixed hex
 // for the whole overlay axis (like each extra axis's own color swatch,
 // §1) — seeded from getSeriesColor() when the column is picked, then
 // sticky (independent of colorState.overrides) until the user repicks it.
-// size: marker/point px, independent per-axis field like each extra axis's
-// own size field — used for the mean/median marker and for the box/violin/
-// points dot size alike, whichever the current mode renders.
-let barOverlayState = { column: '', mode: 'mean', showError: true, showPoints: true, color: '', size: 6 };
+let barOverlayState = { column: '', mode: 'mean', showError: true, showPoints: true, color: '' };
 let barOverlayUI = { expanded: false };
 
 // Extra-axes state ("Advanced Visualization Options", scatter/line only).
@@ -1573,6 +1631,22 @@ let extraAxesUI = { expanded: false, nextId: 1 };
 // field — it's what `scale` (50–300%) multiplies, so raising `size` itself
 // is how to reach a bigger point than the slider alone can reach.
 let sizeState = { column: '', min: 4, max: 20, scale: 1, size: 6 };
+
+// ── Report / Template builder ────────────────────────────────────────────
+// A "report" is an ordered list of plot RECIPES (everything about how a
+// plot was configured — axes, filters, descriptors, colors — but never the
+// row-level data itself), so the same report can be reapplied against
+// whatever dataset happens to be loaded, including a future data batch.
+// See claude/vis4cat-report-template-feature.md.
+let reportState = {
+  open: false,      // Report Builder drawer open?
+  name: '',         // current report's name (set on save, or on load)
+  plots: [],         // [{ id, label, recipe, validation: {valid, errors:[...]} }]
+  activeIndex: -1,  // which slot is currently applied to the main plot area
+  nextId: 1
+};
+let reportSaveUI = { open: false, name: '' };
+let reportLoadUI = { open: false, payload: null, validations: [] };
 
 function classifyColumns(data) {
   if (!data || data.length === 0) return [];
@@ -1643,7 +1717,8 @@ function confirmAndVisualizeImpl() {
   calcState.open = false;
   barState = { xCol: '', splitCols: [], stackCols: [], agg: 'mean', dismissedWarnings: new Set() };
   barWarnUI.expanded = false;
-  barOverlayState = { column: '', mode: 'mean', showError: true, showPoints: true, color: '', size: 6 };
+  barWarnUI.panelOpen = false;
+  barOverlayState = { column: '', mode: 'mean', showError: true, showPoints: true, color: '' };
   barOverlayUI.expanded = false;
   document.getElementById('barOverlayPanel').style.display = 'none';
   document.getElementById('barOverlayCaret').style.transform = 'none';
@@ -1713,6 +1788,7 @@ function confirmAndVisualizeImpl() {
   document.getElementById('filterBtn').style.display = 'flex';
   document.getElementById('calcBtn').style.display = 'flex';
   document.getElementById('colorsBtn').style.display = 'flex';
+  document.getElementById('reportsBtn').style.display = 'flex';
   document.getElementById('shareSessionBtn').style.display = 'flex';
   document.getElementById('figureExportBtn').style.display = 'flex';
 
@@ -1793,7 +1869,13 @@ function toggleStatsPanel() {
   const btn = document.getElementById('statsBtn');
   panel.classList.toggle('open', statsState.open);
   btn.classList.toggle('active', statsState.open);
-  if (statsState.open) { statsState.statsData = computeStats(); renderStatsTable(); }
+  if (statsState.open) {
+    statsState.statsData = computeStats(); renderStatsTable();
+    // Same drawer slot as the Report Builder — only one open at a time.
+    reportState.open = false;
+    document.getElementById('reportPanel').classList.remove('open');
+    document.getElementById('reportsBtn').classList.remove('active');
+  }
 }
 
 function sortStats(key, btnEl) {
@@ -2678,12 +2760,6 @@ function setBarOverlayColor(hex) {
   if (state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
 }
 
-function setBarOverlaySize(val) {
-  const n = parseFloat(val);
-  barOverlayState.size = (isNaN(n) || n <= 0) ? barOverlayState.size : Math.min(40, n);
-  if (state.data && document.getElementById('plotly-chart').style.display !== 'none') renderPlot();
-}
-
 function setBarOverlayMode(mode, btn) {
   barOverlayState.mode = mode;
   btn.parentElement.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
@@ -2780,6 +2856,7 @@ function buildBarControls() {
   stackListEl.scrollTop = stackScroll;
   splitListEl.scrollTop = splitScroll;
   barWarnUI.expanded = false;
+  barWarnUI.panelOpen = false;
 
   // Overlay axis column: numeric, excludes X and Split by (same reasoning
   // as stack columns) but may overlap with a stack column — overlaying the
@@ -2804,8 +2881,6 @@ function buildBarControls() {
   if (barOverlayModeRowEl) barOverlayModeRowEl.style.display = barOverlayState.column ? 'flex' : 'none';
   const barOverlayColorInputEl = document.getElementById('barOverlayColorInput');
   if (barOverlayColorInputEl && barOverlayState.color) barOverlayColorInputEl.value = barOverlayState.color;
-  const barOverlaySizeInputEl = document.getElementById('barOverlaySizeInput');
-  if (barOverlaySizeInputEl) barOverlaySizeInputEl.value = barOverlayState.size;
   updateBarOverlayModeRows();
 
   if (state.plotType === 'bar') {
@@ -3749,6 +3824,7 @@ function renderPlot() {
 function renderPlotImpl() {
   document.getElementById('barWarnings').style.display = 'none';
   document.getElementById('distWarnings').style.display = 'none';
+  document.getElementById('emptyState').classList.remove('report-error-state');
   if (state.plotType === 'bar') { renderBarPlot(); return; }
   if (state.plotType === 'distribution') { renderDistPlot(); return; }
 
@@ -3849,11 +3925,11 @@ function renderPlotImpl() {
   }
 
   const layout = {
-    xaxis: { type: 'linear', title: { text: xCol, font: { size: 12, color: '#6b6860' } }, gridcolor: '#e8e5de', linecolor: '#c8c4bc', tickfont: { size: 11, color: '#6b6860' }, automargin: true },
-    yaxis: { title: { text: yCol, font: { size: 12, color: '#6b6860' } }, gridcolor: '#e8e5de', linecolor: '#c8c4bc', tickfont: { size: 11, color: '#6b6860' }, automargin: true },
+    xaxis: { type: 'linear', title: { text: xCol, font: { size: 13, color: '#6b6860' } }, gridcolor: '#e8e5de', linecolor: '#c8c4bc', tickfont: { size: 12.5, color: '#6b6860' }, automargin: true },
+    yaxis: { title: { text: yCol, font: { size: 13, color: '#6b6860' } }, gridcolor: '#e8e5de', linecolor: '#c8c4bc', tickfont: { size: 12.5, color: '#6b6860' }, automargin: true },
     paper_bgcolor: 'white', plot_bgcolor: '#fafaf8',
     margin: { t: 20, r: 20, b: 60, l: 70 },
-    legend: cCol ? { font: { size: 11 }, bgcolor: 'rgba(255,255,255,0.9)', bordercolor: '#e0ddd6', borderwidth: 1, title: { text: cCol, font: { size: 11, color: '#6b6860' } } } : { visible: false },
+    legend: cCol ? { font: { size: 12.5 }, bgcolor: 'rgba(255,255,255,0.9)', bordercolor: '#e0ddd6', borderwidth: 1, title: { text: cCol, font: { size: 11, color: '#6b6860' } } } : { visible: false },
     hovermode: 'closest',
     font: { family: 'Inter, -apple-system, sans-serif' }
   };
@@ -3914,8 +3990,8 @@ function renderPlotImpl() {
       traceMeta.push({ xlabel: ax.column, ylabel: yCol });
       const axisLayout = {
         overlaying: 'x', side,
-        title: { text: ax.column, font: { size: 11, color: ax.color } },
-        tickfont: { size: 10, color: ax.color },
+        title: { text: ax.column, font: { size: 12, color: ax.color } },
+        tickfont: { size: 11, color: ax.color },
         automargin: true,
         showgrid: false
       };
@@ -3957,8 +4033,8 @@ function renderPlotImpl() {
       traceMeta.push({ xlabel: xCol, ylabel: ax.column });
       layout['yaxis' + n] = {
         overlaying: 'y', side, anchor: 'free', position,
-        title: { text: ax.column, font: { size: 11, color: ax.color } },
-        tickfont: { size: 10, color: ax.color },
+        title: { text: ax.column, font: { size: 12, color: ax.color } },
+        tickfont: { size: 11, color: ax.color },
         automargin: true,
         showgrid: false
       };
@@ -4170,11 +4246,11 @@ function renderDistPlot() {
 
   const layout = {
     boxmode: 'group', violinmode: 'group', barmode: 'overlay',
-    xaxis: { type: xAxisType, title: { text: xAxisTitle, font: { size: 12, color: '#6b6860' } }, gridcolor: '#e8e5de', linecolor: '#c8c4bc', tickfont: { size: 11, color: '#6b6860' }, automargin: true },
-    yaxis: { title: { text: yAxisTitle, font: { size: 12, color: '#6b6860' } }, gridcolor: '#e8e5de', linecolor: '#c8c4bc', tickfont: { size: 11, color: '#6b6860' }, automargin: true },
+    xaxis: { type: xAxisType, title: { text: xAxisTitle, font: { size: 13, color: '#6b6860' } }, gridcolor: '#e8e5de', linecolor: '#c8c4bc', tickfont: { size: 12.5, color: '#6b6860' }, automargin: true },
+    yaxis: { title: { text: yAxisTitle, font: { size: 13, color: '#6b6860' } }, gridcolor: '#e8e5de', linecolor: '#c8c4bc', tickfont: { size: 12.5, color: '#6b6860' }, automargin: true },
     paper_bgcolor: 'white', plot_bgcolor: '#fafaf8',
     margin: { t: 30, r: 20, b: 70, l: 70 },
-    legend: valueCols.length > 1 ? { font: { size: 11 }, bgcolor: 'rgba(255,255,255,0.9)', bordercolor: '#e0ddd6', borderwidth: 1 } : { visible: false },
+    legend: valueCols.length > 1 ? { font: { size: 12.5 }, bgcolor: 'rgba(255,255,255,0.9)', bordercolor: '#e0ddd6', borderwidth: 1 } : { visible: false },
     hovermode: 'closest', font: { family: 'Inter, -apple-system, sans-serif' }
   };
 
@@ -4430,7 +4506,7 @@ function renderBarPlot() {
   const annotations = !splitCols.length ? sortedKeys.map(k => {
     const g = groupAgg.get(k);
     const yPos = g.total + (showError ? g.totalStd : 0);
-    return { x: g.xVal, y: yPos, text: `n=${g.rowCount}`, showarrow: false, yshift: 10, font: { size: 9, color: '#9e9b94' } };
+    return { x: g.xVal, y: yPos, text: `n=${g.rowCount}`, showarrow: false, yshift: 10, font: { size: 11.5, color: '#6b6860' } };
   }) : [];
 
   // ── Overlay axis (single, optional) ────────────────────────────────────
@@ -4468,7 +4544,7 @@ function renderBarPlot() {
         const showOverlayError = document.getElementById('barOverlayShowError').checked;
         traces.push({
           x: xTrace, y: oy, type: 'scatter', mode: 'markers', name: overlayCol,
-          marker: { color: overlayColor, size: barOverlayState.size, symbol: 'diamond', line: { width: 1, color: 'white' } },
+          marker: { color: overlayColor, size: 8, symbol: 'diamond', line: { width: 1, color: 'white' } },
           error_y: { type: 'data', array: oerr, visible: showOverlayError, color: overlayColor, thickness: 1.4, width: 3 },
           customdata: ocustom,
           hovertemplate: `<b>%{x}</b><br>${escapeHtml(overlayCol)}: %{y:.3g}<br>%{customdata}<extra></extra>`,
@@ -4499,7 +4575,7 @@ function renderBarPlot() {
           // up at its bar's x position instead of spreading sideways.
           traces.push({
             x: xArrOverlay, y: oy, type: 'box', name: overlayCol,
-            marker: { color: overlayColor, size: barOverlayState.size, opacity: 0.75 },
+            marker: { color: overlayColor, size: 4, opacity: 0.75 },
             line: { color: 'rgba(0,0,0,0)', width: 0 },
             fillcolor: 'rgba(0,0,0,0)',
             whiskerwidth: 0, boxpoints: 'all', jitter: 0, pointpos: 0,
@@ -4512,7 +4588,7 @@ function renderBarPlot() {
           const showOverlayPoints = document.getElementById('barOverlayShowPoints').checked;
           const base = {
             x: xArrOverlay, y: oy, type: overlayMode, name: overlayCol,
-            marker: { color: overlayColor, size: barOverlayState.size, opacity: 0.6 },
+            marker: { color: overlayColor, size: 4, opacity: 0.6 },
             line: { color: overlayColor },
             fillcolor: hexToRgba(overlayColor, 0.35),
             yaxis: 'y2'
@@ -4536,12 +4612,12 @@ function renderBarPlot() {
     barmode: 'stack',
     xaxis: {
       type: splitCols.length ? 'multicategory' : 'category',
-      title: { text: xCol, font: { size: 12, color: '#6b6860' } }, gridcolor: '#e8e5de', linecolor: '#c8c4bc', tickfont: { size: 11, color: '#6b6860' }, automargin: true
+      title: { text: xCol, font: { size: 13, color: '#6b6860' } }, gridcolor: '#e8e5de', linecolor: '#c8c4bc', tickfont: { size: 12.5, color: '#6b6860' }, automargin: true
     },
-    yaxis: { title: { text: stackCols.length > 1 ? 'stacked value' : stackCols[0], font: { size: 12, color: '#6b6860' } }, gridcolor: '#e8e5de', linecolor: '#c8c4bc', tickfont: { size: 11, color: '#6b6860' }, automargin: true },
+    yaxis: { title: { text: stackCols.length > 1 ? 'stacked value' : stackCols[0], font: { size: 13, color: '#6b6860' } }, gridcolor: '#e8e5de', linecolor: '#c8c4bc', tickfont: { size: 12.5, color: '#6b6860' }, automargin: true },
     paper_bgcolor: 'white', plot_bgcolor: '#fafaf8',
     margin: { t: 30, r: 20, b: 70, l: 70 },
-    legend: { font: { size: 11 }, bgcolor: 'rgba(255,255,255,0.9)', bordercolor: '#e0ddd6', borderwidth: 1 },
+    legend: { font: { size: 12.5 }, bgcolor: 'rgba(255,255,255,0.9)', bordercolor: '#e0ddd6', borderwidth: 1 },
     hovermode: 'closest', font: { family: 'Inter, -apple-system, sans-serif' },
     annotations
   };
@@ -4549,8 +4625,8 @@ function renderBarPlot() {
   if (overlayActive) {
     layout.yaxis2 = {
       overlaying: 'y', side: 'right', anchor: 'free', position: 1,
-      title: { text: overlayCol, font: { size: 11, color: overlayColorForAxis } },
-      tickfont: { size: 10, color: overlayColorForAxis },
+      title: { text: overlayCol, font: { size: 12, color: overlayColorForAxis } },
+      tickfont: { size: 11, color: overlayColorForAxis },
       automargin: true, showgrid: false
     };
     layout.margin.r = 20 + 46;
@@ -4603,7 +4679,7 @@ function renderBarPlot() {
     rowsUsed: totalRows, rowsTotal: state.nRows,
     title: titleEl.textContent,
     overlay: overlayActive ? {
-      column: overlayCol, mode: barOverlayState.mode, color: overlayColorForAxis, size: barOverlayState.size,
+      column: overlayCol, mode: barOverlayState.mode, color: overlayColorForAxis,
       showErrorBars: (barOverlayState.mode === 'mean' || barOverlayState.mode === 'median')
         ? document.getElementById('barOverlayShowError').checked : null,
       showPoints: (barOverlayState.mode === 'box' || barOverlayState.mode === 'violin')
@@ -4613,17 +4689,39 @@ function renderBarPlot() {
   document.getElementById('figureExportBtn').disabled = false;
 }
 
-// ── Bar-plot warning panel: caps how many checks are shown at once, lets
-// the user dismiss ones they've already accounted for (persisted in
-// barState.dismissedWarnings until the next dataset load), and offers a
-// reset link so dismissals aren't permanently hidden. ─────────────────────
+// ── Bar-plot warning panel: collapsed by default behind one small toggle
+// in the toolbar (#barWarnToggle) — the detailed list (which still caps how
+// many checks are shown at once, lets the user dismiss ones they've already
+// accounted for, and offers a reset link) only takes up space once the user
+// actually clicks it. ──────────────────────────────────────────────────────
+function toggleBarWarnPanel() {
+  barWarnUI.panelOpen = !barWarnUI.panelOpen;
+  renderPlot();
+}
+
 function renderBarWarnings(issues, dismissedCount) {
   const box = document.getElementById('barWarnings');
+  const toggle = document.getElementById('barWarnToggle');
+
   if (issues.length === 0 && dismissedCount === 0) {
+    box.style.display = 'none';
+    box.innerHTML = '';
+    toggle.style.display = 'none';
+    return;
+  }
+
+  const toggleCount = issues.length || dismissedCount;
+  toggle.style.display = 'flex';
+  toggle.classList.toggle('has-errors', issues.some(i => i.level === 'error'));
+  document.getElementById('barWarnToggleLabel').textContent = `${toggleCount} check${toggleCount === 1 ? '' : 's'}`;
+  toggle.title = barWarnUI.panelOpen ? 'Hide data-quality checks for this plot' : 'Show data-quality checks for this plot';
+
+  if (!barWarnUI.panelOpen) {
     box.style.display = 'none';
     box.innerHTML = '';
     return;
   }
+
   box.style.display = 'flex';
   if (issues.length === 0) {
     box.innerHTML = `<div class="strategy-hint">${dismissedCount} check${dismissedCount > 1 ? 's' : ''} dismissed for this dataset. <a href="#" onclick="resetBarWarnings(); return false;" style="color:var(--accent);">Reset</a></div>`;
@@ -4956,6 +5054,35 @@ async function downloadFigurePNG() {
   }
 }
 
+// Vector counterpart to downloadFigurePNG() — same single-image export,
+// just asking Plotly for SVG instead of a raster PNG. Scale is meaningless
+// for vector output (no resolution to multiply), so it's omitted here.
+// Not wired into exportFigure()'s bundle or copyFigureToClipboard(): the
+// clipboard write and the embedded-image HTML card both stay PNG, since
+// the Clipboard API's image support and maximum universal compatibility
+// matter more there than vector sharpness.
+async function downloadFigureSVG() {
+  if (!state.lastPlot) return;
+  if (!requireExporterName()) return;
+  const label = document.getElementById('exportSvgLabel');
+  const original = label.textContent;
+  document.getElementById('exportSvgBtn').disabled = true;
+  label.textContent = 'Preparing…';
+  try {
+    const imgDataUrl = await Plotly.toImage('plotly-chart', { format: 'svg' });
+    const a = document.createElement('a');
+    a.href = imgDataUrl;
+    a.download = `${genExportId()}.svg`;
+    a.click();
+    closeExportMenu();
+  } catch (err) {
+    alert('Download failed: ' + err.message);
+  } finally {
+    document.getElementById('exportSvgBtn').disabled = false;
+    label.textContent = original;
+  }
+}
+
 // Copies the figure straight to the clipboard as an image so it can be
 // pasted directly into another document. Needs the Clipboard API (image
 // writes), which wants a secure context — reliable once Vis4Cat is served
@@ -5080,7 +5207,7 @@ function buildShareSnapshot() {
       showErrorBars: document.getElementById('barShowError').checked
     },
     barOverlayState: {
-      column: barOverlayState.column, mode: barOverlayState.mode, color: barOverlayState.color, size: barOverlayState.size,
+      column: barOverlayState.column, mode: barOverlayState.mode, color: barOverlayState.color,
       showError: document.getElementById('barOverlayShowError').checked,
       showPoints: document.getElementById('barOverlayShowPoints').checked
     },
@@ -5253,10 +5380,10 @@ function restoreSharedSession(snapshot) {
 
   barState = Object.assign({ xCol: '', splitCols: [], stackCols: [], agg: 'mean' }, snapshot.barState || {});
   barState.dismissedWarnings = new Set((snapshot.barState && snapshot.barState.dismissedWarnings) || []);
-  barWarnUI = { expanded: false };
+  barWarnUI = { expanded: false, panelOpen: false };
 
   // Older shared snapshots predate the overlay axis — default to "off".
-  barOverlayState = Object.assign({ column: '', mode: 'mean', showError: true, showPoints: true, color: '', size: 6 }, snapshot.barOverlayState || {});
+  barOverlayState = Object.assign({ column: '', mode: 'mean', showError: true, showPoints: true, color: '' }, snapshot.barOverlayState || {});
   barOverlayUI = { expanded: false };
 
   distState = Object.assign({ valueCols: [], groupCol: '', style: 'box' }, snapshot.distState || {});
@@ -5333,6 +5460,7 @@ function restoreSharedSession(snapshot) {
   document.getElementById('filterBtn').style.display = 'flex';
   document.getElementById('calcBtn').style.display = 'flex';
   document.getElementById('colorsBtn').style.display = 'flex';
+  document.getElementById('reportsBtn').style.display = 'flex';
   document.getElementById('shareSessionBtn').style.display = 'flex';
   document.getElementById('figureExportBtn').style.display = 'flex';
   document.getElementById('figureExportBtn').disabled = true;
@@ -5409,6 +5537,591 @@ function restoreSharedSession(snapshot) {
   } else if (isDist && distState.valueCols.length) {
     renderPlot();
   }
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// Report / Template builder
+// ════════════════════════════════════════════════════════════════════════
+// A report slot's "recipe" captures everything buildShareSnapshot() would
+// capture about how a plot is configured — plot type, axes, bar/distribution
+// settings, extra axes, point sizing, active filters, color palette/overrides
+// — but never state.data/state.columns/mergeState. Applying a recipe never
+// touches the currently loaded dataset; it only changes which columns/
+// descriptors the controls point at, so the same report can be re-applied
+// against a different data batch later in the session.
+
+function toggleReportPanel() {
+  reportState.open = !reportState.open;
+  document.getElementById('reportPanel').classList.toggle('open', reportState.open);
+  document.getElementById('reportsBtn').classList.toggle('active', reportState.open);
+  if (reportState.open) {
+    // Same drawer slot as Dataset Statistics — only one open at a time.
+    statsState.open = false;
+    document.getElementById('statsPanel').classList.remove('open');
+    document.getElementById('statsBtn').classList.remove('active');
+    renderReportPanel();
+  }
+}
+
+// Column/descriptor names a recipe directly depends on (not counting names
+// that are themselves one of the recipe's own requiredDescriptors, which are
+// resolved separately via their formula).
+function getRecipeReferencedNames(recipe) {
+  const names = [];
+  if (recipe.selection) { [recipe.selection.x, recipe.selection.y, recipe.selection.color].forEach(v => { if (v) names.push(v); }); }
+  if (recipe.sizeState && recipe.sizeState.column) names.push(recipe.sizeState.column);
+  (recipe.extraAxesState || []).forEach(ax => { if (ax.column) names.push(ax.column); });
+  if (recipe.barState) {
+    if (recipe.barState.xCol) names.push(recipe.barState.xCol);
+    (recipe.barState.splitCols || []).forEach(c => names.push(c));
+    (recipe.barState.stackCols || []).forEach(c => names.push(c));
+  }
+  if (recipe.barOverlayState && recipe.barOverlayState.column) names.push(recipe.barOverlayState.column);
+  if (recipe.distState) {
+    (recipe.distState.valueCols || []).forEach(c => names.push(c));
+    if (recipe.distState.groupCol) names.push(recipe.distState.groupCol);
+  }
+  if (recipe.filterState) {
+    (recipe.filterState.selectedCols || []).forEach(c => names.push(c));
+    Object.keys(recipe.filterState.activeFilters || {}).forEach(c => names.push(c));
+  }
+  return names.filter(Boolean);
+}
+
+// Snapshot of the currently-rendered plot's configuration, in the same
+// shape restoreSharedSession() already knows how to re-apply (minus any
+// data/columns) — this is what a report slot stores.
+function buildPlotRecipe() {
+  const lp = state.lastPlot;
+  if (!lp) return null;
+  const recipe = { schemaVersion: 1, plotType: state.plotType, title: lp.title || '' };
+
+  if (state.plotType === 'bar') {
+    recipe.barState = {
+      xCol: barState.xCol, splitCols: [...barState.splitCols], stackCols: [...barState.stackCols],
+      agg: barState.agg, showErrorBars: document.getElementById('barShowError').checked
+    };
+    recipe.barOverlayState = {
+      column: barOverlayState.column, mode: barOverlayState.mode, color: barOverlayState.color,
+      showError: document.getElementById('barOverlayShowError').checked,
+      showPoints: document.getElementById('barOverlayShowPoints').checked
+    };
+  } else if (state.plotType === 'distribution') {
+    recipe.distState = {
+      valueCols: [...distState.valueCols], groupCol: distState.groupCol, style: distState.style,
+      showPoints: document.getElementById('distShowPoints').checked,
+      bins: document.getElementById('distBins') ? document.getElementById('distBins').value : null
+    };
+  } else {
+    recipe.selection = {
+      x: document.getElementById('xSelect').value,
+      y: document.getElementById('ySelect').value,
+      color: document.getElementById('colorSelect').value
+    };
+    recipe.sizeState = { column: sizeState.column, min: sizeState.min, max: sizeState.max, scale: sizeState.scale, size: sizeState.size };
+    recipe.extraAxesState = extraAxesState.map(ax => ({ ...ax }));
+  }
+
+  recipe.filterState = {
+    selectedCols: [...filterState.selectedCols],
+    activeFilters: serializeFiltersForShare()
+  };
+
+  // Descriptors this plot actually references, by exact name, carried along
+  // with their formula so a missing one can be recreated under that same
+  // name as a convenience — the strict-name-match rule still applies to
+  // whatever a recreated formula itself needs (see validateReportRecipe()).
+  const referencedNames = new Set(getRecipeReferencedNames(recipe));
+  recipe.requiredDescriptors = calcState.descriptors
+    .filter(d => referencedNames.has(d.name))
+    .map(d => ({ name: d.name, formula: d.formula }));
+
+  recipe.colorState = {
+    overrides: { ...colorState.overrides },
+    auto: { ...colorState.auto },
+    palette: colorState.palette,
+    customPalettes: (colorState.palette.startsWith('custom:') && colorState.customPalettes[colorState.palette])
+      ? { [colorState.palette]: colorState.customPalettes[colorState.palette] }
+      : {}
+  };
+
+  return recipe;
+}
+
+function autoLabelForRecipe(recipe) {
+  if (recipe.plotType === 'bar') {
+    const stacks = (recipe.barState.stackCols || []).join(' + ') || '?';
+    return `Bar: ${stacks} by ${recipe.barState.xCol || '?'}`;
+  }
+  if (recipe.plotType === 'distribution') {
+    return `Distribution (${recipe.distState.style}): ${(recipe.distState.valueCols || []).join(', ') || '?'}`;
+  }
+  const typeLabel = recipe.plotType === 'line' ? 'Line' : 'Scatter';
+  return `${typeLabel}: ${(recipe.selection && recipe.selection.y) || '?'} vs ${(recipe.selection && recipe.selection.x) || '?'}`;
+}
+
+// Strict-match validation (no fuzzy matching, no silent partial-apply): every
+// column/descriptor name a recipe depends on must exist in the currently
+// loaded dataset — or, for a descriptor, be recreatable under its exact
+// saved name from its saved formula. Anything else is reported by name, in
+// the same "X is not found in your loaded dataset — make sure the naming is
+// correct" phrasing, so a report slot fails loudly and specifically rather
+// than silently dropping or guessing a replacement.
+function validateReportRecipe(recipe) {
+  if (!recipe) return { valid: false, errors: ['This plot has no recipe to apply.'] };
+  const colNames = new Set(state.columns.map(c => c.name));
+  const existingDescNames = new Set(calcState.descriptors.map(d => d.name));
+  const requiredDescNames = new Set((recipe.requiredDescriptors || []).map(d => d.name));
+  const errors = [];
+
+  (recipe.requiredDescriptors || []).forEach(d => {
+    if (existingDescNames.has(d.name)) return; // the session's own descriptor of that name wins as-is
+    const refs = [...d.formula.matchAll(/\{([^}]+)\}/g)].map(m => m[1]);
+    const missingRefs = refs.filter(r => !colNames.has(r) && !existingDescNames.has(r) && !requiredDescNames.has(r));
+    if (missingRefs.length) {
+      errors.push(`Calculated descriptor "${d.name}" cannot be recreated because ${missingRefs.map(m => `"${m}"`).join(', ')} ${missingRefs.length > 1 ? 'are' : 'is'} not found in your loaded dataset. Make sure the naming is correct.`);
+    }
+  });
+
+  const checkField = (value, label) => {
+    if (!value) return;
+    if (colNames.has(value) || existingDescNames.has(value) || requiredDescNames.has(value)) return;
+    errors.push(`${label} "${value}" is not found in your loaded dataset. Make sure the naming is correct.`);
+  };
+
+  if (recipe.selection) {
+    checkField(recipe.selection.x, 'X axis column');
+    checkField(recipe.selection.y, 'Y axis column');
+    checkField(recipe.selection.color, 'Color-by column');
+  }
+  if (recipe.sizeState) checkField(recipe.sizeState.column, 'Sort-size-by column');
+  (recipe.extraAxesState || []).forEach(ax => checkField(ax.column, 'Extra axis column'));
+  if (recipe.barState) {
+    checkField(recipe.barState.xCol, 'Bar category column');
+    (recipe.barState.splitCols || []).forEach(c => checkField(c, 'Split-by column'));
+    (recipe.barState.stackCols || []).forEach(c => checkField(c, 'Stacked value column'));
+  }
+  if (recipe.barOverlayState) checkField(recipe.barOverlayState.column, 'Overlay axis column');
+  if (recipe.distState) {
+    (recipe.distState.valueCols || []).forEach(c => checkField(c, 'Value column'));
+    checkField(recipe.distState.groupCol, 'Group-by column');
+  }
+  if (recipe.filterState) {
+    Object.keys(recipe.filterState.activeFilters || {}).forEach(c => checkField(c, 'Filter column'));
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
+function showReportSlotError(slot) {
+  document.getElementById('barWarnings').style.display = 'none';
+  document.getElementById('distWarnings').style.display = 'none';
+  document.getElementById('plotly-chart').style.display = 'none';
+  const empty = document.getElementById('emptyState');
+  empty.style.display = 'flex';
+  empty.classList.add('report-error-state');
+  empty.querySelector('.empty-title').textContent = `⚠ "${slot.label}" cannot be rendered`;
+  empty.querySelector('.empty-sub').innerHTML = slot.validation.errors.map(e => escapeHtml(e)).join('<br><br>');
+  state.lastPlot = null;
+  document.getElementById('figureExportBtn').disabled = true;
+}
+
+// Re-applies a saved recipe's configuration to the live controls (never to
+// state.data/state.columns/mergeState) and either renders it, or — if
+// something it depends on isn't in the currently loaded dataset — shows a
+// clear, scoped error in the plot area without touching the other slots.
+function applyReportSlot(index) {
+  const slot = reportState.plots[index];
+  if (!slot) return;
+  reportState.activeIndex = index;
+  const recipe = slot.recipe;
+
+  // Recreate convenience: a required descriptor missing by name is rebuilt
+  // from its saved formula if that formula's own columns are available.
+  (recipe.requiredDescriptors || []).forEach(d => {
+    if (calcState.descriptors.some(existing => existing.name === d.name)) return;
+    const result = computeDescriptor(d.formula);
+    if (!result.error) {
+      calcState.descriptors.push({ name: d.name, formula: d.formula });
+      state.data = state.data.map((row, i) => ({ ...row, [d.name]: result.values[i] }));
+      state.columns = classifyColumns(state.data);
+    }
+  });
+
+  const validation = validateReportRecipe(recipe);
+  slot.validation = validation;
+
+  state.plotType = recipe.plotType || 'scatter';
+  filterState.open = false;
+  filterState.selectedCols = new Set(recipe.filterState ? (recipe.filterState.selectedCols || []) : []);
+  filterState.activeFilters = reviveFiltersFromShare(recipe.filterState ? recipe.filterState.activeFilters : {});
+
+  if (state.plotType === 'bar') {
+    barState = Object.assign({ xCol: '', splitCols: [], stackCols: [], agg: 'mean' }, recipe.barState || {});
+    barState.dismissedWarnings = new Set();
+    barOverlayState = Object.assign({ column: '', mode: 'mean', showError: true, showPoints: true, color: '' }, recipe.barOverlayState || {});
+  } else if (state.plotType === 'distribution') {
+    distState = Object.assign({ valueCols: [], groupCol: '', style: 'box' }, recipe.distState || {});
+  } else {
+    sizeState = Object.assign({ column: '', min: 4, max: 20, scale: 1, size: 6 }, recipe.sizeState || {});
+    extraAxesState = (recipe.extraAxesState || []).map(ax => ({ ...ax }));
+  }
+
+  colorState.overrides = (recipe.colorState && recipe.colorState.overrides) || {};
+  colorState.auto = (recipe.colorState && recipe.colorState.auto) || {};
+  colorState.palette = (recipe.colorState && recipe.colorState.palette) || 'default';
+  colorState.customPalettes = Object.assign({}, colorState.customPalettes, (recipe.colorState && recipe.colorState.customPalettes) || {});
+  saveCustomPalettesToStorage();
+
+  document.querySelectorAll('.toggle-btn[data-type]').forEach(b => b.classList.toggle('active', b.dataset.type === state.plotType));
+  const isBar = state.plotType === 'bar', isDist = state.plotType === 'distribution';
+  document.getElementById('scatterLineControls').style.display = (isBar || isDist) ? 'none' : 'flex';
+  document.getElementById('barControls').style.display = isBar ? 'flex' : 'none';
+  document.getElementById('distControls').style.display = isDist ? 'flex' : 'none';
+  document.querySelectorAll('.toggle-btn[data-agg]').forEach(b => b.classList.toggle('active', b.dataset.agg === barState.agg));
+  document.querySelectorAll('.toggle-btn[data-dist]').forEach(b => b.classList.toggle('active', b.dataset.dist === distState.style));
+  document.getElementById('distBinsRow').style.display = distState.style === 'histogram' ? 'block' : 'none';
+  setSselDisabled('distGroupSelect', distState.style === 'histogram');
+  if (recipe.distState && recipe.distState.bins) { const el = document.getElementById('distBins'); if (el) el.value = recipe.distState.bins; }
+  document.getElementById('barShowError').checked = (recipe.barState && recipe.barState.showErrorBars !== undefined) ? recipe.barState.showErrorBars : true;
+  document.getElementById('distShowPoints').checked = (recipe.distState && recipe.distState.showPoints !== undefined) ? recipe.distState.showPoints : true;
+  document.querySelectorAll('.toggle-btn[data-ovl]').forEach(b => b.classList.toggle('active', b.dataset.ovl === barOverlayState.mode));
+  document.getElementById('barOverlayShowError').checked = (recipe.barOverlayState && recipe.barOverlayState.showError !== undefined) ? recipe.barOverlayState.showError : true;
+  document.getElementById('barOverlayShowPoints').checked = (recipe.barOverlayState && recipe.barOverlayState.showPoints !== undefined) ? recipe.barOverlayState.showPoints : true;
+  updateBarOverlayModeRows();
+
+  buildControls();
+  const xSel = document.getElementById('xSelect'), ySel = document.getElementById('ySelect'), cSel = document.getElementById('colorSelect');
+  const sel = recipe.selection || {};
+  if (sel.x && [...xSel.options].some(o => o.value === sel.x)) xSel.value = sel.x;
+  if (sel.y && [...ySel.options].some(o => o.value === sel.y)) ySel.value = sel.y;
+  if (sel.color && [...cSel.options].some(o => o.value === sel.color)) cSel.value = sel.color;
+  renderSselOptions('xSelect', [...xSel.options].map(o => ({ value: o.value, label: o.textContent })), '— select —');
+  renderSselOptions('ySelect', [...ySel.options].map(o => ({ value: o.value, label: o.textContent })), '— select —');
+  renderSselOptions('colorSelect', [{ value: '', label: '— none —' }].concat([...cSel.options].filter(o => o.value !== '').map(o => ({ value: o.value, label: o.textContent }))), '— none —');
+  onSelectionChange();
+
+  buildBarControls();
+  buildDistControls();
+  renderExtraAxesList();
+
+  renderFilterColList();
+  renderFilterControls();
+  updateFilterBadge();
+
+  renderCalcColRef();
+  renderCalcDescriptors();
+
+  renderPaletteSelectOptions();
+  const paletteSelEl = document.getElementById('colorsPaletteSelect');
+  if (paletteSelEl) paletteSelEl.value = colorState.palette;
+
+  document.getElementById('plotly-chart').style.display = 'none';
+  document.getElementById('emptyState').style.display = 'block';
+
+  if (validation.valid) {
+    renderPlot();
+  } else {
+    showReportSlotError(slot);
+  }
+  renderReportPanel();
+}
+
+function goToReportSlot(delta) {
+  if (!reportState.plots.length) return;
+  let idx = reportState.activeIndex + delta;
+  if (idx < 0) idx = 0;
+  if (idx >= reportState.plots.length) idx = reportState.plots.length - 1;
+  applyReportSlot(idx);
+}
+
+function addCurrentPlotToReport() {
+  if (!state.lastPlot) { alert('Render a plot first, then add it to the report.'); return; }
+  const recipe = buildPlotRecipe();
+  const slot = { id: reportState.nextId++, label: autoLabelForRecipe(recipe), recipe, validation: { valid: true, errors: [] } };
+  reportState.plots.push(slot);
+  reportState.activeIndex = reportState.plots.length - 1;
+  reportState.open = true;
+  document.getElementById('reportPanel').classList.add('open');
+  document.getElementById('reportsBtn').classList.add('active');
+  statsState.open = false;
+  document.getElementById('statsPanel').classList.remove('open');
+  document.getElementById('statsBtn').classList.remove('active');
+  renderReportPanel();
+}
+
+function removeReportSlot(id) {
+  const idx = reportState.plots.findIndex(p => p.id === id);
+  if (idx === -1) return;
+  reportState.plots.splice(idx, 1);
+  if (reportState.activeIndex >= reportState.plots.length) reportState.activeIndex = reportState.plots.length - 1;
+  renderReportPanel();
+}
+
+function moveReportSlot(id, dir) {
+  const idx = reportState.plots.findIndex(p => p.id === id);
+  const j = idx + dir;
+  if (idx === -1 || j < 0 || j >= reportState.plots.length) return;
+  const [item] = reportState.plots.splice(idx, 1);
+  reportState.plots.splice(j, 0, item);
+  if (reportState.activeIndex === idx) reportState.activeIndex = j;
+  renderReportPanel();
+}
+
+function renameReportSlot(id) {
+  const slot = reportState.plots.find(p => p.id === id);
+  if (!slot) return;
+  const name = prompt('Rename this plot:', slot.label);
+  if (name && name.trim()) { slot.label = name.trim(); renderReportPanel(); }
+}
+
+function clearReport() {
+  if (!reportState.plots.length) return;
+  if (!confirm('Remove all plots from this report? This only clears the open report — any file you already downloaded, or saved in the browser, is unaffected.')) return;
+  reportState.plots = [];
+  reportState.activeIndex = -1;
+  reportState.name = '';
+  renderReportPanel();
+}
+
+// ── Save ──────────────────────────────────────────────────────────────────
+function openReportSaveView() {
+  reportSaveUI = { open: true, name: reportState.name || '' };
+  reportLoadUI.open = false;
+  renderReportPanel();
+}
+
+function buildReportFileJSON(name) {
+  return {
+    v4cReportVersion: 1,
+    app: 'Vis4Cat Reaction',
+    name,
+    created_at: new Date().toISOString(),
+    exported_by: getExporterName() || null,
+    plots: reportState.plots.map(p => ({ label: p.label, recipe: p.recipe }))
+  };
+}
+
+function saveReportDownload() {
+  const name = (reportSaveUI.name || '').trim() || 'Untitled report';
+  reportState.name = name;
+  const payload = buildReportFileJSON(name);
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${name.replace(/[^a-z0-9_\-]+/gi, '_')}.v4creport.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  reportSaveUI.open = false;
+  renderReportPanel();
+}
+
+function loadBrowserReportsList() {
+  try { const raw = localStorage.getItem('vis4cat_reaction_reports'); return raw ? (JSON.parse(raw) || []) : []; }
+  catch (e) { return []; }
+}
+
+function saveReportToBrowser() {
+  const name = (reportSaveUI.name || '').trim() || 'Untitled report';
+  reportState.name = name;
+  const payload = buildReportFileJSON(name);
+  const list = loadBrowserReportsList();
+  const id = `rep_${Date.now().toString(36)}${Math.floor(Math.random() * 1000).toString(36)}`;
+  list.push({ id, name, savedAt: payload.created_at, data: payload });
+  try { localStorage.setItem('vis4cat_reaction_reports', JSON.stringify(list)); }
+  catch (e) { alert('Could not save to browser storage: ' + e.message); return; }
+  reportSaveUI.open = false;
+  renderReportPanel();
+}
+
+function deleteBrowserReport(id) {
+  const list = loadBrowserReportsList().filter(r => r.id !== id);
+  try { localStorage.setItem('vis4cat_reaction_reports', JSON.stringify(list)); } catch (e) { /* ignore */ }
+  renderReportPanel();
+}
+
+// ── Load ──────────────────────────────────────────────────────────────────
+function openReportLoadView() {
+  reportLoadUI = { open: true, payload: null, validations: [] };
+  reportSaveUI.open = false;
+  renderReportPanel();
+}
+
+function cancelReportLoad() {
+  reportLoadUI = { open: false, payload: null, validations: [] };
+  renderReportPanel();
+}
+
+function handleReportImportFile(event) {
+  const file = event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try { prepareReportLoadPreview(JSON.parse(e.target.result)); }
+    catch (err) { alert('Could not parse that file as a Vis4Cat report: ' + err.message); }
+  };
+  reader.readAsText(file);
+}
+
+function loadBrowserReportById(id) {
+  const r = loadBrowserReportsList().find(x => x.id === id);
+  if (r) prepareReportLoadPreview(r.data);
+}
+
+// Shows a per-plot validity preview (green check / scoped warning) BEFORE
+// anything is actually applied — same "preview before you commit" pattern
+// as the palette import flow.
+function prepareReportLoadPreview(payload) {
+  if (!payload || !Array.isArray(payload.plots)) { alert('That file does not look like a Vis4Cat report.'); return; }
+  const validations = payload.plots.map(p => validateReportRecipe(p.recipe));
+  reportLoadUI = { open: true, payload, validations };
+  renderReportPanel();
+}
+
+function confirmReportLoad() {
+  const { payload } = reportLoadUI;
+  if (!payload) return;
+  reportState.name = payload.name || '';
+  reportState.plots = payload.plots.map(p => ({ id: reportState.nextId++, label: p.label, recipe: p.recipe, validation: { valid: true, errors: [] } }));
+  reportState.activeIndex = -1;
+  reportLoadUI = { open: false, payload: null, validations: [] };
+  reportState.open = true;
+  document.getElementById('reportPanel').classList.add('open');
+  document.getElementById('reportsBtn').classList.add('active');
+  statsState.open = false;
+  document.getElementById('statsPanel').classList.remove('open');
+  document.getElementById('statsBtn').classList.remove('active');
+  renderReportPanel();
+  if (reportState.plots.length) applyReportSlot(0);
+}
+
+// ── Rendering ─────────────────────────────────────────────────────────────
+function renderReportPanel() {
+  const body = document.getElementById('reportPanelBody');
+  if (!body) return;
+
+  // Revalidate every slot against whatever's currently loaded, every time
+  // the panel renders — this is what surfaces a broken reference after a
+  // new data batch is loaded, without the user having to click into it.
+  reportState.plots.forEach(slot => { slot.validation = validateReportRecipe(slot.recipe); });
+
+  document.getElementById('reportPanelMeta').textContent = reportState.plots.length ? `${reportState.plots.length} plot${reportState.plots.length === 1 ? '' : 's'}` : '';
+  const countBadge = document.getElementById('reportsCount');
+  countBadge.textContent = reportState.plots.length;
+  countBadge.style.display = reportState.plots.length ? 'inline' : 'none';
+
+  if (reportLoadUI.open) { renderReportLoadView(body); return; }
+  if (reportSaveUI.open) { renderReportSaveView(body); return; }
+
+  if (!reportState.plots.length) {
+    body.innerHTML = `
+      <button class="report-cta-btn" onclick="addCurrentPlotToReport()" ${state.lastPlot ? '' : 'disabled'}>+ Add current plot to report</button>
+      <div class="report-empty-hint">${state.lastPlot ? 'Add your current plot, then build more — a report can hold any number of plots you can scroll through.' : 'Render a plot first, then come back here to add it to a report.'}</div>
+      <div class="report-secondary-row"><button onclick="openReportLoadView()">📂 Load report…</button></div>
+    `;
+    return;
+  }
+
+  let nav = '';
+  if (reportState.plots.length > 1) {
+    nav = `<div class="report-nav">
+      <button onclick="goToReportSlot(-1)" ${reportState.activeIndex <= 0 ? 'disabled' : ''}>◀</button>
+      <span class="report-nav-count">${reportState.activeIndex + 1} of ${reportState.plots.length}</span>
+      <button onclick="goToReportSlot(1)" ${reportState.activeIndex >= reportState.plots.length - 1 ? 'disabled' : ''}>▶</button>
+    </div>`;
+  }
+
+  const slotsHtml = reportState.plots.map((slot, i) => {
+    const active = i === reportState.activeIndex;
+    const statusIcon = slot.validation.valid ? '✓' : '⚠';
+    const statusColor = slot.validation.valid ? 'color:#2d6a2d;' : 'color:var(--error-text);';
+    return `
+      <div class="report-slot ${active ? 'active' : ''}" onclick="applyReportSlot(${i})">
+        <div class="report-slot-top">
+          <span class="report-slot-badge">${i + 1}</span>
+          <span class="report-slot-label" title="${escapeHtml(slot.label)}">${escapeHtml(slot.label)}</span>
+          <span class="report-slot-status" style="${statusColor}" title="${slot.validation.valid ? 'Ready' : escapeHtml(slot.validation.errors.join(' '))}">${statusIcon}</span>
+        </div>
+        ${!slot.validation.valid ? `<div class="report-slot-sub">${escapeHtml(slot.validation.errors[0])}</div>` : ''}
+        <div class="report-slot-actions">
+          <button onclick="event.stopPropagation(); renameReportSlot(${slot.id})">Rename</button>
+          <button onclick="event.stopPropagation(); moveReportSlot(${slot.id}, -1)" ${i === 0 ? 'disabled' : ''}>↑</button>
+          <button onclick="event.stopPropagation(); moveReportSlot(${slot.id}, 1)" ${i === reportState.plots.length - 1 ? 'disabled' : ''}>↓</button>
+          <button onclick="event.stopPropagation(); removeReportSlot(${slot.id})">Remove</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  body.innerHTML = `
+    <button class="report-cta-btn" onclick="addCurrentPlotToReport()" ${state.lastPlot ? '' : 'disabled'}>+ Add current plot to report</button>
+    ${nav}
+    ${slotsHtml}
+    <div class="report-secondary-row">
+      <button onclick="openReportSaveView()">💾 Save report…</button>
+      <button onclick="openReportLoadView()">📂 Load report…</button>
+    </div>
+    <div class="report-secondary-row">
+      <button onclick="clearReport()" style="color:var(--error-text); border-color:#f5b7b1;">Clear report</button>
+    </div>
+  `;
+}
+
+function renderReportSaveView(body) {
+  const st = reportSaveUI;
+  body.innerHTML = `
+    <div class="report-save-field">
+      <label>Report name</label>
+      <input type="text" id="reportSaveName" value="${escapeHtml(st.name)}" oninput="reportSaveUI.name=this.value" placeholder="e.g. Monthly KPI check">
+    </div>
+    <div class="report-empty-hint" style="text-align:left; padding:0 0 14px;">${reportState.plots.length} plot${reportState.plots.length === 1 ? '' : 's'}: ${escapeHtml(reportState.plots.map(p => p.label).join(' · '))}</div>
+    <button class="report-cta-btn" onclick="saveReportDownload()">⬇ Download report file</button>
+    <div class="report-secondary-row"><button onclick="saveReportToBrowser()">💾 Save in this browser</button></div>
+    <div class="report-secondary-row"><button onclick="reportSaveUI.open=false; renderReportPanel();">← Back</button></div>
+  `;
+}
+
+function renderReportLoadView(body) {
+  const st = reportLoadUI;
+  if (st.payload) {
+    const rows = st.payload.plots.map((p, i) => {
+      const v = st.validations[i];
+      const icon = v.valid ? '✓' : '⚠';
+      const color = v.valid ? 'color:#2d6a2d;' : 'color:var(--error-text);';
+      return `<div class="report-slot" style="cursor:default;">
+        <div class="report-slot-top">
+          <span class="report-slot-badge">${i + 1}</span>
+          <span class="report-slot-label">${escapeHtml(p.label)}</span>
+          <span class="report-slot-status" style="${color}">${icon}</span>
+        </div>
+        ${!v.valid ? `<div class="report-slot-sub">${escapeHtml(v.errors[0])}</div>` : ''}
+      </div>`;
+    }).join('');
+    const brokenCount = st.validations.filter(v => !v.valid).length;
+    body.innerHTML = `
+      <div class="report-empty-hint" style="text-align:left; padding:0 0 10px;">
+        <strong>${escapeHtml(st.payload.name || 'Untitled report')}</strong> — ${st.payload.plots.length} plot${st.payload.plots.length === 1 ? '' : 's'}
+        ${brokenCount ? `<br><span style="color:var(--error-text);">${brokenCount} plot${brokenCount === 1 ? '' : 's'} reference columns not found in your currently loaded data — you'll still be able to browse the rest after loading.</span>` : ''}
+      </div>
+      ${rows}
+      <button class="report-cta-btn" onclick="confirmReportLoad()">Load this report</button>
+      <div class="report-secondary-row"><button onclick="cancelReportLoad()">← Back</button></div>
+    `;
+    return;
+  }
+  const browserReports = loadBrowserReportsList();
+  body.innerHTML = `
+    <button class="report-cta-btn" onclick="document.getElementById('reportImportInput').click()">⬆ Choose report file…</button>
+    <input type="file" id="reportImportInput" accept=".json,application/json" style="display:none;" onchange="handleReportImportFile(event)">
+    ${browserReports.length ? `<div class="report-slot-sub" style="padding-left:0; margin-bottom:8px;">Saved in this browser:</div>` + browserReports.map(r => `
+      <div class="report-load-row" onclick="loadBrowserReportById('${r.id}')">
+        <div><div style="font-size:12.5px; font-weight:500;">${escapeHtml(r.name)}</div><div class="report-load-row-meta">${r.data.plots.length} plot${r.data.plots.length === 1 ? '' : 's'} · ${new Date(r.savedAt).toLocaleDateString()}</div></div>
+        <button onclick="event.stopPropagation(); deleteBrowserReport('${r.id}')" style="font-size:10.5px;">✕</button>
+      </div>
+    `).join('') : ''}
+    <div class="report-secondary-row"><button onclick="reportLoadUI.open=false; renderReportPanel();">← Back</button></div>
+  `;
 }
 
 setupUpload();

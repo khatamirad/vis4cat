@@ -809,6 +809,13 @@
               <div class="export-action-sub">The rendered overlay, no data/metadata bundle yet</div>
             </span>
           </button>
+          <button class="export-action-btn" id="exportSvgBtn" onclick="downloadFigureSVG()">
+            <span>⬇</span>
+            <span>
+              <div>Download image (SVG)</div>
+              <div class="export-action-sub">Vector — stays sharp at any size, best for publication figures</div>
+            </span>
+          </button>
           <button class="export-action-btn" id="exportCopyBtn" onclick="copyFigureToClipboard()">
             <span>⧉</span>
             <span>
@@ -2520,6 +2527,33 @@ async function downloadFigurePNG() {
     const a = document.createElement('a');
     a.href = imgDataUrl;
     a.download = `${genExportId()}.png`;
+    a.click();
+    closeExportMenu();
+  } catch (err) {
+    alert('Download failed: ' + err.message);
+  } finally {
+    clearButtonBusy(btn);
+  }
+}
+
+// Vector counterpart to downloadFigurePNG() — same single-image export,
+// just asking Plotly for SVG instead of a raster PNG. Scale is meaningless
+// for vector output (no resolution to multiply), so it's omitted here.
+// Note for this build specifically: a spectrum overlay with many series ×
+// many points per series produces one vector element per point, so the SVG
+// can end up considerably larger than the fixed-size PNG — still offered
+// here since the user chooses per-export, but worth knowing before relying
+// on it for a very dense overlay.
+async function downloadFigureSVG() {
+  if (!state.lastPlot) return;
+  if (!requireExporterName()) return;
+  const btn = document.getElementById('exportSvgBtn');
+  setButtonBusy(btn, 'Preparing…');
+  try {
+    const imgDataUrl = await Plotly.toImage('plotly-chart', { format: 'svg' });
+    const a = document.createElement('a');
+    a.href = imgDataUrl;
+    a.download = `${genExportId()}.svg`;
     a.click();
     closeExportMenu();
   } catch (err) {
